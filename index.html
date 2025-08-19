@@ -131,353 +131,307 @@
   </div>
   <script>
     // Performance optimization: Use requestAnimationFrame for DOM updates
-    const requestAnimationFrame = window.requestAnimationFrame || 
-                                window.mozRequestAnimationFrame || 
-                                window.webkitRequestAnimationFrame || 
-                                window.msRequestAnimationFrame ||
-                                function(cb) { return setTimeout(cb, 16); };
+const requestAnimationFrame = window.requestAnimationFrame || 
+                            window.mozRequestAnimationFrame || 
+                            window.webkitRequestAnimationFrame || 
+                            window.msRequestAnimationFrame ||
+                            function(cb) { return setTimeout(cb, 16); };
 
+// Define these at the top level to make them accessible
+let resizeObserver;
+let currentCorrect = null;
+
+// Auto-resize function with RAF for browsers without ResizeObserver
+function autoResize(el) {
+    if (!el) return;
+    requestAnimationFrame(() => {
+        el.style.height = 'auto';
+        const h = el.scrollHeight;
+        el.style.height = Math.min(h, 240) + 'px';
+    });
+}
+
+// Create a new answer item with optimized DOM manipulation
+function createAnswer(value = '') {
+    const li = document.createElement('li');
+    li.className = 'answer-item';
     
+    const span = document.createElement('span');
+    span.className = 'answer-number';
     
-    document.addEventListener('DOMContentLoaded', () => {
-      const answersList = document.getElementById('answersList');
-      const addAnswerBtn = document.getElementById('addAnswerBtn');
-      const saveBtn = document.getElementById('saveBtn');
-      const exitBtn = document.getElementById('exitBtn');
-      const qInput = document.getElementById('questionInput');
-      const exInput = document.getElementById('explanationInput');
+    const ta = document.createElement('textarea');
+    ta.className = 'answer-input';
+    ta.rows = 1;
+    ta.value = value;
+    ta.setAttribute('enterkeyhint', 'done');
+    
+    const actions = document.createElement('div');
+    actions.className = 'answer-actions';
+    
+    const toggle = document.createElement('div');
+    toggle.className = 'correct-toggle';
+    toggle.innerHTML = '<div class="toggle-handle"></div>';
+    
+    const rm = document.createElement('button');
+    rm.className = 'remove-answer';
+    rm.type = 'button';
+    rm.title = 'Remove answer';
+    rm.innerHTML = '<i class="fas fa-trash"></i>';
+    
+    actions.appendChild(toggle);
+    actions.appendChild(rm);
+    li.appendChild(span);
+    li.appendChild(ta);
+    li.appendChild(actions);
+    
+    // Set up resize observer for the new textarea
+    if (resizeObserver) {
+        resizeObserver.observe(ta);
+    }
+    
+    return li;
+}
 
-      // Cache DOM elements and state for performance
-      let currentCorrect = document.querySelector('.answer-item.correct') || null;
-      let resizeObserver;
-      
-      // Set up a single resize observer for all textareas
-      if ('ResizeObserver' in window) {
-        resizeObserver = new ResizeObserver(entries => {
-          for (let entry of entries) {
-            const target = entry.target;
-            if (target.classList.contains('answer-input')) {
-              target.style.height = 'auto';
-              const height = Math.min(target.scrollHeight, 240);
-              target.style.height = height + 'px';
-            }
-          }
-        });
-      }
-
-      // Initialize existing answer textareas
-      const answerInputs = document.querySelectorAll('.answer-input');
-      answerInputs.forEach(el => {
-        if (resizeObserver) {
-          resizeObserver.observe(el);
-        } else {
-          autoResize(el);
-        }
-      });
-
-      // Auto-resize function with RAF for browsers without ResizeObserver
-      function autoResize(el) {
-        if (!el) return;
-        requestAnimationFrame(() => {
-          el.style.height = 'auto';
-          const h = el.scrollHeight;
-          el.style.height = Math.min(h, 240) + 'px';
-        });
-      }
-
-      // Create a new answer item with optimized DOM manipulation
-      function createAnswer(value = '') {
-        const li = document.createElement('li');
-        li.className = 'answer-item';
-        
-        const span = document.createElement('span');
-        span.className = 'answer-number';
-        
-        const ta = document.createElement('textarea');
-        ta.className = 'answer-input';
-        ta.rows = 1;
-        ta.value = value;
-        ta.setAttribute('enterkeyhint', 'done');
-        
-        const actions = document.createElement('div');
-        actions.className = 'answer-actions';
-        
-        const toggle = document.createElement('div');
-        toggle.className = 'correct-toggle';
-        toggle.innerHTML = '<div class="toggle-handle"></div>';
-        
-        const rm = document.createElement('button');
-        rm.className = 'remove-answer';
-        rm.type = 'button';
-        rm.title = 'Remove answer';
-        rm.innerHTML = '<i class="fas fa-trash"></i>';
-        
-        actions.appendChild(toggle);
-        actions.appendChild(rm);
-        li.appendChild(span);
-        li.appendChild(ta);
-        li.appendChild(actions);
-        
-        // Set up resize observer for the new textarea
-        if (resizeObserver) {
-          resizeObserver.observe(ta);
-        }
-        
-        return li;
-      }
-
-      // Batch DOM updates for renumbering
-      function renumber() {
-        const items = answersList.children;
-        const fragment = document.createDocumentFragment();
-        const updatedItems = [];
-        
-        // Collect all items first
+// Batch DOM updates for renumbering
+function renumber() {
+    const items = document.getElementById('answersList').children;
+    requestAnimationFrame(() => {
         for (let i = 0; i < items.length; i++) {
-          updatedItems.push(items[i]);
-        }
-        
-        // Process in a batch
-        requestAnimationFrame(() => {
-          for (let i = 0; i < updatedItems.length; i++) {
-            const num = updatedItems[i].querySelector('.answer-number');
+            const num = items[i].querySelector('.answer-number');
             if (num) num.textContent = i + 1;
-          }
-        });
-      }
+        }
+    });
+}
 
-      // Remove item with optimized DOM manipulation
-      function removeAnswer(li) {
+document.addEventListener('DOMContentLoaded', () => {
+    const answersList = document.getElementById('answersList');
+    const addAnswerBtn = document.getElementById('addAnswerBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const exitBtn = document.getElementById('exitBtn');
+    const qInput = document.getElementById('questionInput');
+    const exInput = document.getElementById('explanationInput');
+
+    // Initialize correct answer
+    currentCorrect = document.querySelector('.answer-item.correct');
+
+    // Set up a single resize observer for all textareas
+    if ('ResizeObserver' in window) {
+        resizeObserver = new ResizeObserver(entries => {
+            for (let entry of entries) {
+                const target = entry.target;
+                if (target.classList.contains('answer-input')) {
+                    target.style.height = 'auto';
+                    const height = Math.min(target.scrollHeight, 240);
+                    target.style.height = height + 'px';
+                }
+            }
+        });
+    }
+
+    // Initialize existing answer textareas
+    const answerInputs = document.querySelectorAll('.answer-input');
+    answerInputs.forEach(el => {
+        if (resizeObserver) {
+            resizeObserver.observe(el);
+        } else {
+            autoResize(el);
+        }
+    });
+
+    // Remove item with optimized DOM manipulation
+    function removeAnswer(li) {
         if (!li) return;
         const wasCorrect = li.classList.contains('correct');
         
         // Unobserve the textarea if using ResizeObserver
         if (resizeObserver) {
-          const ta = li.querySelector('.answer-input');
-          if (ta) resizeObserver.unobserve(ta);
+            const ta = li.querySelector('.answer-input');
+            if (ta) resizeObserver.unobserve(ta);
         }
         
         li.remove();
         if (wasCorrect) currentCorrect = null;
         renumber();
-      }
+    }
 
-      // Set correct answer with minimal DOM manipulation
-      function setCorrect(item) {
+    // Set correct answer with minimal DOM manipulation
+    function setCorrect(item) {
         if (!item || currentCorrect === item) return;
         
         requestAnimationFrame(() => {
-          if (currentCorrect) {
-            currentCorrect.classList.remove('correct');
-            const t = currentCorrect.querySelector('.correct-toggle');
-            if (t) t.classList.remove('active');
-          }
-          
-          item.classList.add('correct');
-          const t2 = item.querySelector('.correct-toggle');
-          if (t2) t2.classList.add('active');
-          currentCorrect = item;
+            if (currentCorrect) {
+                currentCorrect.classList.remove('correct');
+                const t = currentCorrect.querySelector('.correct-toggle');
+                if (t) t.classList.remove('active');
+            }
+            
+            item.classList.add('correct');
+            const t2 = item.querySelector('.correct-toggle');
+            if (t2) t2.classList.add('active');
+            currentCorrect = item;
         });
-      }
+    }
 
-      // Optimized event delegation with specific event filtering
-      function handleAnswersListClick(e) {
+    // Optimized event delegation with specific event filtering
+    function handleAnswersListClick(e) {
         const target = e.target;
         
         // Check for remove button click
         if (target.closest('.remove-answer')) {
-          const li = target.closest('.answer-item');
-          removeAnswer(li);
-          return;
+            const li = target.closest('.answer-item');
+            removeAnswer(li);
+            return;
         }
         
         // Check for correct toggle click
         if (target.closest('.correct-toggle')) {
-          const li = target.closest('.answer-item');
-          setCorrect(li);
-          return;
+            const li = target.closest('.answer-item');
+            setCorrect(li);
+            return;
         }
-      }
-      
-      // Use passive event listeners for better scrolling performance
-      answersList.addEventListener('click', handleAnswersListClick, { passive: true });
-      
-      // Input event with throttling
-      let inputTimeout;
-      function handleAnswersListInput(e) {
+    }
+    
+    // Use passive event listeners for better scrolling performance
+    answersList.addEventListener('click', handleAnswersListClick, { passive: true });
+    
+    // Input event with throttling
+    let inputTimeout;
+    function handleAnswersListInput(e) {
         if (e.target && e.target.classList && e.target.classList.contains('answer-input')) {
-          // Throttle the resize to avoid performance issues
-          clearTimeout(inputTimeout);
-          inputTimeout = setTimeout(() => {
-            if (!resizeObserver) {
-              autoResize(e.target);
-            }
-          }, 100);
+            // Throttle the resize to avoid performance issues
+            clearTimeout(inputTimeout);
+            inputTimeout = setTimeout(() => {
+                if (!resizeObserver) {
+                    autoResize(e.target);
+                }
+            }, 100);
         }
-      }
-      answersList.addEventListener('input', handleAnswersListInput, { passive: true });
+    }
+    answersList.addEventListener('input', handleAnswersListInput, { passive: true });
 
-      //////////////////////////////////////////
-
-  //  const defaultQuestionData = {
-  //"question": "mostaf qustion?",
-  //"answers": ["aa","bb","cc","dd"],
-  //"correctIndex": -1,
-  //"explanation": "Aporphine"
-  //  };
-//
-  //  setQuestionData(defaultQuestionData);
-
-    //////////////////////////////////////////
-      // Keyboard handling
-      function onEnterBlurForNonAnswer(e) {
+    // Keyboard handling
+    function onEnterBlurForNonAnswer(e) {
         if (e.key === 'Enter') {
-          e.preventDefault();
-          e.target.blur();
+            e.preventDefault();
+            e.target.blur();
         }
-      }
-      
-      if (qInput) qInput.addEventListener('keydown', onEnterBlurForNonAnswer);
-      if (exInput) exInput.addEventListener('keydown', onEnterBlurForNonAnswer);
+    }
+    
+    if (qInput) qInput.addEventListener('keydown', onEnterBlurForNonAnswer);
+    if (exInput) exInput.addEventListener('keydown', onEnterBlurForNonAnswer);
 
-      // Add answer button with optimized DOM insertion
-      addAnswerBtn.addEventListener('click', () => {
+    // Add answer button with optimized DOM insertion
+    addAnswerBtn.addEventListener('click', () => {
         const li = createAnswer('');
         answersList.appendChild(li);
         renumber();
         
         const ta = li.querySelector('.answer-input');
         if (ta) {
-          ta.focus();
-          if (!resizeObserver) {
-            autoResize(ta);
-          }
+            ta.focus();
+            if (!resizeObserver) {
+                autoResize(ta);
+            }
         }
-      });
+    });
 
-      // Save handler with optimized data collection
-      saveBtn.addEventListener('click', () => {
-        printQuestionData()
-      });
-      ////////////////////////////////////////////////
+    // Save handler with optimized data collection
+    saveBtn.addEventListener('click', () => {
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+            const data = collectQuestionData();
+            tg.sendData(JSON.stringify(data));
+        }
+    });
 
-      // Exit handler
-      exitBtn.addEventListener('click', () => {
+    // Exit handler
+    exitBtn.addEventListener('click', () => {
         const prev = exitBtn.innerHTML;
         exitBtn.disabled = true;
         exitBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Exiting...';
         
         setTimeout(() => {
-          exitBtn.innerHTML = prev;
-          exitBtn.disabled = false;
+            exitBtn.innerHTML = prev;
+            exitBtn.disabled = false;
         }, 600);
         
         console.log('Exit clicked — implement logic here.');
-      });
-
-      // Clean up observers when needed
-      window.addEventListener('beforeunload', () => {
-        if (resizeObserver) {
-          resizeObserver.disconnect();
-        }
-      });
     });
-    /////////////////////////////////////////////////////
-    // Function to get question data from the form
-  </script>
-  <script>
-    function setQuestionData(data) {
-      // Set question and explanation
-      document.getElementById('questionInput').value = data.question || '';
-      document.getElementById('explanationInput').value = data.explanation || '';
-      
-      // Clear existing answers
-      const answersList = document.getElementById('answersList');
-      answersList.innerHTML = '';
-      
-      // Add new answers
 
-      for (let i = 0; i < data.answers.length; i++) {
-        const li = createAnswer(data.answers[i]);
-        answersList.appendChild(li);
-        renumber();
-      }
-    }
-    function createAnswer(value = '') {
-        const li = document.createElement('li');
-        li.className = 'answer-item';
-        
-        const span = document.createElement('span');
-        span.className = 'answer-number';
-        
-        const ta = document.createElement('textarea');
-        ta.className = 'answer-input';
-        ta.rows = 1;
-        ta.value = value;
-        ta.setAttribute('enterkeyhint', 'done');
-        
-        const actions = document.createElement('div');
-        actions.className = 'answer-actions';
-        
-        const toggle = document.createElement('div');
-        toggle.className = 'correct-toggle';
-        toggle.innerHTML = '<div class="toggle-handle"></div>';
-        
-        const rm = document.createElement('button');
-        rm.className = 'remove-answer';
-        rm.type = 'button';
-        rm.title = 'Remove answer';
-        rm.innerHTML = '<i class="fas fa-trash"></i>';
-        
-        actions.appendChild(toggle);
-        actions.appendChild(rm);
-        li.appendChild(span);
-        li.appendChild(ta);
-        li.appendChild(actions);
-        
-        // Set up resize observer for the new textarea
+    // Clean up observers when needed
+    window.addEventListener('beforeunload', () => {
         if (resizeObserver) {
-          resizeObserver.observe(ta);
+            resizeObserver.disconnect();
         }
+    });
+
+    // Collect question data function
+    function collectQuestionData() {
+        const question = qInput.value.trim();
+        const explanation = exInput.value.trim();
+        const answers = [];
+        let correctIndex = -1;
         
-        return li;
-      }
-        // This function runs when the page is fully loaded
-        window.onload = function() {
-            // Get the Telegram Web App object
-            const tg = window.Telegram.WebApp;
-            tg.ready(); // Inform the Telegram client that the app is ready
-
-            const displayDiv = document.getElementById('data-display');
-            
-            // --- 1. RECEIVING DATA FROM THE BOT ---
-            // We get the query parameters from the URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const data = {
-  "question": urlParams.get('question'),
-  "answers": urlParams.get('answers'),
-  "correctIndex": urlParams.get('correctIndex'),
-  "explanation": urlParams.get('explanation')
-    };
-            setQuestionData(data)
-
-            // --- 2. SENDING DATA TO THE BOT ---
-            const sendButton = document.getElementById('send-button');
-            sendButton.addEventListener('click', function() {
-                // This is the data we will send back to the bot
-                const dataToSend = {
-                    message: "Hello from the Web App!",
-                    status: "ok"
-                };
-
-                // Use the sendData method to send data to the bot
-                // The data must be a string, so we use JSON.stringify
-                tg.sendData(JSON.stringify(dataToSend));
-                
-                // Optional: Close the web app after sending data
-                // tg.close();
-            });
+        const answerItems = answersList.querySelectorAll('.answer-item');
+        answerItems.forEach((item, index) => {
+            const textarea = item.querySelector('.answer-input');
+            answers.push(textarea.value.trim());
+            if (item.classList.contains('correct')) {
+                correctIndex = index;
+            }
+        });
+        
+        return {
+            question,
+            answers,
+            correctIndex,
+            explanation
         };
+    }
+
+    // Set question data function
+    function setQuestionData(data) {
+        if (!data) return;
+        
+        // Set question and explanation
+        if (qInput) qInput.value = data.question || '';
+        if (exInput) exInput.value = data.explanation || '';
+        
+        // Clear existing answers
+        answersList.innerHTML = '';
+        
+        // Add new answers
+        if (data.answers && Array.isArray(data.answers)) {
+            data.answers.forEach((answer, index) => {
+                const li = createAnswer(answer);
+                answersList.appendChild(li);
+                
+                // Set correct answer if index matches
+                if (index === data.correctIndex) {
+                    setCorrect(li);
+                }
+            });
+            renumber();
+        }
+    }
+
+    // Initialize Telegram Web App
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+        tg.ready();
+        
+        // Get initial data from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const initialData = {
+            question: urlParams.get('question'),
+            answers: urlParams.get('answers')?.split(',') || [],
+            correctIndex: parseInt(urlParams.get('correctIndex')) || 0,
+            explanation: urlParams.get('explanation')
+        };
+        
+        setQuestionData(initialData);
+    }
+});
     </script>
 </body>
 </html>
