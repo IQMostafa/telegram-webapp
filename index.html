@@ -1,78 +1,62 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Telegram Web App — debug</title>
-  </head>
-  <body>
-    <h3>Telegram Web App — debug</h3>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
 
-    <div>
-      <strong>navigator.userAgent:</strong>
-      <pre id="ua">(checking...)</pre>
-    </div>
+    <h1>My Mini App</h1>
 
-    <div>
-      <strong>window.Telegram exists?</strong>
-      <pre id="tgExists">(checking...)</pre>
-    </div>
+    <div id="data-display">
+        </div>
 
-    <div>
-      <strong>window.Telegram.WebApp exists?</strong>
-      <pre id="tgWebApp">(checking...)</pre>
-    </div>
+    <br>
 
-    <div>
-      <strong>initDataUnsafe (parsed):</strong>
-      <pre id="initUnsafe">(checking...)</pre>
-    </div>
-
-    <div>
-      <strong>initData (signed string):</strong>
-      <pre id="initSigned">(checking...)</pre>
-    </div>
-
-    <div>
-      <label for="payload">Payload to send to bot:</label><br>
-      <input id="payload" placeholder="type something to send">
-      <button id="sendBtn">Send</button>
-    </div>
+    <button id="send-button">Send Data to Bot</button>
 
     <script>
-      const uaEl = document.getElementById('ua');
-      const tgExistsEl = document.getElementById('tgExists');
-      const tgWebAppEl = document.getElementById('tgWebApp');
-      const initUnsafeEl = document.getElementById('initUnsafe');
-      const initSignedEl = document.getElementById('initSigned');
-      const sendBtn = document.getElementById('sendBtn');
-      const payloadInput = document.getElementById('payload');
+        // This function runs when the page is fully loaded
+        window.onload = function() {
+            // Get the Telegram Web App object
+            const tg = window.Telegram.WebApp;
+            tg.ready(); // Inform the Telegram client that the app is ready
 
-      uaEl.textContent = navigator.userAgent;
+            const displayDiv = document.getElementById('data-display');
+            
+            // --- 1. RECEIVING DATA FROM THE BOT ---
+            // We get the query parameters from the URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('user_id');
+            const firstName = urlParams.get('first_name');
 
-      const hasTelegram = !!(window.Telegram);
-      tgExistsEl.textContent = String(hasTelegram);
-      tgWebAppEl.textContent = String(!!(window.Telegram && window.Telegram.WebApp));
+            // Check if we received data
+            if (userId && firstName) {
+                displayDiv.innerHTML = `<b>Data received from bot:</b><br>User ID: ${userId}<br>First Name: ${firstName}`;
+            } else {
+                displayDiv.innerHTML = "<b>No data received from the bot.</b>";
+            }
+            
+            // --- 2. SENDING DATA TO THE BOT ---
+            const sendButton = document.getElementById('send-button');
+            sendButton.addEventListener('click', function() {
+                // This is the data we will send back to the bot
+                const dataToSend = {
+                    message: "Hello from the Web App!",
+                    status: "ok"
+                };
 
-      if (hasTelegram && window.Telegram.WebApp) {
-        try { window.Telegram.WebApp.expand(); } catch(e) {}
-        const tg = window.Telegram.WebApp;
-        initUnsafeEl.textContent = JSON.stringify(tg.initDataUnsafe || null, null, 2);
-        initSignedEl.textContent = tg.initData || null;
-      } else {
-        initUnsafeEl.textContent = 'no initDataUnsafe (opened outside Telegram webview)';
-        initSignedEl.textContent = 'no initData';
-      }
-
-      sendBtn.addEventListener('click', function() {
-        const tg = window.Telegram && window.Telegram.WebApp;
-        if (!tg) {
-          alert('Cannot send: Telegram.WebApp not present (opened outside Telegram).');
-          return;
-        }
-        const payload = payloadInput.value || 'hello from webapp';
-        tg.sendData(JSON.stringify({payload: payload, time: new Date().toISOString()}));
-      });
+                // Use the sendData method to send data to the bot
+                // The data must be a string, so we use JSON.stringify
+                tg.sendData(JSON.stringify(dataToSend));
+                
+                // Optional: Close the web app after sending data
+                // tg.close();
+            });
+        };
     </script>
-  </body>
+
+</body>
 </html>
