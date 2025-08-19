@@ -552,17 +552,15 @@
     // ================================
     // ✅ Telegram WebApp Integration
     // ================================
-    if (window.Telegram && window.Telegram.WebApp) {
+    setQuestion("this is js")
+    if (true) {
       const tg = window.Telegram.WebApp;
 
       // Get prefilled text from URL (?text=...)
       const urlParams = new URLSearchParams(window.location.search);
       const prefill = urlParams.get("text") || "";
 
-      // Here call the setQuestion function
-      if (prefill) {
-        setQuestion(prefill);
-      }
+      setQuestion(prefill);
 
       // Send button handler (you should add a button with id="sendBtn" in HTML)
       const sendBtn = document.getElementById("sendBtn");
