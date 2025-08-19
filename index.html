@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Telegram Web App</title>
+</head>
+<body>
+    <h2>Enter your text:</h2>
+    <textarea id="userInput" rows="5" cols="40"></textarea>
+    <br>
+    <button onclick="submitText()">Submit</button>
+
+    <script>
+        function submitText() {
+            const text = document.getElementById("userInput").value;
+            // Send text back to Telegram
+            Telegram.WebApp.sendData(text);
+            alert("Text sent to bot!");
+        }
+
+        // Initialize Telegram WebApp
+        window.Telegram.WebApp.ready();
+    </script>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</body>
+</html>
