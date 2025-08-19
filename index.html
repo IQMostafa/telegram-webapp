@@ -18,39 +18,42 @@
     <button id="send-button">Send Data to Bot</button>
 
     <script>
+        // This function runs when the page is fully loaded
         window.onload = function() {
+            // Get the Telegram Web App object
             const tg = window.Telegram.WebApp;
-            tg.ready();
+            tg.ready(); // Inform the Telegram client that the app is ready
 
             const displayDiv = document.getElementById('data-display');
             
-            // --- RECEIVING DATA FROM THE BOT ---
+            // --- 1. RECEIVING DATA FROM THE BOT ---
+            // We get the query parameters from the URL
             const urlParams = new URLSearchParams(window.location.search);
             const userId = urlParams.get('user_id');
             const firstName = urlParams.get('first_name');
-            const timestamp = urlParams.get('timestamp'); // NEW: Get the timestamp
 
-            // MODIFIED: Check for the new data and display it
-            if (userId && firstName && timestamp) {
-                // Convert timestamp back to a readable date
-                const date = new Date(parseInt(timestamp) * 1000);
-                
-                displayDiv.innerHTML = `<b>Data received from bot:</b><br>
-                                        User ID: ${userId}<br>
-                                        First Name: ${firstName}<br>
-                                        <b>Timestamp: ${date.toLocaleString()}</b>`;
+            // Check if we received data
+            if (userId && firstName) {
+                displayDiv.innerHTML = `<b>Data received from bot:</b><br>User ID: ${userId}<br>First Name: ${firstName}`;
             } else {
                 displayDiv.innerHTML = "<b>No data received from the bot.</b>";
             }
             
-            // --- SENDING DATA TO THE BOT (this part is unchanged) ---
+            // --- 2. SENDING DATA TO THE BOT ---
             const sendButton = document.getElementById('send-button');
             sendButton.addEventListener('click', function() {
+                // This is the data we will send back to the bot
                 const dataToSend = {
                     message: "Hello from the Web App!",
                     status: "ok"
                 };
+
+                // Use the sendData method to send data to the bot
+                // The data must be a string, so we use JSON.stringify
                 tg.sendData(JSON.stringify(dataToSend));
+                
+                // Optional: Close the web app after sending data
+                // tg.close();
             });
         };
     </script>
