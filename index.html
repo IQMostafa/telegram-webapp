@@ -5,13 +5,317 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Telegram Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --deep-space: #03040a;
+      --midnight-ocean: #0b2236;
+      --abyssal-blue: #0b2b3a;
+      --teal-depths: #1e686f;
+      --aqua-marine: #2f808a;
+      --navy-shadow: #0f2a3a;
+      --deep-teal: #1f525d;
+      --void-blue: #061521;
+      --twilight-sea: #112f41;
+      --ocean-floor: #163e50;
+      --accent: #338090;
+      --text: #e6f6ff;
+      --text-muted: #9db7c6;
+      --success: #36a46a;
+      --danger: #ee6b6b;
+      --border: rgba(150, 190, 210, 0.10);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    html, body {
+      height: 100%;
+    }
+    
+    body {
+      background: radial-gradient(ellipse at top, var(--void-blue) 0%, var(--deep-space) 70%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 100vw;
+      flex: 1;
+      overflow: auto;
+    }
+    
+    .content {
+      padding: 20px 12px;
+      max-width: 920px;
+      margin: 0 auto;
+      padding-bottom: 100px;
+    }
+    
+    .preview-section {
+      background: var(--navy-shadow);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
+      position: relative;
+    }
+    
+    .preview-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--aqua-marine), var(--teal-depths));
+    }
+    
+    .section-title {
+      color: var(--text);
+      margin-bottom: 14px;
+      font-size: 1.12rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 10px;
+    }
+    
+    .section-title i {
+      background: linear-gradient(135deg, var(--teal-depths), var(--aqua-marine));
+      color: var(--text);
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
+    
+    .editable-group {
+      margin-bottom: 14px;
+    }
+    
+    .editable-label {
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: block;
+      font-size: 1.00rem;
+      padding-left: 6px;
+    }
+    
+    .editable-input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 1.02rem;
+      line-height: 1.4;
+      background: rgba(8, 30, 42, 0.5);
+      color: var(--text);
+      resize: vertical;
+      outline: none;
+    }
+    
+    .editable-input:focus {
+      border-color: rgba(56, 120, 134, 0.32);
+    }
+    
+    .answers-list {
+      list-style: none;
+      margin: 12px 0;
+      padding: 0;
+    }
+    
+    .answer-item {
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      background: rgba(14, 38, 53, 0.7);
+      border-radius: 10px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      border: 1px solid var(--border);
+    }
+    
+    .answer-item.correct {
+      border-left: 5px solid var(--success);
+      background: rgba(22, 58, 72, 0.7);
+    }
+    
+    .answer-number {
+      width: 34px;
+      min-height: 34px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--teal-depths), var(--aqua-marine));
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: var(--text);
+      flex-shrink: 0;
+      padding: 6px;
+    }
+    
+    .answer-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 6px 4px;
+      font-size: 1.00rem;
+      color: var(--text);
+      outline: none;
+      resize: none;
+      min-height: 36px;
+      max-height: 240px;
+    }
+    
+    .answer-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      margin-left: 6px;
+    }
+    
+    .correct-toggle {
+      width: 48px;
+      height: 26px;
+      background: rgba(20, 46, 64, 0.82);
+      border-radius: 14px;
+      position: relative;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      padding: 3px;
+    }
+    
+    .correct-toggle.active {
+      background: var(--success);
+    }
+    
+    .toggle-handle {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #f7fbff;
+      transition: transform .14s ease;
+    }
+    
+    .correct-toggle.active .toggle-handle {
+      transform: translateX(22px);
+      background: #ffffff;
+    }
+    
+    .remove-answer {
+      width: 38px;
+      height: 38px;
+      border-radius: 9px;
+      background: transparent;
+      border: 1px solid rgba(238, 107, 107, 0.12);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--danger);
+      cursor: pointer;
+      font-size: 0.98rem;
+    }
+    
+    .add-answer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      background: rgba(34, 90, 100, 0.10);
+      color: var(--accent);
+      border: 2px dashed rgba(56, 120, 134, 0.20);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    
+    .info-bar {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 10px;
+      margin-top: 14px;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+    
+    .floating-actions {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 10px;
+      display: flex;
+      justify-content: center;
+      z-index: 1200;
+      padding: 0 8px;
+    }
+    
+    .floating-inner {
+      width: 100%;
+      max-width: 920px;
+      display: flex;
+      gap: 8px;
+      padding: 0 6px;
+    }
+    
+    .btn {
+      flex: 1;
+      padding: 12px 12px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      cursor: pointer;
+    }
+    
+    .btn-save {
+      background: linear-gradient(135deg, var(--teal-depths), var(--aqua-marine));
+      color: white;
+    }
+    
+    .btn-exit {
+      background: var(--navy-shadow);
+      color: var(--text);
+    }
+    
+    @media (max-width: 768px) {
+      .content {
+        padding: 16px 10px;
+        padding-bottom: 120px;
+      }
+      
+      .floating-inner {
+        flex-direction: column;
+      }
+    }
+  </style>
 </head>
 <body>
 
     <h1>My Mini App</h1>
 
     <div id="data-display">
-        </div>
+    </div>
 
     <br>
 
