@@ -410,6 +410,18 @@
       align-items: center;
       gap: 10px;
       max-width: 90%;
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translate(-50%, -100%);
+        opacity: 0;
+      }
+      to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+      }
     }
     
     .notification.error {
@@ -505,19 +517,6 @@
         padding: 6px;
       }
     }
-    
-    /* Performance optimizations */
-    .answer-item {
-      will-change: transform;
-    }
-    
-    .correct-toggle {
-      will-change: transform, background;
-    }
-    
-    .answer-input {
-      will-change: height;
-    }
   </style>
 </head>
 <body>
@@ -528,7 +527,7 @@
 
         <div class="editable-group">
           <label class="editable-label">Question:</label>
-          <textarea id="questionInput" class="editable-input" enterkeyhint="done" rows="2"></textarea>
+          <textarea id="questionInput" class="editable-input" enterkeyhint="done" rows="2" placeholder="Enter your question here"></textarea>
         </div>
 
         <div class="editable-group">
@@ -539,12 +538,12 @@
 
         <div class="editable-group">
           <label class="editable-label">Explanation:</label>
-          <textarea id="explanationInput" class="editable-input" enterkeyhint="done" rows="2"></textarea>
+          <textarea id="explanationInput" class="editable-input" enterkeyhint="done" rows="2" placeholder="Add explanation (optional)"></textarea>
         </div>
       </div>
 
       <div class="info-bar" style="margin-top:10px;">
-        <div class="info-item">Question Editor | MOSTAFA ABBAS FADHIL | contact: @al_kaabi33</div>
+        <div class="info-item"><i class="fas fa-info-circle"></i> Question Editor | MOSTAFA ABBAS FADHIL</div>
       </div>
     </div>
   </div>
@@ -569,22 +568,23 @@
       tg = null;
     }
 
-    // Utility: parse ?data=... from url and decode JSON
+    // Utility: parse data from URL parameters
     function parseDataParam() {
       try {
         const params = new URLSearchParams(window.location.search);
-        const encoded = params.get('data');
-        if (!encoded) return null;
-        // If encoded with encodeURIComponent(JSON.stringify(obj))
-        const decoded = decodeURIComponent(encoded);
-        return JSON.parse(decoded);
+        const dataParam = params.get('data');
+        if (!dataParam) return null;
+        
+        // Decode and parse the data
+        const decodedData = decodeURIComponent(dataParam);
+        return JSON.parse(decodedData);
       } catch (e) {
         console.warn('Failed to parse data param:', e);
         return null;
       }
     }
 
-    // DOM refs
+    // DOM references
     const answersList = document.getElementById('answersList');
     const addAnswerBtn = document.getElementById('addAnswerBtn');
     const saveBtn = document.getElementById('saveBtn');
@@ -614,7 +614,7 @@
       }, 3000);
     }
 
-    // Resize helper
+    // Resize textareas automatically
     function autoResize(el) {
       if (!el) return;
       el.style.height = 'auto';
@@ -632,11 +632,12 @@
       const span = document.createElement('span');
       span.className = 'answer-number';
 
-      const ta = document.createElement('textarea');
-      ta.className = 'answer-input';
-      ta.rows = 1;
-      ta.value = value;
-      ta.setAttribute('enterkeyhint', 'done');
+      const textarea = document.createElement('textarea');
+      textarea.className = 'answer-input';
+      textarea.rows = 1;
+      textarea.value = value;
+      textarea.setAttribute('enterkeyhint', 'done');
+      textarea.setAttribute('placeholder', 'Enter answer text');
 
       const actions = document.createElement('div');
       actions.className = 'answer-actions';
@@ -646,21 +647,26 @@
       if (isCorrect) toggle.classList.add('active');
       toggle.innerHTML = '<div class="toggle-handle"></div>';
 
-      const rm = document.createElement('button');
-      rm.className = 'remove-answer';
-      rm.type = 'button';
-      rm.title = 'Remove answer';
-      rm.innerHTML = '<i class="fas fa-trash"></i>';
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove-answer';
+      removeBtn.type = 'button';
+      removeBtn.title = 'Remove answer';
+      removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
 
       actions.appendChild(toggle);
-      actions.appendChild(rm);
+      actions.appendChild(removeBtn);
       li.appendChild(span);
-      li.appendChild(ta);
+      li.appendChild(textarea);
       li.appendChild(actions);
 
-      // events for new nodes
-      ta.addEventListener('input', () => autoResize(ta));
-      ta.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ta.blur(); } });
+      // Add event listeners
+      textarea.addEventListener('input', () => autoResize(textarea));
+      textarea.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          textarea.blur();
+        }
+      });
 
       return li;
     }
@@ -674,7 +680,7 @@
       }
     }
 
-    // Remove
+    // Remove answer
     function removeAnswer(li) {
       if (!li) return;
       const wasCorrect = li.classList.contains('correct');
@@ -683,31 +689,35 @@
       renumber();
     }
 
-    // Set correct
+    // Set correct answer
     function setCorrect(item) {
       if (!item) return;
       if (currentCorrect === item) return;
+      
       if (currentCorrect) {
         currentCorrect.classList.remove('correct');
-        const t = currentCorrect.querySelector('.correct-toggle');
-        if (t) t.classList.remove('active');
+        const toggle = currentCorrect.querySelector('.correct-toggle');
+        if (toggle) toggle.classList.remove('active');
       }
+      
       item.classList.add('correct');
-      const t2 = item.querySelector('.correct-toggle');
-      if (t2) t2.classList.add('active');
+      const toggle = item.querySelector('.correct-toggle');
+      if (toggle) toggle.classList.add('active');
       currentCorrect = item;
     }
 
-    // Event delegation
+    // Event delegation for answers list
     answersList.addEventListener('click', (e) => {
-      const tgt = e.target;
-      if (tgt.closest('.remove-answer')) {
-        const li = tgt.closest('.answer-item');
+      const target = e.target;
+      
+      if (target.closest('.remove-answer')) {
+        const li = target.closest('.answer-item');
         removeAnswer(li);
         return;
       }
-      if (tgt.closest('.correct-toggle')) {
-        const li = tgt.closest('.answer-item');
+      
+      if (target.closest('.correct-toggle')) {
+        const li = target.closest('.answer-item');
         setCorrect(li);
         return;
       }
@@ -718,41 +728,62 @@
       const li = createAnswer('');
       answersList.appendChild(li);
       renumber();
-      const ta = li.querySelector('.answer-input');
-      if (ta) { ta.focus(); autoResize(ta); }
+      const textarea = li.querySelector('.answer-input');
+      if (textarea) {
+        textarea.focus();
+        autoResize(textarea);
+      }
     });
 
-    // Populate editor from incoming dict
-    function populateFromData(d) {
-      if (!d) return;
-      qInput.value = d.question || '';
-      exInput.value = d.explanation || '';
-      // clear existing
+    // Populate editor from data
+    function populateFromData(data) {
+      if (!data) return;
+      
+      // Set question and explanation
+      qInput.value = data.question || '';
+      exInput.value = data.explanation || '';
+      
+      // Clear existing answers
       answersList.innerHTML = '';
-      const answers = Array.isArray(d.answers) ? d.answers : [];
-      // correct_answer may be 0-based or 1-based (try to handle both)
-      let correctIndex = typeof d.correct_answer === 'number' ? d.correct_answer : -1;
+      
+      const answers = Array.isArray(data.answers) ? data.answers : [];
+      let correctIndex = typeof data.correct_answer === 'number' ? data.correct_answer : -1;
+      
+      // Handle 1-based indexing if needed
       if (correctIndex >= 1 && correctIndex <= answers.length) {
-        // looks like 1-based -> convert
         correctIndex = correctIndex - 1;
       }
-      if (correctIndex < 0 || correctIndex >= answers.length) correctIndex = -1;
+      
+      if (correctIndex < 0 || correctIndex >= answers.length) {
+        correctIndex = -1;
+      }
 
-      answers.forEach((ans, idx) => {
-        const li = createAnswer(ans, idx === correctIndex);
+      // Create answer elements
+      answers.forEach((answer, index) => {
+        const isCorrect = index === correctIndex;
+        const li = createAnswer(answer, isCorrect);
         answersList.appendChild(li);
-        if (idx === correctIndex) currentCorrect = li;
+        
+        if (isCorrect) {
+          currentCorrect = li;
+        }
       });
 
-      // if no answers provided, initialise 4 empty answers
+      // If no answers provided, initialize with 4 empty answers
       if (answers.length === 0) {
         for (let i = 0; i < 4; i++) {
-          answersList.appendChild(createAnswer('', i === 0));
+          const li = createAnswer('', i === 0);
+          answersList.appendChild(li);
+          
+          if (i === 0) {
+            currentCorrect = li;
+          }
         }
-        currentCorrect = answersList.children[0];
       }
+      
       renumber();
-      // auto-resize all
+      
+      // Auto-resize all answer textareas
       answersList.querySelectorAll('.answer-input').forEach(autoResize);
     }
 
@@ -764,15 +795,20 @@
       const answers = [];
       let correctIndex = -1;
       
+      // Collect answers and find the correct one
       for (let i = 0; i < items.length; i++) {
         const input = items[i].querySelector('.answer-input');
-        answers.push(input ? input.value : '');
-        if (items[i].classList.contains('correct')) correctIndex = i;
+        answers.push(input ? input.value.trim() : '');
+        
+        if (items[i].classList.contains('correct')) {
+          correctIndex = i;
+        }
       }
 
       // Validate data
       if (!question) {
         showNotification('Please enter a question', 'error');
+        qInput.focus();
         return;
       }
       
@@ -781,7 +817,8 @@
         return;
       }
       
-      if (answers.some(a => !a.trim())) {
+      const emptyAnswers = answers.filter(a => !a);
+      if (emptyAnswers.length > 0) {
         showNotification('Please fill in all answers', 'error');
         return;
       }
@@ -791,6 +828,7 @@
         return;
       }
 
+      // Prepare data object
       const data = {
         question,
         answers,
@@ -802,7 +840,7 @@
       saveBtn.classList.add('btn-loading');
       saveBtn.disabled = true;
 
-      // send data to bot if inside Telegram
+      // Send data to bot if inside Telegram
       if (tg && typeof tg.sendData === 'function') {
         try {
           tg.sendData(JSON.stringify(data));
@@ -817,11 +855,13 @@
         } catch (err) {
           console.error('sendData failed:', err);
           showNotification('Failed to send data to the bot', 'error');
+          saveBtn.classList.remove('btn-loading');
+          saveBtn.disabled = false;
         }
       } else {
-        // Not in Telegram — for local testing just log and show user
+        // Not in Telegram - for testing
         console.log('WebApp data (not in Telegram):', data);
-        showNotification('Running outside Telegram — data printed to console');
+        showNotification('Running outside Telegram - data printed to console');
         
         // Simulate success response
         setTimeout(() => {
@@ -831,48 +871,45 @@
       }
     }
 
-    // Exit: close the miniapp if possible
+    // Exit the editor
     function onExitClick() {
-      const prev = exitBtn.innerHTML;
-      exitBtn.disabled = true;
-      exitBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Exiting...';
-      
-      setTimeout(() => {
-        exitBtn.innerHTML = prev;
-        exitBtn.disabled = false;
-      }, 600);
-
       if (tg && typeof tg.close === 'function') {
         tg.close();
       } else {
-        // Not in Telegram - maybe just go back or close window
-        console.log('Exit clicked (not in Telegram).');
-        showNotification('Exit button clicked (not in Telegram)');
+        // Not in Telegram
+        if (confirm('Are you sure you want to exit? Any unsaved changes will be lost.')) {
+          window.history.back();
+        }
       }
     }
 
-    // wire buttons
-    saveBtn.addEventListener('click', onSaveClick);
-    exitBtn.addEventListener('click', onExitClick);
-
-    // init on load
-    document.addEventListener('DOMContentLoaded', () => {
-      // If in Telegram, let the webapp adjust size and signal ready
+    // Initialize the application
+    function initApp() {
+      // Wire up button events
+      saveBtn.addEventListener('click', onSaveClick);
+      exitBtn.addEventListener('click', onExitClick);
+      
+      // Auto-resize question and explanation inputs
+      qInput.addEventListener('input', () => autoResize(qInput));
+      exInput.addEventListener('input', () => autoResize(exInput));
+      
+      // Load data from URL parameters
+      const incomingData = parseDataParam();
+      populateFromData(incomingData);
+      
+      // Initialize Telegram WebApp if available
       if (tg) {
-        try { 
-          tg.expand(); 
-          tg.ready(); 
-        } catch(e) {}
+        try {
+          tg.ready();
+          tg.expand();
+        } catch(e) {
+          console.error('Error initializing Telegram WebApp:', e);
+        }
       }
+    }
 
-      const incoming = parseDataParam();
-      populateFromData(incoming);
-    });
-
-    // Clean up
-    window.addEventListener('beforeunload', () => {
-      // nothing heavy to do here
-    });
+    // Start the app when DOM is loaded
+    document.addEventListener('DOMContentLoaded', initApp);
   </script>
 </body>
 </html>
