@@ -1,915 +1,195 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Question Editor</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    :root {
-      --deep-space: #03040a;
-      --midnight-ocean: #0b2236;
-      --abyssal-blue: #0b2b3a;
-      --teal-depths: #1e686f;
-      --aqua-marine: #2f808a;
-      --navy-shadow: #0f2a3a;
-      --deep-teal: #1f525d;
-      --void-blue: #061521;
-      --twilight-sea: #112f41;
-      --ocean-floor: #163e50;
-      --accent: #338090;
-      --text: #e6f6ff;
-      --text-muted: #9db7c6;
-      --success: #36a46a;
-      --danger: #ee6b6b;
-      --border: rgba(150, 190, 210, 0.10);
-    }
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    
-    html, body {
-      height: 100%;
-    }
-    
-    body {
-      background: radial-gradient(ellipse at top, var(--void-blue) 0%, var(--deep-space) 70%), linear-gradient(135deg, var(--deep-space) 0%, var(--void-blue) 100%);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      -webkit-font-smoothing: antialiased;
-      line-height: 1.5;
-    }
-    
-    .container {
-      width: 100%;
-      max-width: 100vw;
-      background: transparent;
-      flex: 1;
-      overflow: auto;
-    }
-    
-    .content {
-      padding: 20px 12px;
-      max-width: 920px;
-      margin: 0 auto;
-      padding-bottom: 300px;
-    }
-    
-    .preview-section {
-      background: radial-gradient(circle at 20% 30%, var(--twilight-sea) 0%, var(--void-blue) 70%), linear-gradient(to bottom right, var(--navy-shadow), var(--abyssal-blue));
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 16px;
-      border: 1px solid var(--border);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .preview-section::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--aqua-marine), var(--teal-depths), var(--deep-teal));
-    }
-    
-    .section-title {
-      color: var(--text);
-      margin-bottom: 14px;
-      font-size: 1.12rem;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      position: relative;
-      padding-bottom: 10px;
-    }
-    
-    .section-title::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 56px;
-      height: 3px;
-      background: linear-gradient(90deg, var(--teal-depths), var(--aqua-marine));
-      border-radius: 3px;
-    }
-    
-    .section-title i {
-      background: linear-gradient(135deg, var(--teal-depths), var(--aqua-marine));
-      color: var(--text);
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-    }
-    
-    .editable-group {
-      margin-bottom: 14px;
-    }
-    
-    .editable-label {
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-      display: block;
-      font-size: 1.00rem;
-      padding-left: 6px;
-    }
-    
-    .editable-input {
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      font-size: 1.02rem;
-      line-height: 1.4;
-      background: linear-gradient(to bottom, rgba(10, 34, 46, 0.36), rgba(6, 24, 36, 0.52));
-      color: var(--text);
-      resize: vertical;
-      outline: none;
-    }
-    
-    .editable-input:focus {
-      border-color: rgba(56, 120, 134, 0.32);
-    }
-    
-    .answers-list {
-      list-style: none;
-      margin: 12px 0;
-      padding: 0;
-      display: block;
-    }
-    
-    .answer-item {
-      padding: 10px 12px;
-      margin-bottom: 10px;
-      background: linear-gradient(to right, rgba(18, 40, 56, 0.64), rgba(10, 36, 50, 0.7));
-      border-radius: 10px;
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      border: 1px solid var(--border);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .answer-item::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      width: 4px;
-      background: linear-gradient(to bottom, var(--ocean-floor), var(--twilight-sea));
-    }
-    
-    .answer-item.correct {
-      border-left: 5px solid var(--success);
-      background: linear-gradient(to right, rgba(22, 58, 72, 0.72), rgba(20, 78, 92, 0.64));
-    }
-    
-    .answer-number {
-      width: 34px;
-      min-height: 34px;
-      border-radius: 9px;
-      background: linear-gradient(135deg, var(--teal-depths), var(--aqua-marine));
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      color: var(--text);
-      flex-shrink: 0;
-      font-size: 0.92rem;
-      z-index: 2;
-      padding: 6px;
-    }
-    
-    .answer-input {
-      flex: 1;
-      background: transparent;
-      border: none;
-      padding: 6px 4px;
-      font-size: 1.00rem;
-      color: var(--text);
-      outline: none;
-      resize: none;
-      overflow: hidden;
-      min-height: 36px;
-      max-height: 240px;
-    }
-    
-    .answer-input::placeholder {
-      color: rgba(160, 200, 220, 0.5);
-    }
-    
-    .answer-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-shrink: 0;
-      margin-left: 6px;
-      margin-top: 4px;
-    }
-    
-    .correct-toggle {
-      width: 48px;
-      height: 26px;
-      background: rgba(20, 46, 64, 0.82);
-      border-radius: 14px;
-      position: relative;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      padding: 3px;
-      box-sizing: border-box;
-    }
-    
-    .correct-toggle.active {
-      background: linear-gradient(90deg, var(--success), #2bbd67);
-    }
-    
-    .toggle-handle {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: linear-gradient(to bottom, #f7fbff, #dbeef8);
-      transition: transform .14s ease;
-      transform: translateX(0);
-    }
-    
-    .correct-toggle.active .toggle-handle {
-      transform: translateX(20px);
-      background: linear-gradient(to bottom, #ffffff, #e6f7ff);
-    }
-    
-    .remove-answer {
-      width: 38px;
-      height: 38px;
-      border-radius: 9px;
-      background: transparent;
-      border: 1px solid rgba(238, 107, 107, 0.12);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--danger);
-      cursor: pointer;
-      font-size: 0.98rem;
-      background-clip: padding-box;
-    }
-    
-    .add-answer {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 10px;
-      background: linear-gradient(to right, rgba(34, 90, 100, 0.10), rgba(52, 110, 120, 0.04));
-      color: var(--accent);
-      border: 2px dashed rgba(56, 120, 134, 0.20);
-      cursor: pointer;
-      font-weight: 600;
-    }
-    
-    .info-bar {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 12px;
-      border-radius: 10px;
-      margin-top: 14px;
-      font-size: 0.95rem;
-      color: var(--text-muted);
-    }
-    
-    .info-item {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-    
-    .info-item i {
-      color: var(--accent);
-      font-size: 1.05rem;
-    }
-    
-    footer {
-      color: var(--text-muted);
-      text-align: center;
-      font-size: 0.92rem;
-      padding: 12px 8px;
-      margin-top: auto;
-    }
-    
-    .floating-actions {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 10px;
-      display: flex;
-      justify-content: center;
-      z-index: 1200;
-      padding: 0 8px;
-      pointer-events: auto;
-    }
-    
-    .floating-inner {
-      width: 100%;
-      max-width: 920px;
-      display: flex;
-      gap: 8px;
-      padding: 0 6px;
-    }
-    
-    .floating-inner .btn {
-      flex: 1;
-      padding: 12px 12px;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-weight: 700;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: none;
-      position: relative;
-      overflow: hidden;
-      border: none;
-      cursor: pointer;
-      color: inherit;
-      background-clip: padding-box;
-    }
-    
-    .btn-save {
-      background: linear-gradient(135deg, var(--teal-depths), var(--aqua-marine), var(--accent));
-      color: white;
-    }
-    
-    .btn-exit {
-      background: linear-gradient(135deg, var(--navy-shadow), var(--abyssal-blue), var(--twilight-sea));
-      color: var(--text);
-    }
-    
-    .btn:active {
-      transform: translateY(1px) scale(.997);
-    }
-    
-    .btn:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
-    
-    .btn-loading {
-      position: relative;
-      color: transparent !important;
-    }
-    
-    .btn-loading::after {
-      content: '';
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      top: 50%;
-      left: 50%;
-      margin: -10px 0 0 -10px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      border-top-color: #fff;
-      animation: spin 0.8s ease infinite;
-    }
-    
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-    
-    .notification {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 12px 20px;
-      border-radius: 8px;
-      z-index: 9999;
-      font-weight: 600;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      max-width: 90%;
-      animation: slideIn 0.3s ease;
-    }
-    
-    @keyframes slideIn {
-      from {
-        transform: translate(-50%, -100%);
-        opacity: 0;
-      }
-      to {
-        transform: translate(-50%, 0);
-        opacity: 1;
-      }
-    }
-    
-    .notification.error {
-      background: var(--danger);
-      color: white;
-    }
-    
-    .notification.success {
-      background: var(--success);
-      color: white;
-    }
-    
-    @media (max-width: 768px) {
-      .content {
-        padding: 16px 10px;
-        padding-bottom: 340px;
-      }
-      
-      .section-title {
-        font-size: 1.06rem;
-      }
-      
-      .floating-inner .btn {
-        padding: 10px 10px;
-        font-size: 0.98rem;
-      }
-      
-      .info-bar {
-        flex-direction: column;
-        gap: 8px;
-        align-items: flex-start;
-      }
-    }
-    
-    @media (max-width: 520px) {
-      .preview-section {
-        padding: 12px;
-      }
-      
-      .answer-item {
-        padding: 8px;
-        gap: 8px;
-      }
-      
-      .floating-inner {
-        gap: 8px;
-      }
-      
-      .floating-inner .btn {
-        padding: 10px 8px;
-        font-size: 0.95rem;
-      }
-      
-      .answer-number {
-        width: 30px;
-        height: 30px;
-      }
-    }
-    
-    @media (max-width: 420px) {
-      .floating-inner {
-        flex-direction: column;
-        gap: 8px;
-      }
-      
-      .floating-inner .btn {
-        width: 100%;
-      }
-      
-      .correct-toggle {
-        width: 46px;
-      }
-      
-      .remove-answer {
-        width: 34px;
-        height: 34px;
-      }
-    }
-    
-    @media (max-width: 360px) {
-      .content {
-        padding: 10px 8px;
-        padding-bottom: 380px;
-      }
-      
-      .editable-input {
-        font-size: 0.98rem;
-        padding: 8px;
-      }
-      
-      .answer-input {
-        font-size: 0.96rem;
-        padding: 6px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Telegram Web App</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        .container {
+            text-align: center;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            max-width: 90%;
+            width: 400px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-top: 0;
+            font-weight: 600;
+        }
+        
+        p {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        
+        .send-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 16px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .send-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .send-button:active {
+            transform: translateY(1px);
+        }
+        
+        .send-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            display: block;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <div class="content">
-      <div class="preview-section">
-        <h2 class="section-title"><i class="fas fa-edit"></i> Edit Question</h2>
-
-        <div class="editable-group">
-          <label class="editable-label">Question:</label>
-          <textarea id="questionInput" class="editable-input" enterkeyhint="done" rows="2" placeholder="Enter your question here"></textarea>
-        </div>
-
-        <div class="editable-group">
-          <label class="editable-label">Answers:</label>
-          <ul class="answers-list" id="answersList"></ul>
-          <div class="add-answer" id="addAnswerBtn"><i class="fas fa-plus-circle"></i> Add Answer</div>
-        </div>
-
-        <div class="editable-group">
-          <label class="editable-label">Explanation:</label>
-          <textarea id="explanationInput" class="editable-input" enterkeyhint="done" rows="2" placeholder="Add explanation (optional)"></textarea>
-        </div>
-      </div>
-
-      <div class="info-bar" style="margin-top:10px;">
-        <div class="info-item"><i class="fas fa-info-circle"></i> Question Editor | MOSTAFA ABBAS FADHIL</div>
-      </div>
+    <div class="container">
+        <h1>Simple Data Sender</h1>
+        <p>Click the button below to send data to the Telegram bot.</p>
+        
+        <button id="sendButton" class="send-button">
+            <span id="buttonText">Send Data to Bot</span>
+        </button>
+        
+        <div id="statusMessage" class="status"></div>
     </div>
-  </div>
 
-  <!-- Floating action buttons -->
-  <div class="floating-actions" aria-hidden="false">
-    <div class="floating-inner">
-      <button id="saveBtn" class="btn btn-save"><i class="fas fa-save"></i> Save Changes</button>
-      <button id="exitBtn" class="btn btn-exit"><i class="fas fa-sign-out-alt"></i> Exit Editor</button>
-    </div>
-  </div>
-
-  <script>
-    // Initialize Telegram WebApp
-    let tg;
-    try {
-      tg = window.Telegram.WebApp;
-      tg.expand();
-      tg.enableClosingConfirmation();
-    } catch (e) {
-      console.log("Not in Telegram environment", e);
-      tg = null;
-    }
-
-    // Utility: parse data from URL parameters
-    function parseDataParam() {
-      try {
-        const params = new URLSearchParams(window.location.search);
-        const dataParam = params.get('data');
-        if (!dataParam) return null;
-        
-        // Decode and parse the data
-        const decodedData = decodeURIComponent(dataParam);
-        return JSON.parse(decodedData);
-      } catch (e) {
-        console.warn('Failed to parse data param:', e);
-        return null;
-      }
-    }
-
-    // DOM references
-    const answersList = document.getElementById('answersList');
-    const addAnswerBtn = document.getElementById('addAnswerBtn');
-    const saveBtn = document.getElementById('saveBtn');
-    const exitBtn = document.getElementById('exitBtn');
-    const qInput = document.getElementById('questionInput');
-    const exInput = document.getElementById('explanationInput');
-
-    // State
-    let currentCorrect = null;
-
-    // Show notification
-    function showNotification(message, type = 'success') {
-      const notification = document.createElement('div');
-      notification.className = `notification ${type}`;
-      notification.innerHTML = `
-        <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
-        ${message}
-      `;
-      
-      document.body.appendChild(notification);
-      
-      // Remove after 3 seconds
-      setTimeout(() => {
-        notification.style.opacity = '0';
-        notification.style.transition = 'opacity 0.3s ease';
-        setTimeout(() => notification.remove(), 300);
-      }, 3000);
-    }
-
-    // Resize textareas automatically
-    function autoResize(el) {
-      if (!el) return;
-      el.style.height = 'auto';
-      el.style.height = Math.min(el.scrollHeight, 240) + 'px';
-    }
-
-    // Create answer item
-    function createAnswer(value = '', isCorrect = false) {
-      const li = document.createElement('li');
-      li.className = 'answer-item';
-      if (isCorrect) {
-        li.classList.add('correct');
-      }
-
-      const span = document.createElement('span');
-      span.className = 'answer-number';
-
-      const textarea = document.createElement('textarea');
-      textarea.className = 'answer-input';
-      textarea.rows = 1;
-      textarea.value = value;
-      textarea.setAttribute('enterkeyhint', 'done');
-      textarea.setAttribute('placeholder', 'Enter answer text');
-
-      const actions = document.createElement('div');
-      actions.className = 'answer-actions';
-
-      const toggle = document.createElement('div');
-      toggle.className = 'correct-toggle';
-      if (isCorrect) toggle.classList.add('active');
-      toggle.innerHTML = '<div class="toggle-handle"></div>';
-
-      const removeBtn = document.createElement('button');
-      removeBtn.className = 'remove-answer';
-      removeBtn.type = 'button';
-      removeBtn.title = 'Remove answer';
-      removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
-
-      actions.appendChild(toggle);
-      actions.appendChild(removeBtn);
-      li.appendChild(span);
-      li.appendChild(textarea);
-      li.appendChild(actions);
-
-      // Add event listeners
-      textarea.addEventListener('input', () => autoResize(textarea));
-      textarea.addEventListener('keydown', e => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          textarea.blur();
-        }
-      });
-
-      return li;
-    }
-
-    // Renumber answers
-    function renumber() {
-      const items = answersList.children;
-      for (let i = 0; i < items.length; i++) {
-        const num = items[i].querySelector('.answer-number');
-        if (num) num.textContent = i + 1;
-      }
-    }
-
-    // Remove answer
-    function removeAnswer(li) {
-      if (!li) return;
-      const wasCorrect = li.classList.contains('correct');
-      li.remove();
-      if (wasCorrect) currentCorrect = null;
-      renumber();
-    }
-
-    // Set correct answer
-    function setCorrect(item) {
-      if (!item) return;
-      if (currentCorrect === item) return;
-      
-      if (currentCorrect) {
-        currentCorrect.classList.remove('correct');
-        const toggle = currentCorrect.querySelector('.correct-toggle');
-        if (toggle) toggle.classList.remove('active');
-      }
-      
-      item.classList.add('correct');
-      const toggle = item.querySelector('.correct-toggle');
-      if (toggle) toggle.classList.add('active');
-      currentCorrect = item;
-    }
-
-    // Event delegation for answers list
-    answersList.addEventListener('click', (e) => {
-      const target = e.target;
-      
-      if (target.closest('.remove-answer')) {
-        const li = target.closest('.answer-item');
-        removeAnswer(li);
-        return;
-      }
-      
-      if (target.closest('.correct-toggle')) {
-        const li = target.closest('.answer-item');
-        setCorrect(li);
-        return;
-      }
-    }, { passive: true });
-
-    // Add answer button
-    addAnswerBtn.addEventListener('click', () => {
-      const li = createAnswer('');
-      answersList.appendChild(li);
-      renumber();
-      const textarea = li.querySelector('.answer-input');
-      if (textarea) {
-        textarea.focus();
-        autoResize(textarea);
-      }
-    });
-
-    // Populate editor from data
-    function populateFromData(data) {
-      if (!data) return;
-      
-      // Set question and explanation
-      qInput.value = data.question || '';
-      exInput.value = data.explanation || '';
-      
-      // Clear existing answers
-      answersList.innerHTML = '';
-      
-      const answers = Array.isArray(data.answers) ? data.answers : [];
-      let correctIndex = typeof data.correct_answer === 'number' ? data.correct_answer : -1;
-      
-      // Handle 1-based indexing if needed
-      if (correctIndex >= 1 && correctIndex <= answers.length) {
-        correctIndex = correctIndex - 1;
-      }
-      
-      if (correctIndex < 0 || correctIndex >= answers.length) {
-        correctIndex = -1;
-      }
-
-      // Create answer elements
-      answers.forEach((answer, index) => {
-        const isCorrect = index === correctIndex;
-        const li = createAnswer(answer, isCorrect);
-        answersList.appendChild(li);
-        
-        if (isCorrect) {
-          currentCorrect = li;
-        }
-      });
-
-      // If no answers provided, initialize with 4 empty answers
-      if (answers.length === 0) {
-        for (let i = 0; i < 4; i++) {
-          const li = createAnswer('', i === 0);
-          answersList.appendChild(li);
-          
-          if (i === 0) {
-            currentCorrect = li;
-          }
-        }
-      }
-      
-      renumber();
-      
-      // Auto-resize all answer textareas
-      answersList.querySelectorAll('.answer-input').forEach(autoResize);
-    }
-
-    // Collect data and send back to bot
-    async function onSaveClick() {
-      const question = qInput.value.trim();
-      const explanation = exInput.value.trim();
-      const items = answersList.querySelectorAll('.answer-item');
-      const answers = [];
-      let correctIndex = -1;
-      
-      // Collect answers and find the correct one
-      for (let i = 0; i < items.length; i++) {
-        const input = items[i].querySelector('.answer-input');
-        answers.push(input ? input.value.trim() : '');
-        
-        if (items[i].classList.contains('correct')) {
-          correctIndex = i;
-        }
-      }
-
-      // Validate data
-      if (!question) {
-        showNotification('Please enter a question', 'error');
-        qInput.focus();
-        return;
-      }
-      
-      if (answers.length < 2) {
-        showNotification('Please add at least 2 answers', 'error');
-        return;
-      }
-      
-      const emptyAnswers = answers.filter(a => !a);
-      if (emptyAnswers.length > 0) {
-        showNotification('Please fill in all answers', 'error');
-        return;
-      }
-      
-      if (correctIndex === -1) {
-        showNotification('Please select a correct answer', 'error');
-        return;
-      }
-
-      // Prepare data object
-      const data = {
-        question,
-        answers,
-        correct_answer: correctIndex, // 0-based index
-        explanation
-      };
-
-      // Show loading state
-      saveBtn.classList.add('btn-loading');
-      saveBtn.disabled = true;
-
-      // Send data to bot if inside Telegram
-      if (tg && typeof tg.sendData === 'function') {
-        try {
-          tg.sendData(JSON.stringify(data));
-          showNotification('Data saved successfully!');
-          
-          // Close after sending data
-          setTimeout(() => {
-            if (tg && typeof tg.close === 'function') {
-              tg.close();
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sendButton = document.getElementById('sendButton');
+            const buttonText = document.getElementById('buttonText');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            // Initialize Telegram WebApp
+            let tg;
+            try {
+                tg = window.Telegram.WebApp;
+                tg.expand();
+                tg.ready();
+            } catch (e) {
+                console.log("Not in Telegram environment", e);
+                tg = null;
             }
-          }, 1500);
-        } catch (err) {
-          console.error('sendData failed:', err);
-          showNotification('Failed to send data to the bot', 'error');
-          saveBtn.classList.remove('btn-loading');
-          saveBtn.disabled = false;
-        }
-      } else {
-        // Not in Telegram - for testing
-        console.log('WebApp data (not in Telegram):', data);
-        showNotification('Running outside Telegram - data printed to console');
-        
-        // Simulate success response
-        setTimeout(() => {
-          saveBtn.classList.remove('btn-loading');
-          saveBtn.disabled = false;
-        }, 1000);
-      }
-    }
-
-    // Exit the editor
-    function onExitClick() {
-      if (tg && typeof tg.close === 'function') {
-        tg.close();
-      } else {
-        // Not in Telegram
-        if (confirm('Are you sure you want to exit? Any unsaved changes will be lost.')) {
-          window.history.back();
-        }
-      }
-    }
-
-    // Initialize the application
-    function initApp() {
-      // Wire up button events
-      saveBtn.addEventListener('click', onSaveClick);
-      exitBtn.addEventListener('click', onExitClick);
-      
-      // Auto-resize question and explanation inputs
-      qInput.addEventListener('input', () => autoResize(qInput));
-      exInput.addEventListener('input', () => autoResize(exInput));
-      
-      // Load data from URL parameters
-      const incomingData = parseDataParam();
-      populateFromData(incomingData);
-      
-      // Initialize Telegram WebApp if available
-      if (tg) {
-        try {
-          tg.ready();
-          tg.expand();
-        } catch(e) {
-          console.error('Error initializing Telegram WebApp:', e);
-        }
-      }
-    }
-
-    // Start the app when DOM is loaded
-    document.addEventListener('DOMContentLoaded', initApp);
-  </script>
+            
+            // Sample data to send
+            const sampleData = {
+                action: "user_click",
+                timestamp: new Date().toISOString(),
+                user_id: tg ? tg.initDataUnsafe.user.id : "unknown",
+                message: "Hello from the simple web app!"
+            };
+            
+            sendButton.addEventListener('click', function() {
+                // Show loading state
+                sendButton.disabled = true;
+                buttonText.innerHTML = '<span class="loading"></span> Sending...';
+                statusMessage.style.display = 'none';
+                
+                // Send data to bot if in Telegram
+                if (tg && typeof tg.sendData === 'function') {
+                    try {
+                        tg.sendData(JSON.stringify(sampleData));
+                        
+                        // Show success message
+                        statusMessage.className = 'status success';
+                        statusMessage.textContent = 'Data sent successfully!';
+                        statusMessage.style.display = 'block';
+                        
+                        // Close the app after a short delay
+                        setTimeout(function() {
+                            tg.close();
+                        }, 1500);
+                    } catch (err) {
+                        console.error('sendData failed:', err);
+                        
+                        // Show error message
+                        statusMessage.className = 'status error';
+                        statusMessage.textContent = 'Failed to send data: ' + err.message;
+                        statusMessage.style.display = 'block';
+                        
+                        // Reset button
+                        sendButton.disabled = false;
+                        buttonText.textContent = 'Send Data to Bot';
+                    }
+                } else {
+                    // Not in Telegram - show data that would be sent
+                    console.log('Sample data:', sampleData);
+                    
+                    // Show success message (for demo purposes)
+                    statusMessage.className = 'status success';
+                    statusMessage.textContent = 'Data sent (console): ' + JSON.stringify(sampleData);
+                    statusMessage.style.display = 'block';
+                    
+                    // Reset button after a delay
+                    setTimeout(function() {
+                        sendButton.disabled = false;
+                        buttonText.textContent = 'Send Data to Bot';
+                    }, 2000);
+                }
+            });
+        });
+    </script>
 </body>
 </html>
