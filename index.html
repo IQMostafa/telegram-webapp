@@ -18,44 +18,34 @@
 
     <button id="send-button">Send Data to Bot</button>
     
-    <script>
-        // This function runs when the page is fully loaded
-        window.onload = function() {
-            // Get the Telegram Web App object
-            const tg = window.Telegram.WebApp;
-            tg.ready(); // Inform the Telegram client that the app is ready
+<script>
+window.onload = function() {
+    const tg = window.Telegram?.WebApp;
+    if (!tg) {
+        alert("Open this inside Telegram!");
+        return;
+    }
+    tg.ready();
 
-            const displayDiv = document.getElementById('data-display');
-            
-            // --- 1. RECEIVING DATA FROM THE BOT ---
-            // We get the query parameters from the URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const firstName = urlParams.get('q');
-            const firstName2 = urlParams.get('a');
+    const displayDiv = document.getElementById('data-display');
 
-            displayDiv.innerHTML = `
-            First Name: ${firstName}
-            second Name: ${firstName2}
-            `;
-            
-            // --- 2. SENDING DATA TO THE BOT ---
-            const sendButton = document.getElementById('send-button');
-            sendButton.addEventListener('touchstart', function() {
-                // This is the data we will send back to the bot
-                const dataToSend = {
-                    message: "Hello from the Web App!",
-                    status: "ok"
-                };
+    const urlParams = new URLSearchParams(window.location.search);
+    const firstName = urlParams.get('q');
+    const firstName2 = urlParams.get('a');
 
-                // Use the sendData method to send data to the bot
-                // The data must be a string, so we use JSON.stringify
-                tg.sendData(JSON.stringify(dataToSend));
-                
-                // Optional: Close the web app after sending data
-                // tg.close();
-            });
-        };
-    </script>
+    displayDiv.innerHTML = `
+        First Name: ${firstName}
+        Second Name: ${firstName2}
+    `;
+
+    const sendButton = document.getElementById('send-button');
+    sendButton.addEventListener('click', function() {
+        const dataToSend = { message: "Hello from Web App!", status: "ok" };
+        tg.sendData(JSON.stringify(dataToSend));
+    });
+};
+</script>
+
 
 </body>
 </html>
