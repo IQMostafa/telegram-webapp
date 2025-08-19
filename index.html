@@ -6,13 +6,12 @@
 </head>
 <body>
     <div id="data-display">Waiting for data...</div>
-    <button id="send-button">Send Data to Bot</button>
+    <button id="send-button" style="margin-top: 20px; padding: 10px;">Send Data to Bot</button>
 
     <script>
         // Initialize Telegram Web App
         let tg = window.Telegram.WebApp;
         tg.expand();
-        tg.enableClosingConfirmation();
         
         // Get data from URL parameters
         const urlParams = new URLSearchParams(window.location.search);
@@ -21,7 +20,7 @@
         // Display the data or show "no data received"
         const dataDisplay = document.getElementById('data-display');
         if (dataFromBot) {
-            dataDisplay.innerText = `Data received: ${dataFromBot}`;
+            dataDisplay.innerText = `Data received: ${decodeURIComponent(dataFromBot)}`;
         } else {
             dataDisplay.innerText = 'No data received';
         }
@@ -29,7 +28,13 @@
         // Handle send button click
         document.getElementById('send-button').addEventListener('click', function() {
             // Send data back to the bot
-            tg.sendData(JSON.stringify({message: "Hello from web app!"}));
+            const responseData = JSON.stringify({
+                message: "Hello from web app!",
+                timestamp: new Date().toISOString(),
+                userAction: "button_clicked"
+            });
+            
+            tg.sendData(responseData);
             tg.close();
         });
     </script>
