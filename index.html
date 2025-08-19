@@ -1,203 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Telegram Mini App — Debug</title>
-  <style>
-    :root { --bg:#0f1720; --panel:#111827; --muted:#9ca3af; --accent:#0096d6; --success:#16a34a; --danger:#ef4444; --card:#0b1220; }
-    body { margin:0; font-family: Inter, system-ui, Arial, sans-serif; background:var(--bg); color:#e6eef6; padding:18px; }
-    h1 { margin:4px 0 8px; font-size:20px; }
-    p { margin:6px 0 14px; color:var(--muted); }
-    .card { background:var(--card); border-radius:10px; padding:12px; box-sizing:border-box; margin-bottom:12px; }
-    label { display:block; margin:8px 0 4px; color:var(--muted); font-size:13px; }
-    input[type="text"], textarea {
-      width:100%; box-sizing:border-box; padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);
-      background:#07121c; color:#dbeafe; font-size:14px;
-    }
-    textarea { min-height:90px; resize:vertical; }
-    .row { display:flex; gap:8px; margin-top:10px; }
-    button {
-      background:linear-gradient(180deg,var(--accent),#0077b3); border:none; padding:10px 14px; border-radius:9px; color:white; font-weight:600; cursor:pointer;
-    }
-    button.ghost { background:transparent; border:1px solid rgba(255,255,255,0.06); color:var(--muted); }
-    .status { font-size:13px; color:var(--muted); margin-top:8px; }
-    pre { white-space:pre-wrap; word-wrap:break-word; font-family:monospace; font-size:13px; color:#d1f2ff; background:transparent; margin:8px 0 0;}
-    .log { background:linear-gradient(180deg,#07121c,#041018); padding:10px; border-radius:8px; max-height:220px; overflow:auto; }
-    .small { font-size:12px; color:var(--muted); }
-    .ok { color:var(--success); font-weight:600; }
-    .err { color:var(--danger); font-weight:700; }
-  </style>
+    <title>Telegram Web App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-  <h1>Telegram Mini App — Debugger</h1>
-  <p>Open this page from your Telegram chat (use the bot's "Open Web App" button). The page will show whether it's running inside Telegram, the init data, and let you send test payloads.</p>
+    <div id="data-display">Waiting for data...</div>
+    <button id="send-button">Send Data to Bot</button>
 
-  <div class="card">
-    <div class="small">Environment check:</div>
-    <div id="env" class="status">Checking...</div>
-  </div>
-
-  <div class="card">
-    <label for="payload">Payload (JSON) — edit if you want</label>
-    <textarea id="payload">{ "action": "button_clicked", "timestamp": "", "message": "Hello from Mini App debug" }</textarea>
-
-    <div class="row">
-      <button id="sendBtn">Send Data</button>
-      <button id="sendCloseBtn" class="ghost">Send & Close</button>
-      <button id="copyBtn" class="ghost">Copy Debug Text</button>
-      <button id="simulateBtn" class="ghost">Simulate (browser only)</button>
-    </div>
-
-    <div id="sendStatus" class="status"></div>
-  </div>
-
-  <div class="card">
-    <div class="small">Telegram WebApp init data (if available):</div>
-    <pre id="initData">—</pre>
-  </div>
-
-  <div class="card">
-    <div class="small">Logs</div>
-    <div id="log" class="log"></div>
-  </div>
-
-  <!-- Telegram Mini App SDK -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script>
-    const logEl = document.getElementById('log');
-    function log(...args) {
-      const time = new Date().toLocaleTimeString();
-      const txt = args.map(a => (typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a))).join(' ');
-      logEl.innerHTML = `<div style="margin-bottom:6px"><b style="color:#7dd3fc">${time}</b> — ${txt}</div>` + logEl.innerHTML;
-      console.log(...args);
-    }
-
-    function setEnv(text, ok=false) {
-      const el = document.getElementById('env');
-      el.innerHTML = ok ? `<span class="ok">${text}</span>` : `<span class="err">${text}</span>`;
-    }
-
-    function setInitData(text) {
-      document.getElementById('initData').textContent = text;
-    }
-
-    // Detect Telegram WebApp availability
-    const inTelegram = (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp);
-    if (inTelegram) {
-      setEnv('Running inside Telegram Web App SDK — OK', true);
-      try {
-        Telegram.WebApp.ready();
-        const initData = Telegram.WebApp.initData || Telegram.WebApp.initDataUnsafe || null;
-        setInitData(initData ? JSON.stringify(initData, null, 2) : 'No init data available');
-        log('Telegram.WebApp available', { user: Telegram.WebApp?.initDataUnsafe?.user, platform: Telegram.WebApp?.platform });
-      } catch (e) {
-        setInitData('Error reading initData: ' + e.message);
-        log('Error during Telegram init:', e);
-      }
-    } else {
-      setEnv('Not inside Telegram (open via the bot inside Telegram).', false);
-      setInitData('N/A - open this with the bot "Open Web App" button.');
-      log('Telegram.WebApp not detected. If you opened the page in a browser this is expected.');
-    }
-
-    // Buttons
-    const payloadEl = document.getElementById('payload');
-    const sendBtn = document.getElementById('sendBtn');
-    const sendCloseBtn = document.getElementById('sendCloseBtn');
-    const copyBtn = document.getElementById('copyBtn');
-    const simulateBtn = document.getElementById('simulateBtn');
-    const sendStatus = document.getElementById('sendStatus');
-
-    function buildPayload() {
-      try {
-        const obj = JSON.parse(payloadEl.value);
-        // ensure timestamp
-        obj.timestamp = new Date().toISOString();
-        payloadEl.value = JSON.stringify(obj, null, 2);
-        return obj;
-      } catch (e) {
-        sendStatus.textContent = 'Invalid JSON in payload.';
-        sendStatus.className = 'status';
-        log('Invalid JSON:', e.message);
-        throw e;
-      }
-    }
-
-    sendBtn.addEventListener('click', () => {
-      try {
-        const payload = buildPayload();
-        if (!inTelegram) {
-          sendStatus.textContent = 'Not inside Telegram. Use "Simulate" for browser testing.';
-          return;
+    <script>
+        // Initialize Telegram Web App
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.enableClosingConfirmation();
+        
+        // Get data from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const dataFromBot = urlParams.get('data');
+        
+        // Display the data or show "no data received"
+        const dataDisplay = document.getElementById('data-display');
+        if (dataFromBot) {
+            dataDisplay.innerText = `Data received: ${dataFromBot}`;
+        } else {
+            dataDisplay.innerText = 'No data received';
         }
-        sendStatus.textContent = 'Calling Telegram.WebApp.sendData(...)';
-        Telegram.WebApp.sendData(JSON.stringify(payload));
-        log('sendData called with:', payload);
-        sendStatus.textContent = 'sendData called — waiting for bot update (check bot chat).';
-      } catch (e) {
-        sendStatus.textContent = 'Failed to send data: see logs.';
-      }
-    });
-
-    sendCloseBtn.addEventListener('click', () => {
-      try {
-        const payload = buildPayload();
-        if (!inTelegram) {
-          sendStatus.textContent = 'Not inside Telegram. Use "Simulate" for browser testing.';
-          return;
-        }
-        Telegram.WebApp.sendData(JSON.stringify(payload));
-        log('sendData called with (and closing):', payload);
-        sendStatus.textContent = 'sendData called — closing app';
-        // delay a little so sendData can initiate
-        setTimeout(() => Telegram.WebApp.close(), 250);
-      } catch (e) {
-        sendStatus.textContent = 'Failed to send+close: see logs.';
-      }
-    });
-
-    copyBtn.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(`Debug payload:\n${payloadEl.value}\n\nInitData:\n${document.getElementById('initData').textContent}`);
-        sendStatus.textContent = 'Copied debug info to clipboard.';
-        log('Copied debug info to clipboard');
-      } catch (e) {
-        sendStatus.textContent = 'Copy failed: ' + e.message;
-        log('Copy failed', e);
-      }
-    });
-
-    // Browser-only simulate: shows what would be sent (useful when not opened inside Telegram)
-    simulateBtn.addEventListener('click', () => {
-      try {
-        const payload = buildPayload();
-        log('SIMULATE send (browser only):', payload);
-        sendStatus.textContent = 'Simulation done — check Logs.';
-      } catch (e) {
-        sendStatus.textContent = 'Simulation failed: invalid JSON.';
-      }
-    });
-
-    // Optional: listen to theme / main button events (debug)
-    try {
-      if (inTelegram) {
-        Telegram.WebApp.onEvent('themeChanged', (theme) => log('Theme changed event:', theme));
-      }
-    } catch (e) {
-      // ignore if API differs
-    }
-
-    // Initial sample population
-    (function initExample() {
-      const sample = {
-        action: "debug_send",
-        timestamp: "",
-        message: "Test payload from mini app debug page"
-      };
-      payloadEl.value = JSON.stringify(sample, null, 2);
-    })();
-
-  </script>
+        
+        // Handle send button click
+        document.getElementById('send-button').addEventListener('click', function() {
+            // Send data back to the bot
+            tg.sendData(JSON.stringify({message: "Hello from web app!"}));
+            tg.close();
+        });
+    </script>
 </body>
 </html>
