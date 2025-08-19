@@ -29,10 +29,12 @@
             // --- 1. RECEIVING DATA FROM THE BOT ---
             // We get the query parameters from the URL
             const urlParams = new URLSearchParams(window.location.search);
-            const firstName = urlParams.get('first_name');
+            const firstName = urlParams.get('q');
+            const firstName2 = urlParams.get('a');
 
             displayDiv.innerHTML = `
-            <b>Data received from bot:</b>First Name: ${firstName}
+            First Name: ${firstName}
+            second Name: ${firstName2}
             `;
             
             // --- 2. SENDING DATA TO THE BOT ---
