@@ -1,27 +1,205 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Telegram Web App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Question Editor - Full Width</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="style.css" rel="stylesheet">
 </head>
 <body>
-    <h2>Enter your text:</h2>
-    <textarea id="userInput" rows="5" cols="40"></textarea>
-    <br>
-    <button onclick="submitText()">Submit</button>
-
+    <div class="container">
+        <div class="content">
+            <div class="preview-section">
+                <h2 class="section-title"><i class="fas fa-edit"></i> Edit Question</h2>
+                
+                <div class="editable-group">
+                    <label class="editable-label">Question:</label>
+                    <textarea class="editable-input" id="questionInput">What is the process called when free radicals couple to form aporphine alkaloids?</textarea>
+                </div>
+                
+                <div class="editable-group">
+                    <label class="editable-label">Answers:</label>
+                    <ul class="answers-list" id="answersList">
+                        <li class="answer-item">
+                            <span class="answer-number">1</span>
+                            <input type="text" class="answer-input" value="Ortho-para coupling">
+                            <div class="correct-toggle">
+                                <div class="toggle-handle"></div>
+                            </div>
+                        </li>
+                        <li class="answer-item correct">
+                            <span class="answer-number">2</span>
+                            <input type="text" class="answer-input" value="Electrostatic binding">
+                            <div class="correct-toggle active">
+                                <div class="toggle-handle"></div>
+                            </div>
+                        </li>
+                        <li class="answer-item">
+                            <span class="answer-number">3</span>
+                            <input type="text" class="answer-input" value="Redox reaction">
+                            <div class="correct-toggle">
+                                <div class="toggle-handle"></div>
+                            </div>
+                        </li>
+                        <li class="answer-item">
+                            <span class="answer-number">4</span>
+                            <input type="text" class="answer-input" value="Radical cyclization">
+                            <div class="correct-toggle">
+                                <div class="toggle-handle"></div>
+                            </div>
+                        </li>
+                    </ul>
+                    <div class="add-answer" id="addAnswerBtn">
+                        <i class="fas fa-plus-circle"></i>
+                        Add Answer
+                    </div>
+                </div>
+                
+                <div class="editable-group">
+                    <label class="editable-label">Explanation:</label>
+                    <textarea class="editable-input" id="explanationInput">Aporphine alkaloids arise from ortho- or para-couplings involving free radicals.</textarea>
+                </div>
+            </div>
+            
+            <div class="buttons">
+                <button class="btn btn-save" id="saveBtn"><i class="fas fa-save"></i> Save Changes</button>
+                <button class="btn btn-exit" id="exitBtn"><i class="fas fa-sign-out-alt"></i> Exit</button>
+            </div>
+            
+        </div>
+    </div>
     <script>
-        function submitText() {
-            const text = document.getElementById("userInput").value;
-            // Send text back to Telegram
-            Telegram.WebApp.sendData(text);
-            alert("Text sent to bot!");
-        }
-
-        // Initialize Telegram WebApp
-        window.Telegram.WebApp.ready();
+        document.addEventListener('DOMContentLoaded', function() {
+            const saveBtn = document.getElementById('saveBtn');
+            const exitBtn = document.getElementById('exitBtn');
+            const addAnswerBtn = document.getElementById('addAnswerBtn');
+            const answersList = document.getElementById('answersList');
+            
+            // Add new answer functionality
+            addAnswerBtn.addEventListener('click', function() {
+                const answerCount = answersList.children.length;
+                const newAnswer = document.createElement('li');
+                newAnswer.className = 'answer-item';
+                newAnswer.innerHTML = `
+                    <span class="answer-number">${answerCount + 1}</span>
+                    <input type="text" class="answer-input" placeholder="Enter answer text">
+                    <div class="correct-toggle">
+                        <div class="toggle-handle"></div>
+                    </div>
+                `;
+                answersList.appendChild(newAnswer);
+                
+                // Add event to new toggle
+                newAnswer.querySelector('.correct-toggle').addEventListener('click', function() {
+                    setCorrectAnswer(newAnswer);
+                });
+            });
+            
+            // Set correct answer functionality
+            function setCorrectAnswer(selectedItem) {
+                // Remove correct class from all answers
+                document.querySelectorAll('.answer-item').forEach(item => {
+                    item.classList.remove('correct');
+                    const toggle = item.querySelector('.correct-toggle');
+                    toggle.classList.remove('active');
+                });
+                
+                // Add correct class to selected answer
+                selectedItem.classList.add('correct');
+                selectedItem.querySelector('.correct-toggle').classList.add('active');
+            }
+            
+            // Add toggle events to existing answers
+            document.querySelectorAll('.correct-toggle').forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    const answerItem = this.closest('.answer-item');
+                    setCorrectAnswer(answerItem);
+                });
+            });
+            
+            // Save button functionality
+            saveBtn.addEventListener('click', function() {
+                const question = document.getElementById('questionInput').value;
+                const explanation = document.getElementById('explanationInput').value;
+                
+                const answers = [];
+                document.querySelectorAll('.answer-input').forEach(input => {
+                    answers.push(input.value);
+                });
+                
+                // Find correct answer index
+                const correctIndex = Array.from(document.querySelectorAll('.answer-item')).findIndex(item => 
+                    item.classList.contains('correct')
+                );
+                
+                // Create data object
+                const data = {
+                    question,
+                    answers,
+                    correct_answer: correctIndex,
+                    explanation
+                };
+                
+                // Show success message
+                showMessage('Changes saved successfully!', 'success');
+                console.log('Saved data:', data);
+            });
+            
+            // Exit button functionality
+            exitBtn.addEventListener('click', function() {
+                if(confirm('Are you sure you want to exit? All unsaved changes will be lost.')) {
+                    showMessage('Exiting editor...', 'info');
+                    // In a real app, this would navigate away
+                    setTimeout(() => {
+                        alert('Thank you for using the editor. Goodbye!');
+                    }, 800);
+                }
+            });
+            
+            // Show message to user
+            function showMessage(text, type) {
+                // Create message element
+                const message = document.createElement('div');
+                message.textContent = text;
+                message.style.position = 'fixed';
+                message.style.bottom = '20px';
+                message.style.left = '50%';
+                message.style.transform = 'translateX(-50%)';
+                message.style.padding = '15px 25px';
+                message.style.borderRadius = '10px';
+                message.style.color = 'white';
+                message.style.fontWeight = '600';
+                message.style.boxShadow = '0 5px 15px rgba(0,0,0,0.2)';
+                message.style.zIndex = '1000';
+                message.style.opacity = '0';
+                message.style.transition = 'opacity 0.3s';
+                
+                // Set background based on type
+                if (type === 'success') {
+                    message.style.background = 'linear-gradient(to right, #00c853, #64dd17)';
+                } else if (type === 'error') {
+                    message.style.background = 'linear-gradient(to right, #ff5252, #ff7675)';
+                } else {
+                    message.style.background = 'linear-gradient(to right, #4776E6, #8E54E9)';
+                }
+                
+                document.body.appendChild(message);
+                
+                // Animate in
+                setTimeout(() => {
+                    message.style.opacity = '1';
+                }, 10);
+                
+                // Animate out after delay
+                setTimeout(() => {
+                    message.style.opacity = '0';
+                    setTimeout(() => {
+                        document.body.removeChild(message);
+                    }, 300);
+                }, 3000);
+            }
+        });
     </script>
-
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </body>
 </html>
