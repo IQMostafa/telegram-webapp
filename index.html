@@ -1,51 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Mini App</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
+  <meta charset="utf-8">
+  <title>Mini App Editor</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
+  <h2>Edit the text below:</h2>
+  <textarea id="textArea" rows="6" cols="40"></textarea><br><br>
+  <button id="sendBtn">✅ Send to Bot</button>
 
-    <h1>My Mini App</h1>
+  <script>
+    const tg = window.Telegram.WebApp;
 
-    <div id="data-display">
-    </div>
-
-    <br>
-
-    <button id="send-button">Send Data to Bot</button>
-    
-<script>
-window.onload = function() {
-    const tg = window.Telegram?.WebApp;
-    if (!tg) {
-        alert("Open this inside Telegram!");
-        return;
-    }
-    tg.ready();
-
-    const displayDiv = document.getElementById('data-display');
-
+    // Get text passed in URL (from bot)
     const urlParams = new URLSearchParams(window.location.search);
-    const firstName = urlParams.get('q');
-    const firstName2 = urlParams.get('a');
+    const prefill = urlParams.get("text") || "";
+    document.getElementById("textArea").value = prefill;
 
-    displayDiv.innerHTML = `
-        First Name: ${firstName}
-        Second Name: ${firstName2}
-    `;
+    // When user clicks send
+    document.getElementById("sendBtn").onclick = () => {
+      const newText = document.getElementById("textArea").value;
+      tg.sendData(newText);   // send text back to bot
+      tg.close();             // close mini app
+    };
 
-    const sendButton = document.getElementById('send-button');
-    sendButton.addEventListener('click', function() {
-        const dataToSend = { message: "Hello from Web App!", status: "ok" };
-        tg.sendData(JSON.stringify(dataToSend));
-    });
-};
-</script>
-
-
+    tg.expand(); // fullscreen
+  </script>
 </body>
 </html>
