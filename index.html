@@ -1,195 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Telegram Web App</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        
-        .container {
-            text-align: center;
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            max-width: 90%;
-            width: 400px;
-        }
-        
-        h1 {
-            color: #333;
-            margin-top: 0;
-            font-weight: 600;
-        }
-        
-        p {
-            color: #666;
-            margin-bottom: 30px;
-            line-height: 1.5;
-        }
-        
-        .send-button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 16px 40px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-        
-        .send-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        }
-        
-        .send-button:active {
-            transform: translateY(1px);
-        }
-        
-        .send-button:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .status {
-            margin-top: 20px;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            display: none;
-        }
-        
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            display: block;
-        }
-        
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            display: block;
-        }
-        
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Telegram Mini App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1c1c1c;
+      color: #f0f0f0;
+      text-align: center;
+      padding: 40px;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    button {
+      background-color: #0088cc;
+      color: white;
+      padding: 15px 25px;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0077b5;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Simple Data Sender</h1>
-        <p>Click the button below to send data to the Telegram bot.</p>
-        
-        <button id="sendButton" class="send-button">
-            <span id="buttonText">Send Data to Bot</span>
-        </button>
-        
-        <div id="statusMessage" class="status"></div>
-    </div>
+  <h1>Mini App Demo 🚀</h1>
+  <p>Click the button to send data back to the bot.</p>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const sendButton = document.getElementById('sendButton');
-            const buttonText = document.getElementById('buttonText');
-            const statusMessage = document.getElementById('statusMessage');
-            
-            // Initialize Telegram WebApp
-            let tg;
-            try {
-                tg = window.Telegram.WebApp;
-                tg.expand();
-                tg.ready();
-            } catch (e) {
-                console.log("Not in Telegram environment", e);
-                tg = null;
-            }
-            
-            // Sample data to send
-            const sampleData = {
-                action: "user_click",
-                timestamp: new Date().toISOString(),
-                user_id: tg ? tg.initDataUnsafe.user.id : "unknown",
-                message: "Hello from the simple web app!"
-            };
-            
-            sendButton.addEventListener('click', function() {
-                // Show loading state
-                sendButton.disabled = true;
-                buttonText.innerHTML = '<span class="loading"></span> Sending...';
-                statusMessage.style.display = 'none';
-                
-                // Send data to bot if in Telegram
-                if (tg && typeof tg.sendData === 'function') {
-                    try {
-                        tg.sendData(JSON.stringify(sampleData));
-                        
-                        // Show success message
-                        statusMessage.className = 'status success';
-                        statusMessage.textContent = 'Data sent successfully!';
-                        statusMessage.style.display = 'block';
-                        
-                        // Close the app after a short delay
-                        setTimeout(function() {
-                            tg.close();
-                        }, 1500);
-                    } catch (err) {
-                        console.error('sendData failed:', err);
-                        
-                        // Show error message
-                        statusMessage.className = 'status error';
-                        statusMessage.textContent = 'Failed to send data: ' + err.message;
-                        statusMessage.style.display = 'block';
-                        
-                        // Reset button
-                        sendButton.disabled = false;
-                        buttonText.textContent = 'Send Data to Bot';
-                    }
-                } else {
-                    // Not in Telegram - show data that would be sent
-                    console.log('Sample data:', sampleData);
-                    
-                    // Show success message (for demo purposes)
-                    statusMessage.className = 'status success';
-                    statusMessage.textContent = 'Data sent (console): ' + JSON.stringify(sampleData);
-                    statusMessage.style.display = 'block';
-                    
-                    // Reset button after a delay
-                    setTimeout(function() {
-                        sendButton.disabled = false;
-                        buttonText.textContent = 'Send Data to Bot';
-                    }, 2000);
-                }
-            });
-        });
-    </script>
+  <button onclick="sendData()">Send Data</button>
+
+  <!-- Telegram Mini App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
+    function sendData() {
+      // Example payload
+      const data = {
+        action: "button_clicked",
+        timestamp: new Date().toISOString(),
+        message: "Hello from the Mini App!"
+      };
+
+      // Send data back to the bot
+      Telegram.WebApp.sendData(JSON.stringify(data));
+
+      // Optionally close the mini app after sending
+      Telegram.WebApp.close();
+    }
+
+    // Optional: set theme based on Telegram
+    Telegram.WebApp.ready();
+    document.body.style.background = Telegram.WebApp.backgroundColor || "#1c1c1c";
+  </script>
 </body>
 </html>
