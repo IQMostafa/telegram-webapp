@@ -29,15 +29,11 @@
             // --- 1. RECEIVING DATA FROM THE BOT ---
             // We get the query parameters from the URL
             const urlParams = new URLSearchParams(window.location.search);
-            const userId = urlParams.get('user_id');
             const firstName = urlParams.get('first_name');
 
-            // Check if we received data
-            if (userId && firstName) {
-                displayDiv.innerHTML = `<b>Data received from bot:</b><br>User ID: ${userId}<br>First Name: ${firstName}`;
-            } else {
-                displayDiv.innerHTML = "<b>No data received from the bot.</b>";
-            }
+            displayDiv.innerHTML = `
+            <b>Data received from bot:</b>First Name: ${firstName}
+            `;
             
             // --- 2. SENDING DATA TO THE BOT ---
             const sendButton = document.getElementById('send-button');
