@@ -1,42 +1,83 @@
-<!DOCTYPE html>
+<!--
+Simple Web App HTML (no CSS, pure HTML + JS) that works when opened from Telegram's InlineKeyboardButton.
+Features:
+- Shows initData / initDataUnsafe if provided by Telegram when opening from InlineKeyboardButton
+- If no init data, shows "no data received"
+- Has a text input and a "Send" button. When clicked it sends data back to the bot using Telegram.WebApp.sendData(...)
+- If opened outside Telegram (normal browser), it displays a simple message about that.
+
+Upload this HTML to your WEB_APP_URL (you already have a GitHub Pages URL in your variables).
+-->
+
+<!doctype html>
 <html>
-<head>
-    <title>Telegram Web App</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-</head>
-<body>
-    <div id="data-display">Waiting for data...</div>
-    <button id="send-button" style="margin-top: 20px; padding: 10px;">Send Data to Bot</button>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Simple Telegram Web App</title>
+  </head>
+  <body>
+    <h3>Telegram Web App</h3>
+
+    <div id="status">Checking Telegram environment...</div>
+
+    <div>
+      <p>Init data / data from bot (if any):</p>
+      <pre id="initData">(waiting...)</pre>
+    </div>
+
+    <div>
+      <label for="payload">Payload to send to bot:</label><br>
+      <input id="payload" placeholder='type something to send' />
+      <button id="sendBtn">Send</button>
+    </div>
 
     <script>
-        // Initialize Telegram Web App
-        let tg = window.Telegram.WebApp;
-        tg.expand();
-        
-        // Get data from URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const dataFromBot = urlParams.get('data');
-        
-        // Display the data or show "no data received"
-        const dataDisplay = document.getElementById('data-display');
-        if (dataFromBot) {
-            dataDisplay.innerText = `Data received: ${decodeURIComponent(dataFromBot)}`;
-        } else {
-            dataDisplay.innerText = 'No data received';
+      (function(){
+        const status = document.getElementById('status');
+        const initDataEl = document.getElementById('initData');
+        const sendBtn = document.getElementById('sendBtn');
+        const payloadInput = document.getElementById('payload');
+
+        // Telegram WebApp object exists only when opened inside Telegram client
+        const hasTelegram = !!(window.Telegram && window.Telegram.WebApp);
+        if (!hasTelegram) {
+          status.textContent = 'Not opened inside Telegram. No data received.';
+          initDataEl.textContent = 'no data received (open the web app from the bot InlineKeyboardButton inside Telegram)';
+          // disable send button because sendData won't work
+          sendBtn.disabled = true;
+          return;
         }
-        
-        // Handle send button click
-        document.getElementById('send-button').addEventListener('click', function() {
-            // Send data back to the bot
-            const responseData = JSON.stringify({
-                message: "Hello from web app!",
-                timestamp: new Date().toISOString(),
-                userAction: "button_clicked"
-            });
-            
-            tg.sendData(responseData);
-            tg.close();
+
+        const tg = window.Telegram.WebApp;
+        // try to expand the web app area for better UX inside Telegram
+        try { tg.expand(); } catch (e) { /* ignore */ }
+
+        status.textContent = 'Opened inside Telegram.';
+
+        // initDataUnsafe is a JS object with parsed fields (not signed); initData is signed string
+        const initUnsafe = tg.initDataUnsafe || null;
+        const initSigned = tg.initData || null;
+
+        if (initUnsafe) {
+          initDataEl.textContent = JSON.stringify(initUnsafe, null, 2);
+        } else if (initSigned) {
+          initDataEl.textContent = initSigned;
+        } else {
+          initDataEl.textContent = 'no data received';
+        }
+
+        sendBtn.addEventListener('click', function(){
+          const payload = payloadInput.value || 'hello from webapp';
+          // send string data to the bot. The bot will receive it in update.message.web_app_data.data
+          try {
+            tg.sendData(JSON.stringify({payload: payload, time: new Date().toISOString()}));
+          } catch (e) {
+            alert('sendData failed: ' + e.message);
+          }
         });
+      })();
     </script>
-</body>
+
+  </body>
 </html>
