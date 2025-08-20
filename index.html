@@ -189,15 +189,9 @@ window.onload = () => {
     tg.ready(); // Notify Telegram the app is initialized
     tg.expand(); // Expand the app to full screen
     let firstViewportEvent = true;
-    document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "hidden") {
-    if (firstViewportEvent){firstViewportEvent = false; return;}
-    console.log("User left the Mini App");
-    tg.close() // you can close the app here
-  } else {
-    console.log("User returned to the Mini App");
-  }
-});
+    const onViewport = () => {
+      document.getElementById("main").innerHTML = tg.viewportHeight;
+    };
     tg.onEvent('viewportChanged', onViewport);
   }
 
