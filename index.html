@@ -271,7 +271,7 @@
   </style>
 </head>
 <body>
-  <div class="container">
+  <div id="main" class="container">
     <div class="main-content">
       <div class="card">
         <div class="card-header"></div>
@@ -441,14 +441,14 @@ window.onload = () => {
     tg.ready(); // Notify Telegram the app is initialized
     tg.expand(); // Expand the app to full screen
     let firstViewportEvent = true;
-    let SecindViewportEvent = true;
+    let SecondViewportEvent = true;
     let ExpandedViewportHight = 0;
     const onViewport = () => {
       if (firstViewportEvent){firstViewportEvent = false; return;}
-      if (SecindViewportEvent){
-        SecindViewportEvent = false
+      if (SecondViewportEvent){
+        SecondViewportEvent = false
         ExpandedViewportHight = tg.viewportHeight;
-        document.getElementById("container").innerHTML = ExpandedViewportHight
+        document.getElementById("main").innerHTML = ExpandedViewportHight
         return;
       }
       if (tg.viewportHeight < ExpandedViewportHight - 200){tg.close()}
