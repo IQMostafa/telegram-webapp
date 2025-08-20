@@ -537,7 +537,7 @@ function buildSSString() {
   const parts = [p.question, p.explanation, ...p.answers, String(p.correct_index)];
   return parts.join('SS');
 }
-let dataB = 0;
+let dataB = "";
 // Telegram WebApp Integration (if available)
 window.onload = () => {
   const tg = window.Telegram?.WebApp;
