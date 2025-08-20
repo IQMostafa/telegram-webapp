@@ -169,7 +169,7 @@ function updateAnswers(data) {
     });
   }
 // Telegram WebApp Integration (if available)
-
+window.onload = () => {
   const tg = window.Telegram.WebApp;
   if (tg) tg.ready();
   const urlParams = new URLSearchParams(window.location.search);
@@ -179,7 +179,7 @@ function updateAnswers(data) {
   //autosize.update(document.getElementById('questionInput'));
 
   tg.expand();
-
+}
 </script>
 </body>
 </html>
