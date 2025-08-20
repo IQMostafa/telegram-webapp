@@ -188,8 +188,9 @@ window.onload = () => {
   if (tg) {
     tg.ready(); // Notify Telegram the app is initialized
     tg.expand(); // Expand the app to full screen
+    let firstViewportEvent = true;
     const onViewport = () => {
-      // If user collapses/minimizes the webapp, close it
+      if (firstViewportEvent){firstViewportEvent = false; return;}
       if (!tg.isExpanded) tg.close();
     };
     tg.onEvent('viewportChanged', onViewport);
