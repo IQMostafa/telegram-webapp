@@ -136,7 +136,7 @@ function removeAnswer(answerItem) {
 }
 
 // Add answer
-function addAnswer() {
+function addAnswer(txt = "") {
   const answersList = document.getElementById('answersList');
   const newAnswer = document.createElement('li');
   newAnswer.className = 'answer-item bg-gray-800 p-3 rounded-lg border border-gray-700 flex items-start gap-2';
@@ -145,7 +145,7 @@ function addAnswer() {
   
   newAnswer.innerHTML = `
     <span class="answer-number w-8 h-8 rounded-lg bg-gradient-to-br from-teal-600 to-blue-600 flex items-center justify-center font-bold flex-shrink-0">${answerCount}</span>
-    <textarea class="answer-input bg-transparent border-none p-1 text-gray-100 outline-none resize-y w-full" rows="1" placeholder="Enter answer text"></textarea>
+    <textarea class="answer-input bg-transparent border-none p-1 text-gray-100 outline-none resize-y w-full" rows="1" placeholder="Enter answer text">${txt}</textarea>
     <div class="answer-actions flex items-center gap-2 flex-shrink-0 ml-1">
       <div class="correct-toggle w-12 h-6 bg-gray-700 rounded-full relative cursor-pointer p-1" onclick="setCorrect(this.closest('.answer-item'))">
         <div class="toggle-handle w-4 h-4 bg-white rounded-full transition-transform"></div>
@@ -159,15 +159,15 @@ function addAnswer() {
   answersList.appendChild(newAnswer);
   autosize(newAnswer.querySelector('textarea'));
 }
-function updateAnswers(data) {
-    const listItems = document.querySelectorAll("#answersList .answer-item");
-    listItems.forEach((item, index) => {
-      const textarea = item.querySelector(".answer-input");
-      if (textarea && data[index] !== undefined) {
-        textarea.value = data[index];
-      }
-    });
-  }
+function removeAllAnswers() {
+  // Select all answer items
+  const allAnswers = document.querySelectorAll('.answer-item');
+  
+  // Remove each answer item
+  allAnswers.forEach(item => item.remove());
+
+  // Optionally, if you have a counter or want to reset numbers, no need because all are gone
+}
 // Telegram WebApp Integration (if available)
 window.onload = () => {
   const tg = window.Telegram?.WebApp;
@@ -179,7 +179,11 @@ window.onload = () => {
   const urlParams = new URLSearchParams(window.location.search);
   const dataROW = urlParams.get('data');
   const data = dataROW.split("SS");
-
+  removeAllAnswers()
+  //for (let index = 0; index < data.length-2; index++) {
+  //  const element = array[index];
+  //}
+  addAnswer(data[2])
 
   document.getElementById('questionInput').value = data[0];
   document.getElementById('explanationInput').value = data[1];
