@@ -159,18 +159,27 @@ function addAnswer() {
   answersList.appendChild(newAnswer);
   autosize(newAnswer.querySelector('textarea'));
 }
-
+function updateAnswers(data) {
+    const listItems = document.querySelectorAll("#answersList .answer-item");
+    listItems.forEach((item, index) => {
+      const textarea = item.querySelector(".answer-input");
+      if (textarea && data[index] !== undefined) {
+        textarea.value = data[index];
+      }
+    });
+  }
 // Telegram WebApp Integration (if available)
 
   const tg = window.Telegram.WebApp;
   const urlParams = new URLSearchParams(window.location.search);
   const question = urlParams.get("question") || "";
   const explanation = urlParams.get("explanation") || "";
-  
+  const answers = JSON.parse(urlParams.get('answers'));
+
   document.getElementById('questionInput').value = question;
   autosize.update(document.getElementById('questionInput'));
 
-  document.getElementById('explanationInput').value = question;
+  document.getElementById('explanationInput').value = answers;
   autosize.update(document.getElementById('explanationInput'));
 
   tg.expand();
