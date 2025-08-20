@@ -164,14 +164,15 @@ function addAnswer() {
 
   const tg = window.Telegram.WebApp;
   const urlParams = new URLSearchParams(window.location.search);
-  const prefill = urlParams.get("text") || "";
+  const question = urlParams.get("question") || "";
+  const explanation = urlParams.get("explanation") || "";
   
-  if (true) {
-    document.getElementById('questionInput').value = prefill;
-    autosize.update(document.getElementById('questionInput'));
+  document.getElementById('questionInput').value = question;
+  autosize.update(document.getElementById('questionInput'));
 
-  }
-  
+  document.getElementById('explanationInput').value = question;
+  autosize.update(document.getElementById('explanationInput'));
+
   tg.expand();
 
 </script>
