@@ -486,7 +486,11 @@ window.onload = () => {
     let firstViewportEvent = true;
     let SecondViewportEvent = true;
     let ExpandedViewportHight = 0;
+
     const onViewport = () => {
+      if (!tg.isExpanded) {
+        tg.close();
+      }
       if (firstViewportEvent){firstViewportEvent = false; return;}
       if (SecondViewportEvent){
         SecondViewportEvent = false
@@ -498,7 +502,7 @@ window.onload = () => {
       }
     }
     tg.onEvent('viewportChanged', onViewport);
-    tg.onEvent('deactivated', () => {tg.close();});
+    //tg.onEvent('deactivated', () => {tg.close();});
   }
 
   const urlParams = new URLSearchParams(window.location.search);
