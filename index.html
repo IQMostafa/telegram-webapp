@@ -497,8 +497,8 @@ window.onload = () => {
         if (isTextareaFocused == false){tg.close()}
       }
     }
-
     tg.onEvent('viewportChanged', onViewport);
+    tg.onEvent('deactivated', () => {tg.close();});
   }
 
   const urlParams = new URLSearchParams(window.location.search);
