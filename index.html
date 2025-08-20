@@ -469,10 +469,75 @@ function setCorrectByIndex(index) {
   }
 }
 
-function collectPayload(){
-  return "data"
+function getCurrentCorrectIndex() {
+  const items = Array.from(document.querySelectorAll('.answer-item'));
+
+  // Try several cues, so it works with your different versions:
+  // 1) toggle data-flag you set earlier
+  // 2) Tailwind class used for the green left border
+  // 3) Translated handle (toggle knob moved)
+  for (let i = 0; i < items.length; i++) {
+    const item   = items[i];
+    const toggle = item.querySelector('.correct-toggle');
+    const knob   = toggle?.querySelector('.toggle-handle');
+
+    const hasDataFlag  = toggle?.dataset?.active === 'true';
+    const hasBorder    = item.classList.contains('border-l-4') || item.classList.contains('border-green-500');
+    const knobMoved    = knob?.classList.contains('translate-x-6') || (knob?.style.transform || '').includes('translateX');
+
+    if (hasDataFlag || hasBorder || knobMoved) return i;
+  }
+  return -1;
 }
 
+// Gathers all form data from the page and returns an object ready for JSON.stringify
+function collectPayload() {
+  const questionEl    = document.getElementById('questionInput');
+  const explanationEl = document.getElementById('explanationInput');
+
+  const question    = (questionEl?.value ?? '').trim();
+  const explanation = (explanationEl?.value ?? '').trim();
+
+  // Gather answers (skip completely empty ones)
+  const answers = Array.from(document.querySelectorAll('.answer-item .answer-input'))
+    .map(el => (el.value ?? '').trim())
+    .filter(txt => txt.length > 0);
+
+  // Map correct index to the filtered answers:
+  // We need to compute it against the visible items, skipping empties consistently.
+  const allItems          = Array.from(document.querySelectorAll('.answer-item'));
+  const originalCorrectIx = getCurrentCorrectIndex();
+
+  // Build a mapping from original indices -> filtered indices
+  let filteredIndex = -1;
+  let correctedIndex = -1;
+  for (let i = 0; i < allItems.length; i++) {
+    const val = (allItems[i].querySelector('.answer-input')?.value ?? '').trim();
+    if (val.length === 0) {
+      // skipped in filtered list
+      if (i === originalCorrectIx) correctedIndex = -1; // correct points to an empty answer -> invalidate
+      continue;
+    }
+    filteredIndex++;
+    if (i === originalCorrectIx) correctedIndex = filteredIndex;
+  }
+
+  return {
+    question,
+    explanation,
+    answers,
+    correct_index: correctedIndex,
+
+
+  };
+}
+function buildSSString() {
+  const p = collectPayload();
+  // question SS explanation SS ...answers SS correct_index
+  const parts = [p.question, p.explanation, ...p.answers, String(p.correct_index)];
+  return parts.join('SS');
+}
+let dataB = 0;
 // Telegram WebApp Integration (if available)
 window.onload = () => {
   const tg = window.Telegram?.WebApp;
@@ -495,9 +560,6 @@ window.onload = () => {
         ExpandedViewportHight = tg.viewportStableHeight;
         return;
       }
-      if (!tg.isExpanded) {
-        tg.close();
-      }
       if (tg.viewportHeight < ExpandedViewportHight - 200){
         if (isTextareaFocused == false){tg.close()}
       }
@@ -510,18 +572,19 @@ window.onload = () => {
   const dataROW = urlParams.get('data');
   const data = dataROW.split("SS");
   removeAllAnswers()
-  for (let index = 2; index < data.length-1; index++) {
+  for (let index = 2; index < data.length-2; index++) {
     addAnswer(data[index])
   }
   
-  setCorrectByIndex(parseInt(data[data.length-1], 10));
+  setCorrectByIndex(parseInt(data[data.length-2], 10));
   
 
   document.getElementById('questionInput').value = data[0];
   document.getElementById('explanationInput').value = data[1];
+  dataB = data[-1]
 
   tg.onEvent('mainButtonClicked', () => {
-    const payload = collectPayload();
+    const payload = buildSSString() + "SS" + dataB;
     tg.sendData(payload); // send back to bot
     tg.close(); // close Mini App
   });
