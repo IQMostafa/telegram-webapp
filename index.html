@@ -192,6 +192,7 @@ window.onload = () => {
       // If user collapses/minimizes the webapp, close it
       if (!tg.isExpanded) tg.close();
     };
+    tg.onEvent('viewportChanged', onViewport);
   }
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -214,7 +215,7 @@ window.onload = () => {
       tg.close();                            // close mini app
     });
 
-  tg.onEvent('viewportChanged', onViewport);
+  
 }
 </script>
 </body>
