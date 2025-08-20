@@ -4,227 +4,403 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Quiz Question Editor</title>
+
+  <!-- Keep Telegram JS untouched -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Autosize for textareas -->
   <script src="https://cdn.jsdelivr.net/npm/autosize@4.0.2/dist/autosize.min.js"></script>
+
+  <style>
+    :root {
+      /* Respect Telegram color scheme (light/dark) */
+      color-scheme: var(--tg-color-scheme);
+    }
+
+    /* Base layout */
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: var(--tg-theme-bg-color);
+      color: var(--tg-theme-text-color);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .page {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container {
+      width: min(100%, 960px);
+      margin: 0 auto;
+      padding: 16px;
+      flex: 1;
+    }
+
+    /* Card / sections */
+    .card {
+      background: var(--tg-theme-section-bg-color, var(--tg-theme-secondary-bg-color));
+      border: 1px solid var(--tg-theme-section-separator-color, var(--tg-theme-hint-color));
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .card__bar {
+      position: absolute;
+      inset-inline: 0;
+      top: 0;
+      height: 4px;
+      background: var(--tg-theme-accent-text-color, var(--tg-theme-link-color));
+    }
+
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--tg-theme-section-separator-color, var(--tg-theme-hint-color));
+      margin: 0 0 16px 0;
+    }
+    .title__badge {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: grid; place-items: center;
+      background: var(--tg-theme-button-color);
+      color: var(--tg-theme-button-text-color);
+      font-size: 14px;
+    }
+
+    /* Labels & inputs */
+    .label {
+      color: var(--tg-theme-hint-color);
+      font-weight: 600;
+      margin: 0 0 8px 2px;
+      font-size: 14px;
+    }
+    textarea.input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--tg-theme-section-separator-color, var(--tg-theme-hint-color));
+      background: var(--tg-theme-secondary-bg-color);
+      color: var(--tg-theme-text-color);
+      outline: none;
+      resize: none;                 /* autosize handles height */
+      line-height: 1.4;
+    }
+    textarea.input::placeholder { color: var(--tg-theme-hint-color); }
+
+    /* Answers list */
+    .answers { display: grid; gap: 8px; list-style: none; padding: 0; margin: 0; }
+    .answer {
+      display: flex; align-items: flex-start; gap: 8px;
+      background: var(--tg-theme-secondary-bg-color);
+      border: 1px solid var(--tg-theme-section-separator-color, var(--tg-theme-hint-color));
+      border-radius: 12px; padding: 12px;
+    }
+    .answer.correct {
+      border-inline-start: 4px solid var(--tg-theme-accent-text-color, var(--tg-theme-link-color));
+    }
+    .answer__num {
+      flex: 0 0 auto;
+      width: 32px; height: 32px;
+      border-radius: 10px;
+      display: grid; place-items: center;
+      font-weight: 700;
+      background: var(--tg-theme-button-color);
+      color: var(--tg-theme-button-text-color);
+    }
+    .answer__actions {
+      display: flex; gap: 8px; align-items: center;
+      margin-inline-start: 4px;
+      flex: 0 0 auto;
+    }
+
+    /* Toggle */
+    .toggle {
+      width: 44px; height: 24px; border-radius: 999px;
+      background: var(--tg-theme-secondary-bg-color);
+      border: 1px solid var(--tg-theme-section-separator-color, var(--tg-theme-hint-color));
+      position: relative; padding: 2px; cursor: pointer;
+    }
+    .toggle__dot {
+      width: 18px; height: 18px; border-radius: 999px;
+      background: var(--tg-theme-bg-color);
+      transform: translateX(0);
+      transition: transform 150ms ease;
+    }
+    .toggle.on {
+      background: var(--tg-theme-button-color);
+      border-color: var(--tg-theme-button-color);
+    }
+    .toggle.on .toggle__dot { transform: translateX(20px); }
+
+    /* Remove button */
+    .btn-icon {
+      display: grid; place-items: center;
+      width: 36px; height: 36px; border-radius: 10px;
+      background: transparent;
+      border: 1px solid var(--tg-theme-section-separator-color, var(--tg-theme-hint-color));
+      color: var(--tg-theme-destructive-text-color, var(--tg-theme-link-color));
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    /* Add answer */
+    .add {
+      margin-top: 8px;
+      display: grid; place-items: center; gap: 6px;
+      padding: 10px; border-radius: 12px;
+      border: 2px dashed var(--tg-theme-link-color);
+      color: var(--tg-theme-link-color);
+      font-weight: 600; cursor: pointer;
+    }
+
+    /* Footer + fixed actions */
+    .footer {
+      color: var(--tg-theme-hint-color);
+      font-size: 12px;
+      padding: 8px;
+      text-align: start;
+    }
+    .actions {
+      position: fixed; left: 0; right: 0; bottom: 12px; z-index: 50;
+      display: flex; justify-content: center; padding: 0 8px;
+    }
+    .actions__inner {
+      width: min(100%, 960px);
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }
+    .btn {
+      padding: 12px 14px; border-radius: 12px;
+      font-weight: 700; border: none; cursor: pointer;
+    }
+    .btn--primary {
+      background: var(--tg-theme-button-color);
+      color: var(--tg-theme-button-text-color);
+    }
+    .btn--secondary {
+      background: var(--tg-theme-secondary-bg-color);
+      color: var(--tg-theme-text-color);
+      border: 1px solid var(--tg-theme-section-separator-color, var(--tg-theme-hint-color));
+    }
+
+    /* Small helpers */
+    .row { margin-bottom: 16px; }
+    @media (pointer: coarse) {
+      /* Ensure larger touch targets on phones */
+      .btn, .btn-icon, .toggle { min-height: 44px; }
+    }
+  </style>
 </head>
-<body id="main" class="bg-gradient-to-b from-gray-900 to-gray-950 text-gray-100 min-h-screen flex flex-col">
-  <div class="container mx-auto p-4 flex-1">
-    <div class="max-w-4xl mx-auto">
-      <div class="bg-gray-800 rounded-lg p-4 border border-gray-700 mb-4 relative overflow-hidden">
-        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-500 to-blue-500"></div>
-        
-        <h2 class="text-xl font-semibold mb-4 flex items-center gap-2 pb-2 border-b border-gray-700">
-          <i class="fas fa-edit w-9 h-9 rounded-lg bg-gradient-to-br from-teal-600 to-blue-600 flex items-center justify-center text-sm"></i>
+<body>
+  <div class="page">
+    <div class="container">
+      <div class="card">
+        <div class="card__bar"></div>
+
+        <h2 class="title">
+          <div class="title__badge">✎</div>
           Edit Question
         </h2>
 
-        <div class="mb-4">
-          <label class="block text-gray-400 font-medium mb-2 pl-1">Question:</label>
-          <textarea id="questionInput" class="w-full p-3 rounded-lg border border-gray-700 bg-gray-900 text-gray-100 resize-y focus:border-blue-500 outline-none" rows="2">What is the process called when free radicals couple to form aporphine alkaloids?</textarea>
+        <div class="row">
+          <label class="label" for="questionInput">Question:</label>
+          <textarea id="questionInput" class="input" rows="2"
+            placeholder="Type your question">What is the process called when free radicals couple to form aporphine alkaloids?</textarea>
         </div>
 
-        <div class="mb-4">
-          <label class="block text-gray-400 font-medium mb-2 pl-1">Answers:</label>
-          <ul id="answersList" class="space-y-2">
-            <li class="answer-item bg-gray-800 p-3 rounded-lg border border-gray-700 flex items-start gap-2">
-              <span class="answer-number w-8 h-8 rounded-lg bg-gradient-to-br from-teal-600 to-blue-600 flex items-center justify-center font-bold flex-shrink-0">1</span>
-              <textarea class="answer-input bg-transparent border-none p-1 text-gray-100 outline-none resize-y w-full" rows="1">Ortho-para coupling</textarea>
-              <div class="answer-actions flex items-center gap-2 flex-shrink-0 ml-1">
-                <div class="correct-toggle w-12 h-6 bg-gray-700 rounded-full relative cursor-pointer p-1" onclick="setCorrect(this.closest('.answer-item'))">
-                  <div class="toggle-handle w-4 h-4 bg-white rounded-full transition-transform"></div>
+        <div class="row">
+          <div class="label">Answers:</div>
+          <ul id="answersList" class="answers">
+            <!-- Answer 1 -->
+            <li class="answer">
+              <span class="answer__num">1</span>
+              <textarea class="input" rows="1">Ortho-para coupling</textarea>
+              <div class="answer__actions">
+                <div class="toggle" onclick="setCorrect(this.closest('.answer'))">
+                  <div class="toggle__dot"></div>
                 </div>
-                <button class="remove-answer w-9 h-9 rounded-lg border border-red-500/20 flex items-center justify-center text-red-500" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
-                  <i class="fas fa-trash text-sm"></i>
-                </button>
+                <button class="btn-icon" title="Remove" onclick="removeAnswer(this.closest('.answer'))">🗑️</button>
               </div>
             </li>
 
-            <li class="answer-item bg-gray-800 p-3 rounded-lg border-l-4 border-green-500 border border-gray-700 flex items-start gap-2">
-              <span class="answer-number w-8 h-8 rounded-lg bg-gradient-to-br from-teal-600 to-blue-600 flex items-center justify-center font-bold flex-shrink-0">2</span>
-              <textarea class="answer-input bg-transparent border-none p-1 text-gray-100 outline-none resize-y w-full" rows="1">Electrostatic binding</textarea>
-              <div class="answer-actions flex items-center gap-2 flex-shrink-0 ml-1">
-                <div class="correct-toggle w-12 h-6 bg-green-500 rounded-full relative cursor-pointer p-1" onclick="setCorrect(this.closest('.answer-item'))">
-                  <div class="toggle-handle w-4 h-4 bg-white rounded-full transition-transform translate-x-6"></div>
+            <!-- Answer 2 (correct) -->
+            <li class="answer correct">
+              <span class="answer__num">2</span>
+              <textarea class="input" rows="1">Electrostatic binding</textarea>
+              <div class="answer__actions">
+                <div class="toggle on" onclick="setCorrect(this.closest('.answer'))">
+                  <div class="toggle__dot"></div>
                 </div>
-                <button class="remove-answer w-9 h-9 rounded-lg border border-red-500/20 flex items-center justify-center text-red-500" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
-                  <i class="fas fa-trash text-sm"></i>
-                </button>
+                <button class="btn-icon" title="Remove" onclick="removeAnswer(this.closest('.answer'))">🗑️</button>
               </div>
             </li>
 
-            <li class="answer-item bg-gray-800 p-3 rounded-lg border border-gray-700 flex items-start gap-2">
-              <span class="answer-number w-8 h-8 rounded-lg bg-gradient-to-br from-teal-600 to-blue-600 flex items-center justify-center font-bold flex-shrink-0">3</span>
-              <textarea class="answer-input bg-transparent border-none p-1 text-gray-100 outline-none resize-y w-full" rows="1">Redox reaction</textarea>
-              <div class="answer-actions flex items-center gap-2 flex-shrink-0 ml-1">
-                <div class="correct-toggle w-12 h-6 bg-gray-700 rounded-full relative cursor-pointer p-1" onclick="setCorrect(this.closest('.answer-item'))">
-                  <div class="toggle-handle w-4 h-4 bg-white rounded-full transition-transform"></div>
+            <!-- Answer 3 -->
+            <li class="answer">
+              <span class="answer__num">3</span>
+              <textarea class="input" rows="1">Redox reaction</textarea>
+              <div class="answer__actions">
+                <div class="toggle" onclick="setCorrect(this.closest('.answer'))">
+                  <div class="toggle__dot"></div>
                 </div>
-                <button class="remove-answer w-9 h-9 rounded-lg border border-red-500/20 flex items-center justify-center text-red-500" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
-                  <i class="fas fa-trash text-sm"></i>
-                </button>
+                <button class="btn-icon" title="Remove" onclick="removeAnswer(this.closest('.answer'))">🗑️</button>
               </div>
             </li>
 
-            <li class="answer-item bg-gray-800 p-3 rounded-lg border border-gray-700 flex items-start gap-2">
-              <span class="answer-number w-8 h-8 rounded-lg bg-gradient-to-br from-teal-600 to-blue-600 flex items-center justify-center font-bold flex-shrink-0">4</span>
-              <textarea class="answer-input bg-transparent border-none p-1 text-gray-100 outline-none resize-y w-full" rows="1">Radical cyclization</textarea>
-              <div class="answer-actions flex items-center gap-2 flex-shrink-0 ml-1">
-                <div class="correct-toggle w-12 h-6 bg-gray-700 rounded-full relative cursor-pointer p-1" onclick="setCorrect(this.closest('.answer-item'))">
-                  <div class="toggle-handle w-4 h-4 bg-white rounded-full transition-transform"></div>
+            <!-- Answer 4 -->
+            <li class="answer">
+              <span class="answer__num">4</span>
+              <textarea class="input" rows="1">Radical cyclization</textarea>
+              <div class="answer__actions">
+                <div class="toggle" onclick="setCorrect(this.closest('.answer'))">
+                  <div class="toggle__dot"></div>
                 </div>
-                <button class="remove-answer w-9 h-9 rounded-lg border border-red-500/20 flex items-center justify-center text-red-500" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
-                  <i class="fas fa-trash text-sm"></i>
-                </button>
+                <button class="btn-icon" title="Remove" onclick="removeAnswer(this.closest('.answer'))">🗑️</button>
               </div>
             </li>
           </ul>
 
-          <div id="addAnswerBtn" class="mt-2 flex items-center justify-center gap-2 p-2 rounded-lg border-2 border-dashed border-blue-500/30 text-blue-400 cursor-pointer font-medium" onclick="addAnswer()">
-            <i class="fas fa-plus-circle"></i> Add Answer
+          <div id="addAnswerBtn" class="add" onclick="addAnswer()">
+            ➕ Add Answer
           </div>
         </div>
 
-        <div class="mb-4">
-          <label class="block text-gray-400 font-medium mb-2 pl-1">Explanation:</label>
-          <textarea id="explanationInput" class="w-full p-3 rounded-lg border border-gray-700 bg-gray-900 text-gray-100 resize-y focus:border-blue-500 outline-none" rows="2">Aporphine alkaloids arise from ortho- or para-couplings involving free radicals.</textarea>
+        <div class="row">
+          <label class="label" for="explanationInput">Explanation:</label>
+          <textarea id="explanationInput" class="input" rows="2"
+            placeholder="Explanation">Aporphine alkaloids arise from ortho- or para-couplings involving free radicals.</textarea>
         </div>
       </div>
 
-      <div class="flex justify-between p-3 rounded-lg text-gray-400 text-sm">
-        <div>Question Editor | MOSTAFA ABBAS FADHIL | contact: @al_kaabi33</div>
+      <div class="footer">
+        Question Editor | MOSTAFA ABBAS FADHIL | contact: @al_kaabi33
       </div>
     </div>
-  </div>
 
-  <div class="fixed bottom-4 left-0 right-0 flex justify-center z-50 px-2">
-    <div class="max-w-4xl w-full flex gap-2 p-1">
-      <button id="saveBtn" class="btn flex-1 py-3 rounded-lg font-bold flex items-center justify-center gap-2 bg-gradient-to-br from-teal-600 to-blue-600 text-white">Save</button>
-      <button id="exitBtn" class="btn flex-1 py-3 rounded-lg font-bold flex items-center justify-center gap-2 bg-gray-800 text-gray-200">Exit</button>
+    <!-- Fixed actions -->
+    <div class="actions">
+      <div class="actions__inner">
+        <button id="saveBtn" class="btn btn--primary">Save</button>
+        <button id="exitBtn" class="btn btn--secondary">Exit</button>
+      </div>
     </div>
   </div>
 
 <script>
-// Initialize auto-resize for all textareas
-autosize(document.querySelectorAll('textarea'));
+  // Initialize auto-resize for all textareas
+  autosize(document.querySelectorAll('textarea.input'));
 
-// Set correct answer
-function setCorrect(answerItem) {
-  document.querySelectorAll('.answer-item').forEach(item => {
-    item.classList.remove('border-l-4', 'border-green-500');
-    const toggle = item.querySelector('.correct-toggle');
-    toggle.classList.remove('bg-green-500');
-    toggle.classList.add('bg-gray-700');
-    toggle.querySelector('.toggle-handle').classList.remove('translate-x-6');
-  });
-  
-  answerItem.classList.add('border-l-4', 'border-green-500');
-  const toggle = answerItem.querySelector('.correct-toggle');
-  toggle.classList.remove('bg-gray-700');
-  toggle.classList.add('bg-green-500');
-  toggle.querySelector('.toggle-handle').classList.add('translate-x-6');
-}
-
-// Remove answer
-function removeAnswer(answerItem) {
-  answerItem.remove();
-  // Renumber remaining answers
-  document.querySelectorAll('.answer-item').forEach((item, index) => {
-    item.querySelector('.answer-number').textContent = index + 1;
-  });
-}
-
-// Add answer
-function addAnswer(txt = "") {
-  const answersList = document.getElementById('answersList');
-  const newAnswer = document.createElement('li');
-  newAnswer.className = 'answer-item bg-gray-800 p-3 rounded-lg border border-gray-700 flex items-start gap-2';
-  
-  const answerCount = answersList.children.length + 1;
-  
-  newAnswer.innerHTML = `
-    <span class="answer-number w-8 h-8 rounded-lg bg-gradient-to-br from-teal-600 to-blue-600 flex items-center justify-center font-bold flex-shrink-0">${answerCount}</span>
-    <textarea class="answer-input bg-transparent border-none p-1 text-gray-100 outline-none resize-y w-full" rows="1" placeholder="Enter answer text">${txt}</textarea>
-    <div class="answer-actions flex items-center gap-2 flex-shrink-0 ml-1">
-      <div class="correct-toggle w-12 h-6 bg-gray-700 rounded-full relative cursor-pointer p-1" onclick="setCorrect(this.closest('.answer-item'))">
-        <div class="toggle-handle w-4 h-4 bg-white rounded-full transition-transform"></div>
-      </div>
-      <button class="remove-answer w-9 h-9 rounded-lg border border-red-500/20 flex items-center justify-center text-red-500" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
-        <i class="fas fa-trash text-sm"></i>
-      </button>
-    </div>
-  `;
-  
-  answersList.appendChild(newAnswer);
-  autosize(newAnswer.querySelector('textarea'));
-}
-function removeAllAnswers() {
-  // Select all answer items
-  const allAnswers = document.querySelectorAll('.answer-item');
-  
-  // Remove each answer item
-  allAnswers.forEach(item => item.remove());
-
-  // Optionally, if you have a counter or want to reset numbers, no need because all are gone
-}
-
-function setCorrectByIndex(index) {
-  const allAnswers = document.querySelectorAll('.answer-item');
-  
-  // Check if the index is valid
-  if (index >= 0 && index < allAnswers.length) {
-    setCorrect(allAnswers[index]);
-  } else {
-    console.warn('Invalid index for setCorrectByIndex');
-  }
-}
-function collectPayload(){
-  return "data"
-}
-// Telegram WebApp Integration (if available)
-window.onload = () => {
-  const tg = window.Telegram?.WebApp;
-  if (tg) {
-    tg.ready(); // Notify Telegram the app is initialized
-    tg.expand(); // Expand the app to full screen
-    let firstViewportEvent = true;
-    let SecindViewportEvent = true;
-    let ExpandedViewportHight = 0;
-    const onViewport = () => {
-      if (firstViewportEvent){firstViewportEvent = false; return;}
-      if (SecindViewportEvent){
-        SecindViewportEvent = false
-        ExpandedViewportHight = tg.viewportHeight;
-        return;
-      }
-      if (tg.viewportHeight < ExpandedViewportHight - 100){tg.close()}
-    }
-    tg.onEvent('viewportChanged', onViewport);
-  }
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const dataROW = urlParams.get('data');
-  const data = dataROW.split("SS");
-  removeAllAnswers()
-  for (let index = 2; index < data.length-1; index++) {
-    addAnswer(data[index])
-  }
-  
-  setCorrectByIndex(parseInt(data[data.length-1], 10));
-  
-
-  document.getElementById('questionInput').value = data[0];
-  document.getElementById('explanationInput').value = data[1];
-
-  document.getElementById('saveBtn').addEventListener('click', () => {
-      const payload = collectPayload();
-      tg.sendData(JSON.stringify(payload)); // deliver to your bot
-      tg.close();                            // close mini app
+  // Mark one answer as correct
+  function setCorrect(answerEl) {
+    document.querySelectorAll('.answer').forEach(el => {
+      el.classList.remove('correct');
+      const t = el.querySelector('.toggle');
+      t.classList.remove('on');
     });
+    answerEl.classList.add('correct');
+    const toggle = answerEl.querySelector('.toggle');
+    toggle.classList.add('on');
+  }
 
-  
-}
+  // Remove answer + renumber
+  function removeAnswer(answerEl) {
+    answerEl.remove();
+    document.querySelectorAll('.answer').forEach((el, i) => {
+      el.querySelector('.answer__num').textContent = i + 1;
+    });
+  }
+
+  // Add answer
+  function addAnswer(txt = "") {
+    const list = document.getElementById('answersList');
+    const li = document.createElement('li');
+    li.className = 'answer';
+    const n = list.children.length + 1;
+    li.innerHTML = `
+      <span class="answer__num">${n}</span>
+      <textarea class="input" rows="1" placeholder="Enter answer text"></textarea>
+      <div class="answer__actions">
+        <div class="toggle" onclick="setCorrect(this.closest('.answer'))">
+          <div class="toggle__dot"></div>
+        </div>
+        <button class="btn-icon" title="Remove" onclick="removeAnswer(this.closest('.answer'))">🗑️</button>
+      </div>
+    `;
+    list.appendChild(li);
+    const ta = li.querySelector('textarea');
+    ta.value = txt;
+    autosize(ta);
+  }
+
+  function removeAllAnswers() {
+    document.querySelectorAll('.answer').forEach(item => item.remove());
+  }
+
+  function setCorrectByIndex(index) {
+    const all = document.querySelectorAll('.answer');
+    if (index >= 0 && index < all.length) setCorrect(all[index]);
+  }
+
+  function collectPayload(){
+    // TODO: assemble your payload as needed
+    return "data";
+  }
+
+  // Telegram WebApp Integration (kept as you had it)
+  window.onload = () => {
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.MainButton.setText("Save & Close");
+      tg.MainButton.color = getComputedStyle(document.documentElement).getPropertyValue('--tg-theme-button-color')?.trim() || "#2ea86d";
+      tg.MainButton.textColor = getComputedStyle(document.documentElement).getPropertyValue('--tg-theme-button-text-color')?.trim() || "#ffffff";
+      tg.MainButton.show();
+
+      tg.ready();
+      tg.expand();
+
+      let firstViewportEvent = true;
+      let secondViewportEvent = true;
+      let expandedH = 0;
+      const onViewport = () => {
+        if (firstViewportEvent){ firstViewportEvent = false; return; }
+        if (secondViewportEvent){
+          secondViewportEvent = false;
+          expandedH = tg.viewportHeight;
+          return;
+        }
+        if (tg.viewportHeight < expandedH - 200){ tg.close(); }
+      };
+      tg.onEvent('viewportChanged', onViewport);
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const dataROW = urlParams.get('data');
+    if (dataROW) {
+      const data = dataROW.split("SS");
+      removeAllAnswers();
+      for (let i = 2; i < data.length - 1; i++) addAnswer(data[i]);
+      setCorrectByIndex(parseInt(data[data.length-1], 10));
+
+      document.getElementById('questionInput').value = data[0] || "";
+      document.getElementById('explanationInput').value = data[1] || "";
+    }
+
+    document.getElementById('saveBtn').addEventListener('click', () => {
+      const payload = collectPayload();
+      if (window.Telegram?.WebApp) {
+        window.Telegram.WebApp.sendData(JSON.stringify(payload));
+        window.Telegram.WebApp.close();
+      }
+    });
+    document.getElementById('exitBtn').addEventListener('click', () => {
+      if (window.Telegram?.WebApp) window.Telegram.WebApp.close();
+    });
+  };
 </script>
 </body>
 </html>
