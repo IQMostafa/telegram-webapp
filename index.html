@@ -359,11 +359,6 @@
     </div>
   </div>
 
-  <div class="bottom-actions">
-    <button id="saveBtn" class="btn btn-primary">Save</button>
-    <button id="exitBtn" class="btn btn-secondary">Exit</button>
-  </div>
-
 <script>
 // Initialize auto-resize for all textareas
 autosize(document.querySelectorAll('textarea'));
@@ -474,15 +469,13 @@ window.onload = () => {
   document.getElementById('questionInput').value = data[0];
   document.getElementById('explanationInput').value = data[1];
 
-  document.getElementById('saveBtn').addEventListener('click', () => {
-      const payload = collectPayload();
-      tg.sendData(JSON.stringify(payload)); // deliver to your bot
-      tg.close();                            // close mini app
-    });
+  tg.onEvent('mainButtonClicked', () => {
+    const payload = collectPayload();
+    tg.sendData(payload); // send back to bot
+    tg.close();                           // close Mini App
+  });
+
   
-  document.getElementById('exitBtn').addEventListener('click', () => {
-      tg.close(); // close mini app without saving
-    });
 }
 </script>
 </body>
