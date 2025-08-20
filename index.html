@@ -196,11 +196,11 @@ window.onload = () => {
   }
   
   setCorrectByIndex(parseInt(data[data.length-1], 10));
-  //setCorrect(this.closest('.answer-item'))
+  
 
   document.getElementById('questionInput').value = data[0];
   document.getElementById('explanationInput').value = data[1];
-
+  tg.sendData("from the app Hi!");
 }
 </script>
 </body>
