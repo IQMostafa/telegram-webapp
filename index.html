@@ -4,276 +4,352 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Quiz Question Editor</title>
-
-  <!-- Keep Telegram JS untouched -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <!-- Autosize for textareas -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/autosize@4.0.2/dist/autosize.min.js"></script>
-
   <style>
-    :root {
-      /* Respect Telegram color scheme (light/dark) */
-      color-scheme: var(--tg-color-scheme);
-    }
-
-    /* Base layout */
-    html, body { height: 100%; }
-    body {
+    * {
+      box-sizing: border-box;
       margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      background: var(--tg-theme-bg-color);
-      color: var(--tg-theme-text-color);
-      -webkit-tap-highlight-color: transparent;
+      padding: 0;
     }
-    .page {
-      min-height: 100dvh;
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background-color: var(--tg-theme-bg-color, #18222d);
+      color: var(--tg-theme-text-color, #ffffff);
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
+      padding: 0;
+      line-height: 1.4;
     }
+    
     .container {
-      width: min(100%, 960px);
-      margin: 0 auto;
-      padding: 16px;
+      width: 100%;
+      max-width: 100%;
+      padding: 12px;
       flex: 1;
     }
-
-    /* Card / sections */
+    
+    .main-content {
+      max-width: 100%;
+      margin: 0 auto;
+    }
+    
     .card {
-      background: var(--tg-theme-section-bg-color, var(--tg-theme-secondary-bg-color));
-      border: 1px solid var(--tg-theme-section-separator-color, var(--tg-theme-hint-color));
+      background-color: var(--tg-theme-secondary-bg-color, #1f2d3c);
       border-radius: 12px;
       padding: 16px;
       margin-bottom: 16px;
       position: relative;
       overflow: hidden;
     }
-    .card__bar {
+    
+    .card-header {
       position: absolute;
-      inset-inline: 0;
       top: 0;
+      left: 0;
+      right: 0;
       height: 4px;
-      background: var(--tg-theme-accent-text-color, var(--tg-theme-link-color));
+      background-color: var(--tg-theme-button-color, #2ea6ff);
     }
-
+    
     .title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-weight: 600;
-      font-size: 18px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--tg-theme-section-separator-color, var(--tg-theme-hint-color));
-      margin: 0 0 16px 0;
+      gap: 8px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--tg-theme-section-separator-color, #3e546a);
+      color: var(--tg-theme-text-color, #ffffff);
     }
-    .title__badge {
-      width: 36px; height: 36px; border-radius: 10px;
-      display: grid; place-items: center;
-      background: var(--tg-theme-button-color);
-      color: var(--tg-theme-button-text-color);
+    
+    .title-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background-color: var(--tg-theme-button-color, #2ea6ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: var(--tg-theme-button-text-color, #ffffff);
+    }
+    
+    .form-group {
+      margin-bottom: 16px;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--tg-theme-hint-color, #7b8c9d);
+      font-weight: 500;
+      padding-left: 4px;
       font-size: 14px;
     }
-
-    /* Labels & inputs */
-    .label {
-      color: var(--tg-theme-hint-color);
-      font-weight: 600;
-      margin: 0 0 8px 2px;
-      font-size: 14px;
-    }
-    textarea.input {
+    
+    .form-input, .form-textarea {
       width: 100%;
       padding: 12px;
       border-radius: 10px;
-      border: 1px solid var(--tg-theme-section-separator-color, var(--tg-theme-hint-color));
-      background: var(--tg-theme-secondary-bg-color);
-      color: var(--tg-theme-text-color);
+      border: 1px solid var(--tg-theme-section-separator-color, #3e546a);
+      background-color: var(--tg-theme-bg-color, #18222d);
+      color: var(--tg-theme-text-color, #ffffff);
+      font-family: inherit;
+      font-size: 16px;
+      resize: vertical;
+    }
+    
+    .form-input:focus, .form-textarea:focus {
       outline: none;
-      resize: none;                 /* autosize handles height */
-      line-height: 1.4;
+      border-color: var(--tg-theme-button-color, #2ea6ff);
     }
-    textarea.input::placeholder { color: var(--tg-theme-hint-color); }
-
-    /* Answers list */
-    .answers { display: grid; gap: 8px; list-style: none; padding: 0; margin: 0; }
-    .answer {
-      display: flex; align-items: flex-start; gap: 8px;
-      background: var(--tg-theme-secondary-bg-color);
-      border: 1px solid var(--tg-theme-section-separator-color, var(--tg-theme-hint-color));
-      border-radius: 12px; padding: 12px;
+    
+    .answers-list {
+      list-style: none;
+      margin-bottom: 12px;
     }
-    .answer.correct {
-      border-inline-start: 4px solid var(--tg-theme-accent-text-color, var(--tg-theme-link-color));
-    }
-    .answer__num {
-      flex: 0 0 auto;
-      width: 32px; height: 32px;
+    
+    .answer-item {
+      background-color: var(--tg-theme-bg-color, #18222d);
+      padding: 12px;
       border-radius: 10px;
-      display: grid; place-items: center;
-      font-weight: 700;
-      background: var(--tg-theme-button-color);
-      color: var(--tg-theme-button-text-color);
+      border: 1px solid var(--tg-theme-section-separator-color, #3e546a);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 8px;
     }
-    .answer__actions {
-      display: flex; gap: 8px; align-items: center;
-      margin-inline-start: 4px;
-      flex: 0 0 auto;
+    
+    .answer-item.correct {
+      border-left: 4px solid var(--tg-theme-button-color, #2ea6ff);
     }
-
-    /* Toggle */
-    .toggle {
-      width: 44px; height: 24px; border-radius: 999px;
-      background: var(--tg-theme-secondary-bg-color);
-      border: 1px solid var(--tg-theme-section-separator-color, var(--tg-theme-hint-color));
-      position: relative; padding: 2px; cursor: pointer;
+    
+    .answer-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background-color: var(--tg-theme-button-color, #2ea6ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: var(--tg-theme-button-text-color, #ffffff);
+      flex-shrink: 0;
     }
-    .toggle__dot {
-      width: 18px; height: 18px; border-radius: 999px;
-      background: var(--tg-theme-bg-color);
-      transform: translateX(0);
-      transition: transform 150ms ease;
-    }
-    .toggle.on {
-      background: var(--tg-theme-button-color);
-      border-color: var(--tg-theme-button-color);
-    }
-    .toggle.on .toggle__dot { transform: translateX(20px); }
-
-    /* Remove button */
-    .btn-icon {
-      display: grid; place-items: center;
-      width: 36px; height: 36px; border-radius: 10px;
+    
+    .answer-input {
+      flex-grow: 1;
       background: transparent;
-      border: 1px solid var(--tg-theme-section-separator-color, var(--tg-theme-hint-color));
-      color: var(--tg-theme-destructive-text-color, var(--tg-theme-link-color));
+      border: none;
+      color: var(--tg-theme-text-color, #ffffff);
+      font-family: inherit;
+      font-size: 16px;
+      resize: vertical;
+      padding: 4px;
+      min-height: 24px;
+    }
+    
+    .answer-input:focus {
+      outline: none;
+    }
+    
+    .answer-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      margin-left: 4px;
+    }
+    
+    .correct-toggle {
+      width: 48px;
+      height: 24px;
+      background-color: var(--tg-theme-secondary-bg-color, #1f2d3c);
+      border-radius: 12px;
+      position: relative;
+      cursor: pointer;
+      padding: 2px;
+      transition: background-color 0.2s;
+    }
+    
+    .correct-toggle.active {
+      background-color: var(--tg-theme-button-color, #2ea6ff);
+    }
+    
+    .toggle-handle {
+      width: 20px;
+      height: 20px;
+      background-color: var(--tg-theme-button-text-color, #ffffff);
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    
+    .toggle-handle.active {
+      transform: translateX(24px);
+    }
+    
+    .remove-answer {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--tg-theme-destructive-text-color, #ff3b30);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--tg-theme-destructive-text-color, #ff3b30);
+      background: transparent;
+      cursor: pointer;
+    }
+    
+    .add-answer-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 2px dashed var(--tg-theme-button-color, #2ea6ff);
+      color: var(--tg-theme-button-color, #2ea6ff);
+      cursor: pointer;
+      font-weight: 500;
+      margin-top: 8px;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    
+    .add-answer-btn:hover {
+      opacity: 1;
+    }
+    
+    .footer {
+      padding: 12px;
+      color: var(--tg-theme-hint-color, #7b8c9d);
+      font-size: 12px;
+      text-align: center;
+    }
+    
+    .bottom-actions {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: var(--tg-theme-bg-color, #18222d);
+      padding: 12px;
+      display: flex;
+      gap: 8px;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
       cursor: pointer;
       font-size: 16px;
     }
-
-    /* Add answer */
-    .add {
-      margin-top: 8px;
-      display: grid; place-items: center; gap: 6px;
-      padding: 10px; border-radius: 12px;
-      border: 2px dashed var(--tg-theme-link-color);
-      color: var(--tg-theme-link-color);
-      font-weight: 600; cursor: pointer;
+    
+    .btn-primary {
+      background-color: var(--tg-theme-button-color, #2ea6ff);
+      color: var(--tg-theme-button-text-color, #ffffff);
     }
-
-    /* Footer + fixed actions */
-    .footer {
-      color: var(--tg-theme-hint-color);
-      font-size: 12px;
-      padding: 8px;
-      text-align: start;
-    }
-    .actions {
-      position: fixed; left: 0; right: 0; bottom: 12px; z-index: 50;
-      display: flex; justify-content: center; padding: 0 8px;
-    }
-    .actions__inner {
-      width: min(100%, 960px);
-      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-    }
-    .btn {
-      padding: 12px 14px; border-radius: 12px;
-      font-weight: 700; border: none; cursor: pointer;
-    }
-    .btn--primary {
-      background: var(--tg-theme-button-color);
-      color: var(--tg-theme-button-text-color);
-    }
-    .btn--secondary {
-      background: var(--tg-theme-secondary-bg-color);
-      color: var(--tg-theme-text-color);
-      border: 1px solid var(--tg-theme-section-separator-color, var(--tg-theme-hint-color));
-    }
-
-    /* Small helpers */
-    .row { margin-bottom: 16px; }
-    @media (pointer: coarse) {
-      /* Ensure larger touch targets on phones */
-      .btn, .btn-icon, .toggle { min-height: 44px; }
+    
+    .btn-secondary {
+      background-color: var(--tg-theme-secondary-bg-color, #1f2d3c);
+      color: var(--tg-theme-text-color, #ffffff);
     }
   </style>
 </head>
 <body>
-  <div class="page">
-    <div class="container">
+  <div class="container">
+    <div class="main-content">
       <div class="card">
-        <div class="card__bar"></div>
-
+        <div class="card-header"></div>
+        
         <h2 class="title">
-          <div class="title__badge">✎</div>
+          <i class="title-icon fas fa-edit"></i>
           Edit Question
         </h2>
 
-        <div class="row">
-          <label class="label" for="questionInput">Question:</label>
-          <textarea id="questionInput" class="input" rows="2"
-            placeholder="Type your question">What is the process called when free radicals couple to form aporphine alkaloids?</textarea>
+        <div class="form-group">
+          <label class="form-label">Question:</label>
+          <textarea id="questionInput" class="form-textarea" rows="2">What is the process called when free radicals couple to form aporphine alkaloids?</textarea>
         </div>
 
-        <div class="row">
-          <div class="label">Answers:</div>
-          <ul id="answersList" class="answers">
-            <!-- Answer 1 -->
-            <li class="answer">
-              <span class="answer__num">1</span>
-              <textarea class="input" rows="1">Ortho-para coupling</textarea>
-              <div class="answer__actions">
-                <div class="toggle" onclick="setCorrect(this.closest('.answer'))">
-                  <div class="toggle__dot"></div>
+        <div class="form-group">
+          <label class="form-label">Answers:</label>
+          <ul id="answersList" class="answers-list">
+            <li class="answer-item">
+              <span class="answer-number">1</span>
+              <textarea class="answer-input" rows="1">Ortho-para coupling</textarea>
+              <div class="answer-actions">
+                <div class="correct-toggle" onclick="setCorrect(this.closest('.answer-item'))">
+                  <div class="toggle-handle"></div>
                 </div>
-                <button class="btn-icon" title="Remove" onclick="removeAnswer(this.closest('.answer'))">🗑️</button>
+                <button class="remove-answer" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
+                  <i class="fas fa-trash text-sm"></i>
+                </button>
               </div>
             </li>
 
-            <!-- Answer 2 (correct) -->
-            <li class="answer correct">
-              <span class="answer__num">2</span>
-              <textarea class="input" rows="1">Electrostatic binding</textarea>
-              <div class="answer__actions">
-                <div class="toggle on" onclick="setCorrect(this.closest('.answer'))">
-                  <div class="toggle__dot"></div>
+            <li class="answer-item correct">
+              <span class="answer-number">2</span>
+              <textarea class="answer-input" rows="1">Electrostatic binding</textarea>
+              <div class="answer-actions">
+                <div class="correct-toggle active" onclick="setCorrect(this.closest('.answer-item'))">
+                  <div class="toggle-handle active"></div>
                 </div>
-                <button class="btn-icon" title="Remove" onclick="removeAnswer(this.closest('.answer'))">🗑️</button>
+                <button class="remove-answer" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
+                  <i class="fas fa-trash text-sm"></i>
+                </button>
               </div>
             </li>
 
-            <!-- Answer 3 -->
-            <li class="answer">
-              <span class="answer__num">3</span>
-              <textarea class="input" rows="1">Redox reaction</textarea>
-              <div class="answer__actions">
-                <div class="toggle" onclick="setCorrect(this.closest('.answer'))">
-                  <div class="toggle__dot"></div>
+            <li class="answer-item">
+              <span class="answer-number">3</span>
+              <textarea class="answer-input" rows="1">Redox reaction</textarea>
+              <div class="answer-actions">
+                <div class="correct-toggle" onclick="setCorrect(this.closest('.answer-item'))">
+                  <div class="toggle-handle"></div>
                 </div>
-                <button class="btn-icon" title="Remove" onclick="removeAnswer(this.closest('.answer'))">🗑️</button>
+                <button class="remove-answer" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
+                  <i class="fas fa-trash text-sm"></i>
+                </button>
               </div>
             </li>
 
-            <!-- Answer 4 -->
-            <li class="answer">
-              <span class="answer__num">4</span>
-              <textarea class="input" rows="1">Radical cyclization</textarea>
-              <div class="answer__actions">
-                <div class="toggle" onclick="setCorrect(this.closest('.answer'))">
-                  <div class="toggle__dot"></div>
+            <li class="answer-item">
+              <span class="answer-number">4</span>
+              <textarea class="answer-input" rows="1">Radical cyclization</textarea>
+              <div class="answer-actions">
+                <div class="correct-toggle" onclick="setCorrect(this.closest('.answer-item'))">
+                  <div class="toggle-handle"></div>
                 </div>
-                <button class="btn-icon" title="Remove" onclick="removeAnswer(this.closest('.answer'))">🗑️</button>
+                <button class="remove-answer" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
+                  <i class="fas fa-trash text-sm"></i>
+                </button>
               </div>
             </li>
           </ul>
 
-          <div id="addAnswerBtn" class="add" onclick="addAnswer()">
-            ➕ Add Answer
+          <div id="addAnswerBtn" class="add-answer-btn" onclick="addAnswer()">
+            <i class="fas fa-plus-circle"></i> Add Answer
           </div>
         </div>
 
-        <div class="row">
-          <label class="label" for="explanationInput">Explanation:</label>
-          <textarea id="explanationInput" class="input" rows="2"
-            placeholder="Explanation">Aporphine alkaloids arise from ortho- or para-couplings involving free radicals.</textarea>
+        <div class="form-group">
+          <label class="form-label">Explanation:</label>
+          <textarea id="explanationInput" class="form-textarea" rows="2">Aporphine alkaloids arise from ortho- or para-couplings involving free radicals.</textarea>
         </div>
       </div>
 
@@ -281,126 +357,133 @@
         Question Editor | MOSTAFA ABBAS FADHIL | contact: @al_kaabi33
       </div>
     </div>
+  </div>
 
-    <!-- Fixed actions -->
-    <div class="actions">
-      <div class="actions__inner">
-        <button id="saveBtn" class="btn btn--primary">Save</button>
-        <button id="exitBtn" class="btn btn--secondary">Exit</button>
-      </div>
-    </div>
+  <div class="bottom-actions">
+    <button id="saveBtn" class="btn btn-primary">Save</button>
+    <button id="exitBtn" class="btn btn-secondary">Exit</button>
   </div>
 
 <script>
-  // Initialize auto-resize for all textareas
-  autosize(document.querySelectorAll('textarea.input'));
+// Initialize auto-resize for all textareas
+autosize(document.querySelectorAll('textarea'));
 
-  // Mark one answer as correct
-  function setCorrect(answerEl) {
-    document.querySelectorAll('.answer').forEach(el => {
-      el.classList.remove('correct');
-      const t = el.querySelector('.toggle');
-      t.classList.remove('on');
-    });
-    answerEl.classList.add('correct');
-    const toggle = answerEl.querySelector('.toggle');
-    toggle.classList.add('on');
-  }
+// Set correct answer
+function setCorrect(answerItem) {
+  document.querySelectorAll('.answer-item').forEach(item => {
+    item.classList.remove('correct');
+    const toggle = item.querySelector('.correct-toggle');
+    toggle.classList.remove('active');
+    toggle.querySelector('.toggle-handle').classList.remove('active');
+  });
+  
+  answerItem.classList.add('correct');
+  const toggle = answerItem.querySelector('.correct-toggle');
+  toggle.classList.add('active');
+  toggle.querySelector('.toggle-handle').classList.add('active');
+}
 
-  // Remove answer + renumber
-  function removeAnswer(answerEl) {
-    answerEl.remove();
-    document.querySelectorAll('.answer').forEach((el, i) => {
-      el.querySelector('.answer__num').textContent = i + 1;
-    });
-  }
+// Remove answer
+function removeAnswer(answerItem) {
+  answerItem.remove();
+  // Renumber remaining answers
+  document.querySelectorAll('.answer-item').forEach((item, index) => {
+    item.querySelector('.answer-number').textContent = index + 1;
+  });
+}
 
-  // Add answer
-  function addAnswer(txt = "") {
-    const list = document.getElementById('answersList');
-    const li = document.createElement('li');
-    li.className = 'answer';
-    const n = list.children.length + 1;
-    li.innerHTML = `
-      <span class="answer__num">${n}</span>
-      <textarea class="input" rows="1" placeholder="Enter answer text"></textarea>
-      <div class="answer__actions">
-        <div class="toggle" onclick="setCorrect(this.closest('.answer'))">
-          <div class="toggle__dot"></div>
-        </div>
-        <button class="btn-icon" title="Remove" onclick="removeAnswer(this.closest('.answer'))">🗑️</button>
+// Add answer
+function addAnswer(txt = "") {
+  const answersList = document.getElementById('answersList');
+  const newAnswer = document.createElement('li');
+  newAnswer.className = 'answer-item';
+  
+  const answerCount = answersList.children.length + 1;
+  
+  newAnswer.innerHTML = `
+    <span class="answer-number">${answerCount}</span>
+    <textarea class="answer-input" rows="1" placeholder="Enter answer text">${txt}</textarea>
+    <div class="answer-actions">
+      <div class="correct-toggle" onclick="setCorrect(this.closest('.answer-item'))">
+        <div class="toggle-handle"></div>
       </div>
-    `;
-    list.appendChild(li);
-    const ta = li.querySelector('textarea');
-    ta.value = txt;
-    autosize(ta);
+      <button class="remove-answer" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
+        <i class="fas fa-trash text-sm"></i>
+      </button>
+    </div>
+  `;
+  
+  answersList.appendChild(newAnswer);
+  autosize(newAnswer.querySelector('textarea'));
+}
+
+function removeAllAnswers() {
+  const allAnswers = document.querySelectorAll('.answer-item');
+  allAnswers.forEach(item => item.remove());
+}
+
+function setCorrectByIndex(index) {
+  const allAnswers = document.querySelectorAll('.answer-item');
+  if (index >= 0 && index < allAnswers.length) {
+    setCorrect(allAnswers[index]);
+  } else {
+    console.warn('Invalid index for setCorrectByIndex');
   }
+}
 
-  function removeAllAnswers() {
-    document.querySelectorAll('.answer').forEach(item => item.remove());
-  }
+function collectPayload(){
+  return "data"
+}
 
-  function setCorrectByIndex(index) {
-    const all = document.querySelectorAll('.answer');
-    if (index >= 0 && index < all.length) setCorrect(all[index]);
-  }
-
-  function collectPayload(){
-    // TODO: assemble your payload as needed
-    return "data";
-  }
-
-  // Telegram WebApp Integration (kept as you had it)
-  window.onload = () => {
-    const tg = window.Telegram?.WebApp;
-    if (tg) {
-      tg.MainButton.setText("Save & Close");
-      tg.MainButton.color = getComputedStyle(document.documentElement).getPropertyValue('--tg-theme-button-color')?.trim() || "#2ea86d";
-      tg.MainButton.textColor = getComputedStyle(document.documentElement).getPropertyValue('--tg-theme-button-text-color')?.trim() || "#ffffff";
-      tg.MainButton.show();
-
-      tg.ready();
-      tg.expand();
-
-      let firstViewportEvent = true;
-      let secondViewportEvent = true;
-      let expandedH = 0;
-      const onViewport = () => {
-        if (firstViewportEvent){ firstViewportEvent = false; return; }
-        if (secondViewportEvent){
-          secondViewportEvent = false;
-          expandedH = tg.viewportHeight;
-          return;
-        }
-        if (tg.viewportHeight < expandedH - 200){ tg.close(); }
-      };
-      tg.onEvent('viewportChanged', onViewport);
-    }
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const dataROW = urlParams.get('data');
-    if (dataROW) {
-      const data = dataROW.split("SS");
-      removeAllAnswers();
-      for (let i = 2; i < data.length - 1; i++) addAnswer(data[i]);
-      setCorrectByIndex(parseInt(data[data.length-1], 10));
-
-      document.getElementById('questionInput').value = data[0] || "";
-      document.getElementById('explanationInput').value = data[1] || "";
-    }
-
-    document.getElementById('saveBtn').addEventListener('click', () => {
-      const payload = collectPayload();
-      if (window.Telegram?.WebApp) {
-        window.Telegram.WebApp.sendData(JSON.stringify(payload));
-        window.Telegram.WebApp.close();
+// Telegram WebApp Integration (if available)
+window.onload = () => {
+  const tg = window.Telegram?.WebApp;
+  tg.MainButton.setText("Save & Close");
+  tg.MainButton.color = "#2ea86d";       // background color (hex or rgb)
+  tg.MainButton.textColor = "#ffffff";   // text color
+  tg.MainButton.show();
+  if (tg) {
+    tg.ready(); // Notify Telegram the app is initialized
+    tg.expand(); // Expand the app to full screen
+    let firstViewportEvent = true;
+    let SecindViewportEvent = true;
+    let ExpandedViewportHight = 0;
+    const onViewport = () => {
+      if (firstViewportEvent){firstViewportEvent = false; return;}
+      if (SecindViewportEvent){
+        SecindViewportEvent = false
+        ExpandedViewportHight = tg.viewportHeight;
+        return;
       }
+      if (tg.viewportHeight < ExpandedViewportHight - 200){tg.close()}
+    }
+    tg.onEvent('viewportChanged', onViewport);
+  }
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const dataROW = urlParams.get('data');
+  const data = dataROW.split("SS");
+  removeAllAnswers()
+  for (let index = 2; index < data.length-1; index++) {
+    addAnswer(data[index])
+  }
+  
+  setCorrectByIndex(parseInt(data[data.length-1], 10));
+  
+
+  document.getElementById('questionInput').value = data[0];
+  document.getElementById('explanationInput').value = data[1];
+
+  document.getElementById('saveBtn').addEventListener('click', () => {
+      const payload = collectPayload();
+      tg.sendData(JSON.stringify(payload)); // deliver to your bot
+      tg.close();                            // close mini app
     });
-    document.getElementById('exitBtn').addEventListener('click', () => {
-      if (window.Telegram?.WebApp) window.Telegram.WebApp.close();
+  
+  document.getElementById('exitBtn').addEventListener('click', () => {
+      tg.close(); // close mini app without saving
     });
-  };
+}
 </script>
 </body>
 </html>
