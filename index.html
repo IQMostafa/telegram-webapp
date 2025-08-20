@@ -197,7 +197,7 @@ window.onload = () => {
         return;
       }
       if (tg.viewportHeight < ExpandedViewportHight - 100)
-        tg.close();
+        document.getElementById("main").innerHTML = ExpandedViewportHight
     };
     tg.onEvent('viewportChanged', onViewport);
   }
