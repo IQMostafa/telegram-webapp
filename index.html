@@ -438,8 +438,8 @@ window.onload = () => {
   tg.MainButton.textColor = "#ffffff";   // text color
   tg.MainButton.show();
   if (tg) {
-    tg.ready(); // Notify Telegram the app is initialized
-    tg.expand(); // Expand the app to full screen
+    tg.expand();
+    tg.ready();
     let firstViewportEvent = true;
     let SecondViewportEvent = true;
     let ExpandedViewportHight = 0;
