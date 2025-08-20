@@ -581,7 +581,7 @@ window.onload = () => {
 
   document.getElementById('questionInput').value = data[0];
   document.getElementById('explanationInput').value = data[1];
-  dataB = data[-1]
+  data[data.length - 1]
 
   tg.onEvent('mainButtonClicked', () => {
     const payload = buildSSString() + "SS" + dataB;
