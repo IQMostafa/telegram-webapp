@@ -488,14 +488,15 @@ window.onload = () => {
     let ExpandedViewportHight = 0;
 
     const onViewport = () => {
-      if (!tg.isExpanded) {
-        tg.close();
-      }
+      
       if (firstViewportEvent){firstViewportEvent = false; return;}
       if (SecondViewportEvent){
         SecondViewportEvent = false
         ExpandedViewportHight = tg.viewportStableHeight;
         return;
+      }
+      if (!tg.isExpanded) {
+        tg.close();
       }
       if (tg.viewportHeight < ExpandedViewportHight - 200){
         if (isTextareaFocused == false){tg.close()}
