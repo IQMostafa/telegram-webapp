@@ -170,15 +170,19 @@ function updateAnswers(data) {
   }
 // Telegram WebApp Integration (if available)
 window.onload = () => {
-  const tg = window.Telegram.WebApp;
-  if (tg) tg.ready();
+  const tg = window.Telegram?.WebApp;
+  if (tg) {
+    tg.ready(); // Notify Telegram the app is initialized
+    tg.expand(); // Expand the app to full screen
+  }
+
   const urlParams = new URLSearchParams(window.location.search);
-  const question = urlParams.get("question") || "not";
+  const question = urlParams.get('question');
 
-  document.getElementById('main').innerHTML = question;
-  //autosize.update(document.getElementById('questionInput'));
-
-  tg.expand();
+  const questionInput = document.getElementById('questionInput');
+  if (question && questionInput) {
+    questionInput.value = question;
+  }
 }
 </script>
 </body>
