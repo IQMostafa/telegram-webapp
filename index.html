@@ -171,6 +171,7 @@ function updateAnswers(data) {
 // Telegram WebApp Integration (if available)
 
   const tg = window.Telegram.WebApp;
+  if (tg) tg.ready();
   const urlParams = new URLSearchParams(window.location.search);
   const question = urlParams.get("question") || "";
 
