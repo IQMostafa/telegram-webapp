@@ -189,8 +189,15 @@ window.onload = () => {
     tg.ready(); // Notify Telegram the app is initialized
     tg.expand(); // Expand the app to full screen
     let firstViewportEvent = true;
+    let ExpandedViewportHight = 0;
     const onViewport = () => {
-      document.getElementById("main").innerHTML = tg.viewportHeight;
+      if (firstViewportEvent){
+        firstViewportEvent = false;
+        ExpandedViewportHight = tg.viewportHeight;
+        return;
+      }
+      if (tg.viewportHeight < ExpandedViewportHight - 100)
+        dtg.close();
     };
     tg.onEvent('viewportChanged', onViewport);
   }
