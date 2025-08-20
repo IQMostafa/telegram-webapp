@@ -180,10 +180,11 @@ window.onload = () => {
   const dataROW = urlParams.get('data');
   const data = dataROW.split("SS");
   removeAllAnswers()
-  //for (let index = 0; index < data.length-2; index++) {
-  //  const element = array[index];
-  //}
-  addAnswer(data[2])
+  for (let index = 2; index < data.length-2; index++) {
+    addAnswer(data[index])
+  }
+  const allAnswers = document.querySelectorAll('.answer-item');
+  setCorrect(allAnswers[data.length-1]);
 
   document.getElementById('questionInput').value = data[0];
   document.getElementById('explanationInput').value = data[1];
