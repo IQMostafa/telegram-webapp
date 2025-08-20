@@ -188,6 +188,10 @@ window.onload = () => {
   if (tg) {
     tg.ready(); // Notify Telegram the app is initialized
     tg.expand(); // Expand the app to full screen
+    const onViewport = () => {
+      // If user collapses/minimizes the webapp, close it
+      if (!tg.isExpanded) tg.close();
+    };
   }
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -210,11 +214,7 @@ window.onload = () => {
       tg.close();                            // close mini app
     });
 
-  tg.onEvent('viewportChanged', () => {
-      if (tg.isExpanded == false){
-        tg.close();
-      }
-  });
+  tg.onEvent('viewportChanged', onViewport);
 }
 </script>
 </body>
