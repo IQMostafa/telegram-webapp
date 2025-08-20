@@ -363,6 +363,37 @@
 // Initialize auto-resize for all textareas
 autosize(document.querySelectorAll('textarea'));
 
+// Variable to track textarea focus state
+let isTextareaFocused = false;
+
+// Add event listeners for textarea focus and blur
+document.addEventListener('DOMContentLoaded', function() {
+  // Add focus and blur event listeners to all textareas
+  const textareas = document.querySelectorAll('textarea');
+  textareas.forEach(textarea => {
+    textarea.addEventListener('focus', () => {
+      isTextareaFocused = true;
+      console.log('Textarea focused');
+    });
+    
+    textarea.addEventListener('blur', () => {
+      isTextareaFocused = false;
+      console.log('Textarea blurred');
+    });
+  });
+  
+  // Add click event listener to document to blur focused textarea
+  document.addEventListener('click', function(event) {
+    // Check if a textarea is focused and the click is not on a textarea
+    if (isTextareaFocused && event.target.tagName !== 'TEXTAREA') {
+      // Blur the currently focused element
+      if (document.activeElement && document.activeElement.tagName === 'TEXTAREA') {
+        document.activeElement.blur();
+      }
+    }
+  });
+});
+
 // Set correct answer
 function setCorrect(answerItem) {
   document.querySelectorAll('.answer-item').forEach(item => {
@@ -410,6 +441,18 @@ function addAnswer(txt = "") {
   
   answersList.appendChild(newAnswer);
   autosize(newAnswer.querySelector('textarea'));
+  
+  // Add focus and blur event listeners to the new textarea
+  const newTextarea = newAnswer.querySelector('textarea');
+  newTextarea.addEventListener('focus', () => {
+    isTextareaFocused = true;
+    console.log('Textarea focused');
+  });
+  
+  newTextarea.addEventListener('blur', () => {
+    isTextareaFocused = false;
+    console.log('Textarea blurred');
+  });
 }
 
 function removeAllAnswers() {
@@ -448,7 +491,6 @@ window.onload = () => {
       if (SecondViewportEvent){
         SecondViewportEvent = false
         ExpandedViewportHight = tg.viewportStableHeight;
-        document.getElementById("main").innerHTML = ExpandedViewportHight
         return;
       }
       if (tg.viewportHeight < ExpandedViewportHight - 200){tg.close()}
