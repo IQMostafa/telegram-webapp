@@ -179,6 +179,9 @@ function setCorrectByIndex(index) {
     console.warn('Invalid index for setCorrectByIndex');
   }
 }
+function collectPayload(){
+  return "data"
+}
 // Telegram WebApp Integration (if available)
 window.onload = () => {
   const tg = window.Telegram?.WebApp;
@@ -200,7 +203,18 @@ window.onload = () => {
 
   document.getElementById('questionInput').value = data[0];
   document.getElementById('explanationInput').value = data[1];
-  tg.sendData("from the app Hi!");
+
+  document.getElementById('saveBtn').addEventListener('click', () => {
+      const payload = collectPayload();
+      tg.sendData(JSON.stringify(payload)); // deliver to your bot
+      tg.close();                            // close mini app
+    });
+
+  tg.onEvent('viewportChanged', () => {
+      if (tg.isExpanded == false){
+        tg.close();
+      }
+  });
 }
 </script>
 </body>
