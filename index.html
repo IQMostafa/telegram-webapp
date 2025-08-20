@@ -173,14 +173,9 @@ function updateAnswers(data) {
   const tg = window.Telegram.WebApp;
   const urlParams = new URLSearchParams(window.location.search);
   const question = urlParams.get("question") || "";
-  const explanation = urlParams.get("explanation") || "";
-  const answers = urlParams.get('answers') || "";
 
   document.getElementById('questionInput').value = question;
   autosize.update(document.getElementById('questionInput'));
-
-  document.getElementById('explanationInput').value = answers;
-  autosize.update(document.getElementById('explanationInput'));
 
   tg.expand();
 
