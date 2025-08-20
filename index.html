@@ -173,9 +173,9 @@ window.onload = () => {
   const tg = window.Telegram.WebApp;
   if (tg) tg.ready();
   const urlParams = new URLSearchParams(window.location.search);
-  const question = urlParams.get("question") || "";
+  const question = urlParams.get("question") || "not";
 
-  document.getElementById('questionInput').value = question;
+  document.getElementById('questionInput').innerHTML == question;
   //autosize.update(document.getElementById('questionInput'));
 
   tg.expand();
