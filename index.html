@@ -552,31 +552,14 @@
     // ================================
     // ✅ Telegram WebApp Integration
     // ================================
-    setQuestion("this is js")
-    if (true) {
-      const tg = window.Telegram.WebApp;
-
-      // Get prefilled text from URL (?text=...)
-      const urlParams = new URLSearchParams(window.location.search);
-      const prefill = urlParams.get("text") || "";
-
-      setQuestion(prefill);
-
-      // Send button handler (you should add a button with id="sendBtn" in HTML)
-      const sendBtn = document.getElementById("sendBtn");
-      if (sendBtn) {
-        sendBtn.onclick = () => {
-          const payload = {
-            question: getQuestion(),
-            explanation: getExplanation(),
-            answers: getAnswers()
-          };
-          tg.sendData(JSON.stringify(payload));
-        };
-      }
-
-      tg.expand();
-    }
+    //setQuestion("this is js")
+    const tg = window.Telegram.WebApp;
+    // Get prefilled text from URL (?text=...)
+    const urlParams = new URLSearchParams(window.location.search);
+    const prefill = urlParams.get("text") || "";
+    setQuestion(prefill);
+    tg.expand();
+    
   });
 </script>
 
