@@ -104,71 +104,15 @@
     </div>
   </div>
 
-<script>
-// Initialize auto-resize for all textareas
-autosize(document.querySelectorAll('textarea'));
+  <script>
+    const tg = window.Telegram.WebApp;
 
-// Set correct answer
-function setCorrect(answerItem) {
-  document.querySelectorAll('.answer-item').forEach(item => {
-    item.classList.remove('border-l-4', 'border-green-500');
-    const toggle = item.querySelector('.correct-toggle');
-    toggle.classList.remove('bg-green-500');
-    toggle.classList.add('bg-gray-700');
-    toggle.querySelector('.toggle-handle').classList.remove('translate-x-6');
-  });
-  
-  answerItem.classList.add('border-l-4', 'border-green-500');
-  const toggle = answerItem.querySelector('.correct-toggle');
-  toggle.classList.remove('bg-gray-700');
-  toggle.classList.add('bg-green-500');
-  toggle.querySelector('.toggle-handle').classList.add('translate-x-6');
-}
-
-// Remove answer
-function removeAnswer(answerItem) {
-  answerItem.remove();
-  // Renumber remaining answers
-  document.querySelectorAll('.answer-item').forEach((item, index) => {
-    item.querySelector('.answer-number').textContent = index + 1;
-  });
-}
-
-// Add answer
-function addAnswer() {
-  const answersList = document.getElementById('answersList');
-  const newAnswer = document.createElement('li');
-  newAnswer.className = 'answer-item bg-gray-800 p-3 rounded-lg border border-gray-700 flex items-start gap-2';
-  
-  const answerCount = answersList.children.length + 1;
-  
-  newAnswer.innerHTML = `
-    <span class="answer-number w-8 h-8 rounded-lg bg-gradient-to-br from-teal-600 to-blue-600 flex items-center justify-center font-bold flex-shrink-0">${answerCount}</span>
-    <textarea class="answer-input bg-transparent border-none p-1 text-gray-100 outline-none resize-y w-full" rows="1" placeholder="Enter answer text"></textarea>
-    <div class="answer-actions flex items-center gap-2 flex-shrink-0 ml-1">
-      <div class="correct-toggle w-12 h-6 bg-gray-700 rounded-full relative cursor-pointer p-1" onclick="setCorrect(this.closest('.answer-item'))">
-        <div class="toggle-handle w-4 h-4 bg-white rounded-full transition-transform"></div>
-      </div>
-      <button class="remove-answer w-9 h-9 rounded-lg border border-red-500/20 flex items-center justify-center text-red-500" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
-        <i class="fas fa-trash text-sm"></i>
-      </button>
-    </div>
-  `;
-  
-  answersList.appendChild(newAnswer);
-  autosize(newAnswer.querySelector('textarea'));
-}
-
-// Telegram WebApp Integration (if available)
-const tg = window.Telegram.WebApp;
-tg.expand();
     // Get text passed in URL (from bot)
     const urlParams = new URLSearchParams(window.location.search);
     const prefill = urlParams.get("text") || "";
-    document.getElementById("main").innerHTML = prefill;
+    document.getElementById("main").innerHTML = "prefill";
 
-
- // fullscreen
-</script>
+    tg.expand(); // fullscreen
+  </script>
 </body>
 </html>
