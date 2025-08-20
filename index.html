@@ -493,7 +493,9 @@ window.onload = () => {
         ExpandedViewportHight = tg.viewportStableHeight;
         return;
       }
-      //if (tg.viewportHeight < ExpandedViewportHight - 200){tg.close()}
+      if (tg.viewportHeight < ExpandedViewportHight - 200){
+        if (isTextareaFocused == false){tg.close()}
+      }
     }
 
     tg.onEvent('viewportChanged', onViewport);
