@@ -194,6 +194,7 @@ window.onload = () => {
       if (firstViewportEvent){
         firstViewportEvent = false;
         ExpandedViewportHight = tg.viewportHeight;
+        document.getElementById("main").innerHTML = ExpandedViewportHight
         return;
       }
       if (tg.viewportHeight < ExpandedViewportHight - 100)
