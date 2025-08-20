@@ -1,31 +1,177 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Mini App Editor</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Quiz Question Editor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/autosize@4.0.2/dist/autosize.min.js"></script>
 </head>
-<body>
-  <h2>Edit the text below:</h2>
-  <textarea id="textArea" rows="6" cols="40"></textarea><br><br>
-  <button id="sendBtn">✅ Send to Bot</button>
+<body id="main" class="bg-gradient-to-b from-gray-900 to-gray-950 text-gray-100 min-h-screen flex flex-col">
+  <div class="container mx-auto p-4 flex-1">
+    <div class="max-w-4xl mx-auto">
+      <div class="bg-gray-800 rounded-lg p-4 border border-gray-700 mb-4 relative overflow-hidden">
+        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-500 to-blue-500"></div>
+        
+        <h2 class="text-xl font-semibold mb-4 flex items-center gap-2 pb-2 border-b border-gray-700">
+          <i class="fas fa-edit w-9 h-9 rounded-lg bg-gradient-to-br from-teal-600 to-blue-600 flex items-center justify-center text-sm"></i>
+          Edit Question
+        </h2>
 
-  <script>
-    const tg = window.Telegram.WebApp;
+        <div class="mb-4">
+          <label class="block text-gray-400 font-medium mb-2 pl-1">Question:</label>
+          <textarea id="questionInput" class="w-full p-3 rounded-lg border border-gray-700 bg-gray-900 text-gray-100 resize-y focus:border-blue-500 outline-none" rows="2">What is the process called when free radicals couple to form aporphine alkaloids?</textarea>
+        </div>
 
-    // Get text passed in URL (from bot)
-    const urlParams = new URLSearchParams(window.location.search);
-    const prefill = urlParams.get("text") || "";
-    document.getElementById("textArea").value = prefill;
+        <div class="mb-4">
+          <label class="block text-gray-400 font-medium mb-2 pl-1">Answers:</label>
+          <ul id="answersList" class="space-y-2">
+            <li class="answer-item bg-gray-800 p-3 rounded-lg border border-gray-700 flex items-start gap-2">
+              <span class="answer-number w-8 h-8 rounded-lg bg-gradient-to-br from-teal-600 to-blue-600 flex items-center justify-center font-bold flex-shrink-0">1</span>
+              <textarea class="answer-input bg-transparent border-none p-1 text-gray-100 outline-none resize-y w-full" rows="1">Ortho-para coupling</textarea>
+              <div class="answer-actions flex items-center gap-2 flex-shrink-0 ml-1">
+                <div class="correct-toggle w-12 h-6 bg-gray-700 rounded-full relative cursor-pointer p-1" onclick="setCorrect(this.closest('.answer-item'))">
+                  <div class="toggle-handle w-4 h-4 bg-white rounded-full transition-transform"></div>
+                </div>
+                <button class="remove-answer w-9 h-9 rounded-lg border border-red-500/20 flex items-center justify-center text-red-500" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
+                  <i class="fas fa-trash text-sm"></i>
+                </button>
+              </div>
+            </li>
 
-    // When user clicks send
-    document.getElementById("sendBtn").onclick = () => {
-      const newText = document.getElementById("textArea").value;
-      tg.sendData(newText);   // send text back to bot
-      tg.close();             // close mini app
-    };
+            <li class="answer-item bg-gray-800 p-3 rounded-lg border-l-4 border-green-500 border border-gray-700 flex items-start gap-2">
+              <span class="answer-number w-8 h-8 rounded-lg bg-gradient-to-br from-teal-600 to-blue-600 flex items-center justify-center font-bold flex-shrink-0">2</span>
+              <textarea class="answer-input bg-transparent border-none p-1 text-gray-100 outline-none resize-y w-full" rows="1">Electrostatic binding</textarea>
+              <div class="answer-actions flex items-center gap-2 flex-shrink-0 ml-1">
+                <div class="correct-toggle w-12 h-6 bg-green-500 rounded-full relative cursor-pointer p-1" onclick="setCorrect(this.closest('.answer-item'))">
+                  <div class="toggle-handle w-4 h-4 bg-white rounded-full transition-transform translate-x-6"></div>
+                </div>
+                <button class="remove-answer w-9 h-9 rounded-lg border border-red-500/20 flex items-center justify-center text-red-500" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
+                  <i class="fas fa-trash text-sm"></i>
+                </button>
+              </div>
+            </li>
 
-    tg.expand(); // fullscreen
-  </script>
+            <li class="answer-item bg-gray-800 p-3 rounded-lg border border-gray-700 flex items-start gap-2">
+              <span class="answer-number w-8 h-8 rounded-lg bg-gradient-to-br from-teal-600 to-blue-600 flex items-center justify-center font-bold flex-shrink-0">3</span>
+              <textarea class="answer-input bg-transparent border-none p-1 text-gray-100 outline-none resize-y w-full" rows="1">Redox reaction</textarea>
+              <div class="answer-actions flex items-center gap-2 flex-shrink-0 ml-1">
+                <div class="correct-toggle w-12 h-6 bg-gray-700 rounded-full relative cursor-pointer p-1" onclick="setCorrect(this.closest('.answer-item'))">
+                  <div class="toggle-handle w-4 h-4 bg-white rounded-full transition-transform"></div>
+                </div>
+                <button class="remove-answer w-9 h-9 rounded-lg border border-red-500/20 flex items-center justify-center text-red-500" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
+                  <i class="fas fa-trash text-sm"></i>
+                </button>
+              </div>
+            </li>
+
+            <li class="answer-item bg-gray-800 p-3 rounded-lg border border-gray-700 flex items-start gap-2">
+              <span class="answer-number w-8 h-8 rounded-lg bg-gradient-to-br from-teal-600 to-blue-600 flex items-center justify-center font-bold flex-shrink-0">4</span>
+              <textarea class="answer-input bg-transparent border-none p-1 text-gray-100 outline-none resize-y w-full" rows="1">Radical cyclization</textarea>
+              <div class="answer-actions flex items-center gap-2 flex-shrink-0 ml-1">
+                <div class="correct-toggle w-12 h-6 bg-gray-700 rounded-full relative cursor-pointer p-1" onclick="setCorrect(this.closest('.answer-item'))">
+                  <div class="toggle-handle w-4 h-4 bg-white rounded-full transition-transform"></div>
+                </div>
+                <button class="remove-answer w-9 h-9 rounded-lg border border-red-500/20 flex items-center justify-center text-red-500" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
+                  <i class="fas fa-trash text-sm"></i>
+                </button>
+              </div>
+            </li>
+          </ul>
+
+          <div id="addAnswerBtn" class="mt-2 flex items-center justify-center gap-2 p-2 rounded-lg border-2 border-dashed border-blue-500/30 text-blue-400 cursor-pointer font-medium" onclick="addAnswer()">
+            <i class="fas fa-plus-circle"></i> Add Answer
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-gray-400 font-medium mb-2 pl-1">Explanation:</label>
+          <textarea id="explanationInput" class="w-full p-3 rounded-lg border border-gray-700 bg-gray-900 text-gray-100 resize-y focus:border-blue-500 outline-none" rows="2">Aporphine alkaloids arise from ortho- or para-couplings involving free radicals.</textarea>
+        </div>
+      </div>
+
+      <div class="flex justify-between p-3 rounded-lg text-gray-400 text-sm">
+        <div>Question Editor | MOSTAFA ABBAS FADHIL | contact: @al_kaabi33</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fixed bottom-4 left-0 right-0 flex justify-center z-50 px-2">
+    <div class="max-w-4xl w-full flex gap-2 p-1">
+      <button id="saveBtn" class="btn flex-1 py-3 rounded-lg font-bold flex items-center justify-center gap-2 bg-gradient-to-br from-teal-600 to-blue-600 text-white">Save</button>
+      <button id="exitBtn" class="btn flex-1 py-3 rounded-lg font-bold flex items-center justify-center gap-2 bg-gray-800 text-gray-200">Exit</button>
+    </div>
+  </div>
+
+<script>
+// Initialize auto-resize for all textareas
+autosize(document.querySelectorAll('textarea'));
+
+// Set correct answer
+function setCorrect(answerItem) {
+  document.querySelectorAll('.answer-item').forEach(item => {
+    item.classList.remove('border-l-4', 'border-green-500');
+    const toggle = item.querySelector('.correct-toggle');
+    toggle.classList.remove('bg-green-500');
+    toggle.classList.add('bg-gray-700');
+    toggle.querySelector('.toggle-handle').classList.remove('translate-x-6');
+  });
+  
+  answerItem.classList.add('border-l-4', 'border-green-500');
+  const toggle = answerItem.querySelector('.correct-toggle');
+  toggle.classList.remove('bg-gray-700');
+  toggle.classList.add('bg-green-500');
+  toggle.querySelector('.toggle-handle').classList.add('translate-x-6');
+}
+
+// Remove answer
+function removeAnswer(answerItem) {
+  answerItem.remove();
+  // Renumber remaining answers
+  document.querySelectorAll('.answer-item').forEach((item, index) => {
+    item.querySelector('.answer-number').textContent = index + 1;
+  });
+}
+
+// Add answer
+function addAnswer() {
+  const answersList = document.getElementById('answersList');
+  const newAnswer = document.createElement('li');
+  newAnswer.className = 'answer-item bg-gray-800 p-3 rounded-lg border border-gray-700 flex items-start gap-2';
+  
+  const answerCount = answersList.children.length + 1;
+  
+  newAnswer.innerHTML = `
+    <span class="answer-number w-8 h-8 rounded-lg bg-gradient-to-br from-teal-600 to-blue-600 flex items-center justify-center font-bold flex-shrink-0">${answerCount}</span>
+    <textarea class="answer-input bg-transparent border-none p-1 text-gray-100 outline-none resize-y w-full" rows="1" placeholder="Enter answer text"></textarea>
+    <div class="answer-actions flex items-center gap-2 flex-shrink-0 ml-1">
+      <div class="correct-toggle w-12 h-6 bg-gray-700 rounded-full relative cursor-pointer p-1" onclick="setCorrect(this.closest('.answer-item'))">
+        <div class="toggle-handle w-4 h-4 bg-white rounded-full transition-transform"></div>
+      </div>
+      <button class="remove-answer w-9 h-9 rounded-lg border border-red-500/20 flex items-center justify-center text-red-500" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
+        <i class="fas fa-trash text-sm"></i>
+      </button>
+    </div>
+  `;
+  
+  answersList.appendChild(newAnswer);
+  autosize(newAnswer.querySelector('textarea'));
+}
+
+// Telegram WebApp Integration (if available)
+if (window.Telegram?.WebApp) {
+  const tg = window.Telegram.WebApp;
+  const urlParams = new URLSearchParams(window.location.search);
+  const prefill = urlParams.get("text") || "";
+  
+  if (prefill) {
+    document.getElementById('main').value = prefill;
+    //autosize.update(document.getElementById('questionInput'));
+  }
+  
+  tg.expand();
+}
+</script>
 </body>
 </html>
