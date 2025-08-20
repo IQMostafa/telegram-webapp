@@ -177,12 +177,13 @@ window.onload = () => {
   }
 
   const urlParams = new URLSearchParams(window.location.search);
-  const question = urlParams.get('question');
+  const dataROW = urlParams.get('data');
+  const data = dataROW.split("SS");
 
-  const questionInput = document.getElementById('questionInput');
-  if (question && questionInput) {
-    questionInput.value = question;
-  }
+
+  document.getElementById('questionInput').value = data[0];
+  document.getElementById('explanationInput').value = data[1];
+
 }
 </script>
 </body>
