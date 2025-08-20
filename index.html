@@ -447,7 +447,7 @@ window.onload = () => {
       if (firstViewportEvent){firstViewportEvent = false; return;}
       if (SecondViewportEvent){
         SecondViewportEvent = false
-        ExpandedViewportHight = tg.viewportHeight;
+        ExpandedViewportHight = tg.viewportStableHeight;
         document.getElementById("main").innerHTML = ExpandedViewportHight
         return;
       }
