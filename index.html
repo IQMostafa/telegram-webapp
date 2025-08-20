@@ -448,11 +448,12 @@ window.onload = () => {
       if (SecindViewportEvent){
         SecindViewportEvent = false
         ExpandedViewportHight = tg.viewportHeight;
-        document.getElementById("main").innerHTML = ExpandedViewportHight
+        document.getElementById("container").innerHTML = ExpandedViewportHight
         return;
       }
       if (tg.viewportHeight < ExpandedViewportHight - 200){tg.close()}
     }
+
     tg.onEvent('viewportChanged', onViewport);
   }
 
@@ -473,7 +474,7 @@ window.onload = () => {
   tg.onEvent('mainButtonClicked', () => {
     const payload = collectPayload();
     tg.sendData(payload); // send back to bot
-    tg.close();                           // close Mini App
+    tg.close(); // close Mini App
   });
 
   
