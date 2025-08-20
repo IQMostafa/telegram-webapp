@@ -168,6 +168,17 @@ function removeAllAnswers() {
 
   // Optionally, if you have a counter or want to reset numbers, no need because all are gone
 }
+
+function setCorrectByIndex(index) {
+  const allAnswers = document.querySelectorAll('.answer-item');
+  
+  // Check if the index is valid
+  if (index >= 0 && index < allAnswers.length) {
+    setCorrect(allAnswers[index]);
+  } else {
+    console.warn('Invalid index for setCorrectByIndex');
+  }
+}
 // Telegram WebApp Integration (if available)
 window.onload = () => {
   const tg = window.Telegram?.WebApp;
@@ -180,11 +191,12 @@ window.onload = () => {
   const dataROW = urlParams.get('data');
   const data = dataROW.split("SS");
   removeAllAnswers()
-  for (let index = 2; index < data.length-2; index++) {
+  for (let index = 2; index < data.length-1; index++) {
     addAnswer(data[index])
   }
-  const allAnswers = document.querySelectorAll('.answer-item');
-  setCorrect(allAnswers[data.length-1]);
+  
+  setCorrectByIndex(parseInt(data[data.length-1], 10));
+  //setCorrect(this.closest('.answer-item'))
 
   document.getElementById('questionInput').value = data[0];
   document.getElementById('explanationInput').value = data[1];
