@@ -167,8 +167,9 @@ function addAnswer() {
   const prefill = urlParams.get("text") || "";
   
   if (true) {
-    document.getElementById('main').innerHTML = prefill;
-    //autosize.update(document.getElementById('questionInput'));
+    document.getElementById('questionInput').value = prefill;
+    autosize.update(document.getElementById('questionInput'));
+
   }
   
   tg.expand();
