@@ -174,8 +174,8 @@ function updateAnswers(data) {
   const urlParams = new URLSearchParams(window.location.search);
   const question = urlParams.get("question") || "";
 
-  document.getElementById('questionInput').value = "SSthis is the qustionSSthis is the explanationSS1SSaSSbSScSSd";
-  autosize.update(document.getElementById('questionInput'));
+  document.getElementById('questionInput').value = question;
+  //autosize.update(document.getElementById('questionInput'));
 
   tg.expand();
 
