@@ -411,11 +411,32 @@ function setCorrect(answerItem) {
 
 // Remove answer
 function removeAnswer(answerItem) {
+  // Remove the selected item
+  const items = document.querySelectorAll('.answer-item');
+
+  if (items.length == 1) return; 
   answerItem.remove();
-  // Renumber remaining answers
-  document.querySelectorAll('.answer-item').forEach((item, index) => {
+
+  let hasActive = false;
+
+  items.forEach((item, index) => {
+    // Renumber
     item.querySelector('.answer-number').textContent = index + 1;
+
+    // Check for active toggle
+    const handle = item.querySelector('.toggle-handle');
+    if (handle.classList.contains('active')) {
+      hasActive = true;
+    }
   });
+
+  // If none is active, set the first one active
+  if (!hasActive) {
+    const firstHandle = items[0].querySelector('.toggle-handle');
+    if (firstHandle) {
+      firstHandle.classList.add('active');
+    }
+  }
 }
 
 // Add answer
@@ -509,18 +530,14 @@ function collectPayload() {
   const originalCorrectIx = getCurrentCorrectIndex();
 
   // Build a mapping from original indices -> filtered indices
-  let filteredIndex = -1;
+  
   let correctedIndex = -1;
-  for (let i = 0; i < allItems.length; i++) {
-    const val = (allItems[i].querySelector('.answer-input')?.value ?? '').trim();
-    if (val.length === 0) {
-      // skipped in filtered list
-      if (i === originalCorrectIx) correctedIndex = -1; // correct points to an empty answer -> invalidate
-      continue;
+  document.querySelectorAll('.answer-item').forEach((item, index) => {
+    const handle = item.querySelector('.toggle-handle');
+    if (handle && handle.classList.contains('active')) {
+      correctedIndex = index;
     }
-    filteredIndex++;
-    if (i === originalCorrectIx) correctedIndex = filteredIndex;
-  }
+  });
 
   return {
     question,
