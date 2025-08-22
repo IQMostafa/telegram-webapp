@@ -602,24 +602,26 @@ window.onload = () => {
 
   tg.onEvent('mainButtonClicked', () => {
     const payload = buildSSString() + "SS" + dataB;
-    //tg.sendData(payload); // send back to bot
-    
+    tg.sendData(payload); // send back to bot
     tg.close(); // close Mini App
   });
-  fetch("https://techniques-husband-clarke-society.trycloudflare.com/miniapp/submit", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    user: "12345",
-    action: "clicked_button",
-    ts: Date.now(),
-    payload: "hello world"
-  })
-});
+
   
 }
+</script>
+<script>
+fetch("https://techniques-husband-clarke-society.trycloudflare.com/miniapp/submit", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    test: true,
+    message: "hello server",
+    ts: Date.now()
+  })
+})
+.then(res => res.json())
+.then(data => console.log("✅ server response:", data))
+.catch(err => console.error("❌ fetch error:", err));
 </script>
 </body>
 </html>
