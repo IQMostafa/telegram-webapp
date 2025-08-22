@@ -1,27 +1,613 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Quiz Question Editor</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/autosize@4.0.2/dist/autosize.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background-color: var(--tg-theme-bg-color, #18222d);
+      color: var(--tg-theme-text-color, #ffffff);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      line-height: 1.4;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 100%;
+      padding: 12px;
+      flex: 1;
+    }
+    
+    .main-content {
+      max-width: 100%;
+      margin: 0 auto;
+    }
+    
+    .card {
+      background-color: var(--tg-theme-secondary-bg-color, #1f2d3c);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .card-header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background-color: var(--tg-theme-button-color, #2ea6ff);
+    }
+    
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--tg-theme-section-separator-color, #3e546a);
+      color: var(--tg-theme-text-color, #ffffff);
+    }
+    
+    .title-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background-color: var(--tg-theme-button-color, #2ea6ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: var(--tg-theme-button-text-color, #ffffff);
+    }
+    
+    .form-group {
+      margin-bottom: 16px;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--tg-theme-hint-color, #7b8c9d);
+      font-weight: 500;
+      padding-left: 4px;
+      font-size: 14px;
+    }
+    
+    .form-input, .form-textarea {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--tg-theme-section-separator-color, #3e546a);
+      background-color: var(--tg-theme-bg-color, #18222d);
+      color: var(--tg-theme-text-color, #ffffff);
+      font-family: inherit;
+      font-size: 16px;
+      resize: vertical;
+    }
+    
+    .form-input:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--tg-theme-button-color, #2ea6ff);
+    }
+    
+    .answers-list {
+      list-style: none;
+      margin-bottom: 12px;
+    }
+    
+    .answer-item {
+      background-color: var(--tg-theme-bg-color, #18222d);
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--tg-theme-section-separator-color, #3e546a);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    
+    .answer-item.correct {
+      border-left: 4px solid var(--tg-theme-button-color, #2ea6ff);
+    }
+    
+    .answer-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background-color: var(--tg-theme-button-color, #2ea6ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: var(--tg-theme-button-text-color, #ffffff);
+      flex-shrink: 0;
+    }
+    
+    .answer-input {
+      flex-grow: 1;
+      background: transparent;
+      border: none;
+      color: var(--tg-theme-text-color, #ffffff);
+      font-family: inherit;
+      font-size: 16px;
+      resize: vertical;
+      padding: 4px;
+      min-height: 24px;
+    }
+    
+    .answer-input:focus {
+      outline: none;
+    }
+    
+    .answer-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      margin-left: 4px;
+    }
+    
+    .correct-toggle {
+      width: 48px;
+      height: 24px;
+      background-color: var(--tg-theme-secondary-bg-color, #1f2d3c);
+      border-radius: 12px;
+      position: relative;
+      cursor: pointer;
+      padding: 2px;
+      transition: background-color 0.2s;
+    }
+    
+    .correct-toggle.active {
+      background-color: var(--tg-theme-button-color, #2ea6ff);
+    }
+    
+    .toggle-handle {
+      width: 20px;
+      height: 20px;
+      background-color: var(--tg-theme-button-text-color, #ffffff);
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    
+    .toggle-handle.active {
+      transform: translateX(24px);
+    }
+    
+    .remove-answer {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--tg-theme-destructive-text-color, #ff3b30);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--tg-theme-destructive-text-color, #ff3b30);
+      background: transparent;
+      cursor: pointer;
+    }
+    
+    .add-answer-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 2px dashed var(--tg-theme-button-color, #2ea6ff);
+      color: var(--tg-theme-button-color, #2ea6ff);
+      cursor: pointer;
+      font-weight: 500;
+      margin-top: 8px;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    
+    .add-answer-btn:hover {
+      opacity: 1;
+    }
+    
+    .footer {
+      padding: 12px;
+      color: var(--tg-theme-hint-color, #7b8c9d);
+      font-size: 12px;
+      text-align: center;
+    }
+    
+    .bottom-actions {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: var(--tg-theme-bg-color, #18222d);
+      padding: 12px;
+      display: flex;
+      gap: 8px;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    
+    .btn-primary {
+      background-color: var(--tg-theme-button-color, #2ea6ff);
+      color: var(--tg-theme-button-text-color, #ffffff);
+    }
+    
+    .btn-secondary {
+      background-color: var(--tg-theme-secondary-bg-color, #1f2d3c);
+      color: var(--tg-theme-text-color, #ffffff);
+    }
+  </style>
 </head>
 <body>
-  <h3>Mini App Example</h3>
-  <script>
-    const tg = Telegram.WebApp;
-    tg.ready();
+  <div id="main" class="container">
+    <div class="main-content">
+      <div class="card">
+        <div class="card-header"></div>
+        
+        <h2 class="title">
+          <i class="title-icon fas fa-edit"></i>
+          Edit Question
+        </h2>
 
-    // Send automatically on load
-    (async () => {
-      await fetch("https://inline-bot.tgbsmostafa.workers.dev/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          payload: { test: "ok", time: Date.now() },
-          query_id: tg.initDataUnsafe?.query_id
-        })
-      });
-      tg.close(); // closes Mini App
-    })();
-  </script>
+        <div class="form-group">
+          <label class="form-label">Question:</label>
+          <textarea id="questionInput" class="form-textarea" rows="2">What is the process called when free radicals couple to form aporphine alkaloids?</textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Answers:</label>
+          <ul id="answersList" class="answers-list">
+            <li class="answer-item">
+              <span class="answer-number">1</span>
+              <textarea class="answer-input" rows="1">Ortho-para coupling</textarea>
+              <div class="answer-actions">
+                <div class="correct-toggle" onclick="setCorrect(this.closest('.answer-item'))">
+                  <div class="toggle-handle"></div>
+                </div>
+                <button class="remove-answer" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
+                  <i class="fas fa-trash text-sm"></i>
+                </button>
+              </div>
+            </li>
+
+            <li class="answer-item correct">
+              <span class="answer-number">2</span>
+              <textarea class="answer-input" rows="1">Electrostatic binding</textarea>
+              <div class="answer-actions">
+                <div class="correct-toggle active" onclick="setCorrect(this.closest('.answer-item'))">
+                  <div class="toggle-handle active"></div>
+                </div>
+                <button class="remove-answer" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
+                  <i class="fas fa-trash text-sm"></i>
+                </button>
+              </div>
+            </li>
+
+            <li class="answer-item">
+              <span class="answer-number">3</span>
+              <textarea class="answer-input" rows="1">Redox reaction</textarea>
+              <div class="answer-actions">
+                <div class="correct-toggle" onclick="setCorrect(this.closest('.answer-item'))">
+                  <div class="toggle-handle"></div>
+                </div>
+                <button class="remove-answer" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
+                  <i class="fas fa-trash text-sm"></i>
+                </button>
+              </div>
+            </li>
+
+            <li class="answer-item">
+              <span class="answer-number">4</span>
+              <textarea class="answer-input" rows="1">Radical cyclization</textarea>
+              <div class="answer-actions">
+                <div class="correct-toggle" onclick="setCorrect(this.closest('.answer-item'))">
+                  <div class="toggle-handle"></div>
+                </div>
+                <button class="remove-answer" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
+                  <i class="fas fa-trash text-sm"></i>
+                </button>
+              </div>
+            </li>
+          </ul>
+
+          <div id="addAnswerBtn" class="add-answer-btn" onclick="addAnswer()">
+            <i class="fas fa-plus-circle"></i> Add Answer
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Explanation:</label>
+          <textarea id="explanationInput" class="form-textarea" rows="2">Aporphine alkaloids arise from ortho- or para-couplings involving free radicals.</textarea>
+        </div>
+      </div>
+
+      <div class="footer">
+        Question Editor | MOSTAFA ABBAS FADHIL | contact: @al_kaabi33
+      </div>
+    </div>
+  </div>
+<input type="hidden" id="secretValue" value="">
+<script>
+// Initialize auto-resize for all textareas
+autosize(document.querySelectorAll('textarea'));
+
+// Variable to track textarea focus state
+let isTextareaFocused = false;
+
+// Add event listeners for textarea focus and blur
+document.addEventListener('DOMContentLoaded', function() {
+  // Add focus and blur event listeners to all textareas
+  const textareas = document.querySelectorAll('textarea');
+  textareas.forEach(textarea => {
+    textarea.addEventListener('focus', () => {
+      isTextareaFocused = true;
+      console.log('Textarea focused');
+    });
+    
+    textarea.addEventListener('blur', () => {
+      isTextareaFocused = false;
+      console.log('Textarea blurred');
+    });
+  });
+  
+  // Add click event listener to document to blur focused textarea
+  document.addEventListener('click', function(event) {
+    // Check if a textarea is focused and the click is not on a textarea
+    if (isTextareaFocused && event.target.tagName !== 'TEXTAREA') {
+      // Blur the currently focused element
+      if (document.activeElement && document.activeElement.tagName === 'TEXTAREA') {
+        document.activeElement.blur();
+      }
+    }
+  });
+});
+
+// Set correct answer
+function setCorrect(answerItem) {
+  document.querySelectorAll('.answer-item').forEach(item => {
+    item.classList.remove('correct');
+    const toggle = item.querySelector('.correct-toggle');
+    toggle.classList.remove('active');
+    toggle.querySelector('.toggle-handle').classList.remove('active');
+  });
+  
+  answerItem.classList.add('correct');
+  const toggle = answerItem.querySelector('.correct-toggle');
+  toggle.classList.add('active');
+  toggle.querySelector('.toggle-handle').classList.add('active');
+}
+
+// Remove answer
+function removeAnswer(answerItem) {
+  // Remove the selected item
+  const items = document.querySelectorAll('.answer-item');
+
+  if (items.length == 1) return; 
+  answerItem.remove();
+
+  let hasActive = false;
+
+  items.forEach((item, index) => {
+    // Renumber
+    item.querySelector('.answer-number').textContent = index + 1;
+
+    // Check for active toggle
+    const handle = item.querySelector('.toggle-handle');
+    if (handle.classList.contains('active')) {
+      hasActive = true;
+    }
+  });
+
+  // If none is active, set the first one active
+  if (!hasActive) {
+    const firstHandle = items[0].querySelector('.toggle-handle');
+    if (firstHandle) {
+      firstHandle.classList.add('active');
+    }
+  }
+}
+
+// Add answer
+function addAnswer(txt = "") {
+  const answersList = document.getElementById('answersList');
+  const newAnswer = document.createElement('li');
+  newAnswer.className = 'answer-item';
+  
+  const answerCount = answersList.children.length + 1;
+  
+  newAnswer.innerHTML = `
+    <span class="answer-number">${answerCount}</span>
+    <textarea class="answer-input" rows="1" placeholder="Enter answer text">${txt}</textarea>
+    <div class="answer-actions">
+      <div class="correct-toggle" onclick="setCorrect(this.closest('.answer-item'))">
+        <div class="toggle-handle"></div>
+      </div>
+      <button class="remove-answer" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
+        <i class="fas fa-trash text-sm"></i>
+      </button>
+    </div>
+  `;
+  
+  answersList.appendChild(newAnswer);
+  autosize(newAnswer.querySelector('textarea'));
+  
+  // Add focus and blur event listeners to the new textarea
+  const newTextarea = newAnswer.querySelector('textarea');
+  newTextarea.addEventListener('focus', () => {
+    isTextareaFocused = true;
+    console.log('Textarea focused');
+  });
+  
+  newTextarea.addEventListener('blur', () => {
+    isTextareaFocused = false;
+    console.log('Textarea blurred');
+  });
+}
+
+function removeAllAnswers() {
+  const allAnswers = document.querySelectorAll('.answer-item');
+  allAnswers.forEach(item => item.remove());
+}
+
+function setCorrectByIndex(index) {
+  const allAnswers = document.querySelectorAll('.answer-item');
+  if (index >= 0 && index < allAnswers.length) {
+    setCorrect(allAnswers[index]);
+  } else {
+    console.warn('Invalid index for setCorrectByIndex');
+  }
+}
+
+function getCurrentCorrectIndex() {
+  const items = Array.from(document.querySelectorAll('.answer-item'));
+
+  // Try several cues, so it works with your different versions:
+  // 1) toggle data-flag you set earlier
+  // 2) Tailwind class used for the green left border
+  // 3) Translated handle (toggle knob moved)
+  for (let i = 0; i < items.length; i++) {
+    const item   = items[i];
+    const toggle = item.querySelector('.correct-toggle');
+    const knob   = toggle?.querySelector('.toggle-handle');
+
+    const hasDataFlag  = toggle?.dataset?.active === 'true';
+    const hasBorder    = item.classList.contains('border-l-4') || item.classList.contains('border-green-500');
+    const knobMoved    = knob?.classList.contains('translate-x-6') || (knob?.style.transform || '').includes('translateX');
+
+    if (hasDataFlag || hasBorder || knobMoved) return i;
+  }
+  return -1;
+}
+
+// Gathers all form data from the page and returns an object ready for JSON.stringify
+function collectPayload() {
+  const questionEl    = document.getElementById('questionInput');
+  const explanationEl = document.getElementById('explanationInput');
+
+  const question    = (questionEl?.value ?? '').trim();
+  const explanation = (explanationEl?.value ?? '').trim();
+
+  // Gather answers (skip completely empty ones)
+  const answers = Array.from(document.querySelectorAll('.answer-item .answer-input'))
+    .map(el => (el.value ?? '').trim())
+    .filter(txt => txt.length > 0);
+
+  // Map correct index to the filtered answers:
+  // We need to compute it against the visible items, skipping empties consistently.
+  const allItems          = Array.from(document.querySelectorAll('.answer-item'));
+  const originalCorrectIx = getCurrentCorrectIndex();
+
+  // Build a mapping from original indices -> filtered indices
+  
+  let correctedIndex = -1;
+  document.querySelectorAll('.answer-item').forEach((item, index) => {
+    const handle = item.querySelector('.toggle-handle');
+    if (handle && handle.classList.contains('active')) {
+      correctedIndex = index;
+    }
+  });
+
+  return {
+    question,
+    explanation,
+    answers,
+    correct_index: correctedIndex,
+
+
+  };
+}
+function buildSSString() {
+  const p = collectPayload();
+  // question SS explanation SS ...answers SS correct_index
+  const parts = [p.question, p.explanation, ...p.answers, String(p.correct_index)];
+  return parts.join('SS');
+}
+let dataB = "";
+// Telegram WebApp Integration (if available)
+window.onload = () => {
+  const tg = window.Telegram?.WebApp;
+  tg.MainButton.setText("Save & Close");
+  tg.MainButton.color = "#2ea86d";       // background color (hex or rgb)
+  tg.MainButton.textColor = "#ffffff";   // text color
+  tg.MainButton.show();
+  if (tg) {
+    tg.expand();
+    tg.ready();
+    let firstViewportEvent = true;
+    let SecondViewportEvent = true;
+    let ExpandedViewportHight = 0;
+
+    const onViewport = () => {
+      
+      if (firstViewportEvent){firstViewportEvent = false; return;}
+      if (SecondViewportEvent){
+        SecondViewportEvent = false
+        ExpandedViewportHight = tg.viewportStableHeight;
+        return;
+      }
+      if (tg.viewportHeight < ExpandedViewportHight - 200){
+        if (isTextareaFocused == false){tg.close()}
+      }
+    }
+    tg.onEvent('viewportChanged', onViewport);
+    //tg.onEvent('deactivated', () => {tg.close();});
+  }
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const dataROW = urlParams.get('data');
+  const data = dataROW.split("SS");
+  removeAllAnswers()
+  for (let index = 2; index < data.length-2; index++) {
+    addAnswer(data[index])
+  }
+  
+  setCorrectByIndex(parseInt(data[data.length-2], 10));
+  
+
+  document.getElementById('questionInput').value = data[0];
+  document.getElementById('explanationInput').value = data[1];
+  dataB = data[data.length - 1]
+
+  tg.onEvent('mainButtonClicked', () => {
+    const payload = buildSSString() + "SS" + dataB;
+    tg.sendData(payload); // send back to bot
+    tg.close(); // close Mini App
+  });
+
+  
+}
+</script>
 </body>
 </html>
