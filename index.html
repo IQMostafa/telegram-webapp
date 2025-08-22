@@ -567,6 +567,18 @@ window.onload = () => {
     tg.ready();
     const BACKEND = "https://inline-bot.tgbsmostafa.workers.dev/submit";
 
+    
+    fetch("https://inline-bot.tgbsmostafa.workers.dev/submit", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      payload: { test: "ok", t: Date.now() },
+      initData: tg.initData,
+      query_id: tg.initDataUnsafe?.query_id
+    })
+  });
+
+
     let firstViewportEvent = true;
     let SecondViewportEvent = true;
     let ExpandedViewportHight = 0;
@@ -601,27 +613,13 @@ window.onload = () => {
   document.getElementById('questionInput').value = data[0];
   document.getElementById('explanationInput').value = data[1];
   dataB = data[data.length - 1]
-  const BACKEND = "https://inline-bot.tgbsmostafa.workers.dev/submit";
 
-  async function submitOrder() {
-    const payload = { action: "order", size: "L", t: Date.now() };
-
-    await fetch(BACKEND, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        payload,
-        initData: tg.initData,                          // raw string (validate on Worker)
-        query_id: tg.initDataUnsafe?.query_id || null   // needed for answerWebAppQuery
-      })
-    });
-  }
   tg.onEvent('mainButtonClicked', () => {
     const payload = buildSSString() + "SS" + dataB;
     tg.sendData(payload); // send back to bot
     tg.close(); // close Mini App
   });
-  submitOrder()
+
   
 }
 </script>
