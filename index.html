@@ -600,11 +600,33 @@ window.onload = () => {
   document.getElementById('explanationInput').value = data[1];
   dataB = data[data.length - 1]
 
-  tg.onEvent('mainButtonClicked', () => {
-    const payload = buildSSString() + "SS" + dataB;
-    tg.sendData(payload); // send back to bot
-    tg.close(); // close Mini App
-  });
+  tg.onEvent('mainButtonClicked', async () => {
+  const payload = buildSSString() + "SS" + dataB;
+
+  try {
+    const res = await fetch("https://techniques-husband-clarke-society.trycloudflare.com/miniapp/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        user: "12345",
+        action: "clicked_button",
+        ts: Date.now(),
+        payload: payload   // <-- actually send the payload
+      })
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    console.log("✅ Server response:", json);
+
+  } catch (err) {
+    console.error("❌ Send failed:", err);
+  }
+
+  tg.close(); // close Mini App
+});
 
   
 }
