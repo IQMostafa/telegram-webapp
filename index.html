@@ -1092,6 +1092,7 @@ window.onload = () => {
   }
 
   // preload data from URL ?data=
+  try{
   const urlParams = new URLSearchParams(window.location.search);
   const dataROW = urlParams.get('data');
   if (dataROW) {
@@ -1102,7 +1103,11 @@ window.onload = () => {
     $('#questionInput').value = data[0];
     $('#explanationInput').value = data[1];
     dataB = data[data.length - 1];
+  }}
+  catch{
+    window.location.href = "/telegram-webapp/page-not-found/";
   }
+  ex
   tg.onEvent('mainButtonClicked', () => {
     const payload = buildSSString() + "SS" + dataB;
     tg.sendData(payload);
@@ -1115,7 +1120,7 @@ window.onload = () => {
     }
   });
 
-  tg.onEvent('deactivated ', () => {
+  tg.onEvent('deactivated', () => {
       tg.close();
   });
 
