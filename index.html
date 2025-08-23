@@ -1090,22 +1090,53 @@ window.onload = () => {
     };
     tg.onEvent('viewportChanged', onViewport);
   }
-
+  const redirect404 = () => location.replace('/telegram-webapp/page-not-found');
+  const $ = (s) => document.querySelector(s);
   // preload data from URL ?data=
-  try{
-  const urlParams = new URLSearchParams(window.location.search);
-  const dataROW = urlParams.get('data');
-  if (dataROW) {
-    const data = dataROW.split("SS");
-    removeAllAnswers();
-    for (let index = 2; index < data.length - 2; index++) addAnswer(data[index]);
-    setCorrectByIndex(parseInt(data[data.length-2], 10));
-    $('#questionInput').value = data[0];
-    $('#explanationInput').value = data[1];
-    dataB = data[data.length - 1];
-  }}
-  catch{
-    window.location.href = "/telegram-webapp/page-not-found/";
+  try {
+    // 1) Read ?data=... first; if missing, also check #data=...
+    const url = new URL(location.href);
+    const fromQuery = url.searchParams.get('data');
+    const fromHash = new URLSearchParams(location.hash.replace(/^#/, '')).get('data');
+    const dataROW = fromQuery || fromHash;
+
+    // 2) If no data → redirect (don’t wait for an exception)
+    if (!dataROW) return redirect404();
+
+    // 3) Split & minimally validate
+    const parts = dataROW.split('SS');
+    // Expect: [question, explanation, ...answers..., correctIndex, payload]
+    if (parts.length < 5) return redirect404();
+
+    const question = parts[0];
+    const explanation = parts[1];
+    const correctIndex = parseInt(parts[parts.length - 2], 10);
+    const payload = parts[parts.length - 1];
+    const answers = parts.slice(2, -2);
+
+    // 4) Populate UI (guard functions in case not defined)
+    if (typeof removeAllAnswers === 'function') removeAllAnswers();
+    if (Array.isArray(answers) && typeof addAnswer === 'function') {
+      answers.forEach((a) => addAnswer(a));
+    }
+    if (typeof setCorrectByIndex === 'function' && Number.isInteger(correctIndex)) {
+      setCorrectByIndex(correctIndex);
+    }
+
+    const qEl = $('#questionInput');
+    const eEl = $('#explanationInput');
+    if (!qEl || !eEl) return redirect404();
+
+    qEl.value = question;
+    eEl.value = explanation;
+
+    // 5) Save payload safely
+    let dataB = payload; // use this local, or attach to window if needed:
+    // window.dataB = payload;
+
+  } catch (e) {
+    // Fallback to your 404 page
+    redirect404();
   }
   ex
   tg.onEvent('mainButtonClicked', () => {
@@ -1120,9 +1151,12 @@ window.onload = () => {
     }
   });
 
-  tg.onEvent('deactivated', () => {
-      tg.close();
-  });
+  document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    // App has been minimized or switched away
+    Telegram.WebApp.close();
+  }
+});
 
   // Init DnD after DOM is ready
   initDragAndDrop();
