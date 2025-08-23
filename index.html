@@ -1096,9 +1096,13 @@ async function initTg() {
     }
 
     // Then, request full-screen mode for the most immersive experience
-    if (viewport.isAvailable) {
-      await viewport.requestFullscreen();
-    }
+    if (viewport.mount.isAvailable()) {
+  await viewport.mount();
+}
+
+if (viewport.requestFullscreen.isAvailable()) {
+  await viewport.requestFullscreen();
+}
   }
 }
 
