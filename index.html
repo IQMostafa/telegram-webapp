@@ -1047,12 +1047,24 @@ window.onload = () => {
   tg.MainButton.textColor = "#ffffff";   // text color
   tg.MainButton.show();
   if (tg) {
-    tg.ready();
-    if (typeof tg.requestFullscreen === 'function') {
-    tg.requestFullscreen().catch(() => tg.expand()); // fallback
-  } else {
-    tg.expand(); // older clients
-  }
+    useEffect(() => {
+    async function initTg() {
+      if (await isTMA()) {
+        init();
+
+        if (viewport.mount.isAvailable()) {
+          await viewport.mount();
+          viewport.expand();
+        }
+
+        if (viewport.requestFullscreen.isAvailable()) {
+          await viewport.requestFullscreen();
+        }
+      }
+    }
+    initTg();
+
+  }, []);
     let firstViewportEvent = true;
     let SecondViewportEvent = true;
     let ExpandedViewportHight = 0;
