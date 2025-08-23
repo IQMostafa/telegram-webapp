@@ -1109,6 +1109,16 @@ window.onload = () => {
     tg.close();
   });
 
+  tg.onEvent('fullscreenChanged', () => {
+    if (tg.isFullscreen  == false){
+      tg.close();
+    }
+  });
+
+  tg.onEvent('deactivated ', () => {
+      tg.close();
+  });
+
   // Init DnD after DOM is ready
   initDragAndDrop();
 };
