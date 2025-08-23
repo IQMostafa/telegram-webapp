@@ -8,10 +8,11 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/autosize@4.0.2/dist/autosize.min.js"></script>
   <style>
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-      background-color: #18222d;
+      background-color: #1f2d3c;
       color: #ffffff;
       min-height: 100vh; display: flex; flex-direction: column; padding: 0; line-height: 1.4;
       opacity: 0; animation: fadeIn 0.8s ease forwards; overflow-x: hidden; touch-action: manipulation;
@@ -25,7 +26,7 @@
     .card {
       background-color:  #1f2d3c;
        padding: 20px; margin-bottom: 20px; position: relative; overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: translateY(20px); opacity: 0;
+       transform: translateY(20px); opacity: 0;
       animation: cardAppear 0.6s ease forwards 0.2s;
     }
     @keyframes cardAppear { to { transform: translateY(0); opacity: 1; } }
@@ -43,7 +44,7 @@
 
     .form-group { margin-bottom: 20px; }
     .form-label { display:block; margin-bottom:8px; color:  #7b8c9d; font-weight:500; padding-left:4px; font-size:14px; }
-
+    
     .form-input, .form-textarea {
       width:100%; padding:14px; border-radius:12px;
       border:1px solid  #3e546a;
@@ -69,7 +70,7 @@
     @keyframes slideIn { to { opacity:1; transform: translateX(0);} }
 
     .answer-item.correct {
-      border-left: 4px solid ,#2ea6ff;
+      border-left: 4px solid #2ea6ff;
       background: linear-gradient(90deg, rgba(46,166,255,.15) 0%, rgba(46,166,255,.05) 100%);
       animation: pulseCorrect .8s ease;
     }
@@ -189,21 +190,23 @@ body::-webkit-scrollbar {
     .shake { animation: shake .6s ease; }
 
     .toast {
-  position: absolute;                      /* pin to viewport */
+  position: fixed;            /* was absolute */
   top: calc(env(safe-area-inset-top, 0px) + 16px);
-  right: 0px;
-  z-index: 100000;                      /* above overlays */
-  pointer-events: none;                 /* don't block drags/clicks */
+  right: 16px;
+  left: auto;
+  z-index: 100000;
+  pointer-events: none;
   padding: 12px 20px;
   background: #1f2d3c;
   color: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0,0,0,.2);
-  transform: translateX(120%);          /* off-screen start */
-  opacity: 1;
+  max-width: calc(100vw - 32px);  /* never exceed viewport */
+  transform: translateX(100%);    /* was 120% */
+  opacity: 0;
   transition: transform .3s ease, opacity .3s ease;
   will-change: transform, opacity;
-  
+  contain: layout paint;          /* isolates painting; avoids overflow side-effects */
 }
 @keyframes slideAndPulse {
   0% { transform: translateX(120%) scale(1);box-shadow: 0 0 15px rgba(46,166,255,.4);}
@@ -455,11 +458,14 @@ function showToast(message, duration = 3000) {
 
   // force reflow so the next add triggers the transition
   // eslint-disable-next-line no-unused-expressions
-  toast.offsetHeight;
+  toast.classList.remove('show');
+  void toast.offsetHeight;
   toast.classList.add('show');
-  const { y } = getScrollXY();
+
   toast.style.position = 'absolute';
-  toast.style.top = (y + 100) + 'px';
+  
+  toast.style.top = (getScrollXY().y + 100) + 'px';
+  toast.style.right = '16px';
   clearTimeout(showToast._t);
   showToast._t = setTimeout(() => {
     toast.classList.remove('show');
@@ -1090,6 +1096,38 @@ window.onload = () => {
   // Init DnD after DOM is ready
   initDragAndDrop();
 };
+</script>
+<script>
+function resizeFonts() {
+  const w = window.innerWidth;
+
+  // Base font size for body
+  let baseSize;
+  if (w < 480) {
+    baseSize = 14; // small phones
+  } else if (w < 768) {
+    baseSize = 15; // tablets
+  } else {
+    baseSize = 16; // desktops
+  }
+
+  document.body.style.fontSize = baseSize + "px";
+
+  // Example: force specific elements
+  document.querySelectorAll(".title").forEach(el => {
+    el.style.fontSize = (baseSize + 6) + "px";
+  });
+
+  document.querySelectorAll(".form-label, .answer-input, .form-textarea").forEach(el => {
+    el.style.fontSize = baseSize + "px";
+  });
+}
+
+// Run once on load
+resizeFonts();
+
+// Run again on window resize
+window.addEventListener("resize", resizeFonts);
 </script>
 
 </body>
