@@ -1047,9 +1047,12 @@ window.onload = () => {
   tg.MainButton.textColor = "#ffffff";   // text color
   tg.MainButton.show();
   if (tg) {
-    tg.expand();
-    tg.requestFullscreen();
     tg.ready();
+    if (typeof tg.requestFullscreen === 'function') {
+    tg.requestFullscreen().catch(() => tg.expand()); // fallback
+  } else {
+    tg.expand(); // older clients
+  }
     let firstViewportEvent = true;
     let SecondViewportEvent = true;
     let ExpandedViewportHight = 0;
