@@ -8,274 +8,292 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/autosize@4.0.2/dist/autosize.min.js"></script>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
       background-color: var(--tg-theme-bg-color, #18222d);
       color: var(--tg-theme-text-color, #ffffff);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      padding: 0;
-      line-height: 1.4;
+      min-height: 100vh; display: flex; flex-direction: column; padding: 0; line-height: 1.4;
+      opacity: 0; animation: fadeIn 0.8s ease forwards; overflow-x: hidden; touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
-    
-    .container {
-      width: 100%;
-      max-width: 100%;
-      padding: 12px;
-      flex: 1;
-    }
-    
-    .main-content {
-      max-width: 100%;
-      margin: 0 auto;
-    }
-    
+    @keyframes fadeIn { from {opacity:0; transform: translateY(10px);} to {opacity:1; transform: translateY(0);} }
+
+    .container { width: 100%; max-width: 100%; flex: 1; padding-bottom: 80px; }
+    .main-content { max-width: 100%; margin: 0 auto; }
+
     .card {
       background-color: var(--tg-theme-secondary-bg-color, #1f2d3c);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
-      position: relative;
-      overflow: hidden;
+       padding: 20px; margin-bottom: 20px; position: relative; overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: translateY(20px); opacity: 0;
+      animation: cardAppear 0.6s ease forwards 0.2s;
     }
-    
-    .card-header {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background-color: var(--tg-theme-button-color, #2ea6ff);
-    }
-    
-    .title {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--tg-theme-section-separator-color, #3e546a);
-      color: var(--tg-theme-text-color, #ffffff);
-    }
-    
+    @keyframes cardAppear { to { transform: translateY(0); opacity: 1; } }
+
+
+    .title { font-size:22px; font-weight:700; margin-bottom:20px; display:flex; align-items:center; gap:12px;
+      padding-bottom:16px; border-bottom:1px solid var(--tg-theme-section-separator-color,#3e546a); }
     .title-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background-color: var(--tg-theme-button-color, #2ea6ff);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      color: var(--tg-theme-button-text-color, #ffffff);
+      width: 40px; height: 40px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--tg-theme-button-color,#2ea6ff), #6c5ce7);
+      display:flex; align-items:center; justify-content:center; font-size:18px; color: var(--tg-theme-button-text-color,#fff);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3); animation: pulse 2s infinite;
     }
-    
-    .form-group {
-      margin-bottom: 16px;
-    }
-    
-    .form-label {
-      display: block;
-      margin-bottom: 6px;
-      color: var(--tg-theme-hint-color, #7b8c9d);
-      font-weight: 500;
-      padding-left: 4px;
-      font-size: 14px;
-    }
-    
+    @keyframes pulse { 0%{transform:scale(1)} 50%{transform:scale(1.05)} 100%{transform:scale(1)} }
+
+    .form-group { margin-bottom: 20px; }
+    .form-label { display:block; margin-bottom:8px; color: var(--tg-theme-hint-color, #7b8c9d); font-weight:500; padding-left:4px; font-size:14px; }
+
     .form-input, .form-textarea {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid var(--tg-theme-section-separator-color, #3e546a);
-      background-color: var(--tg-theme-bg-color, #18222d);
-      color: var(--tg-theme-text-color, #ffffff);
-      font-family: inherit;
-      font-size: 16px;
-      resize: vertical;
+      width:100%; padding:14px; border-radius:12px;
+      border:1px solid var(--tg-theme-section-separator-color, #3e546a);
+      background-color: var(--tg-theme-bg-color, #18222d); color: var(--tg-theme-text-color,#fff);
+      font-family: inherit; font-size:16px; resize: vertical; transition: all .3s ease;
+      animation: pulseCorrect .8s ease;
     }
-    
-    .form-input:focus, .form-textarea:focus {
-      outline: none;
-      border-color: var(--tg-theme-button-color, #2ea6ff);
-    }
-    
-    .answers-list {
-      list-style: none;
-      margin-bottom: 12px;
-    }
-    
+    .form-input:focus,
+.form-textarea:focus:not(.focused-textarea) {
+  outline: none;
+  border-color: var(--tg-theme-button-color,#2ea6ff);
+  box-shadow: 0 0 0 3px rgba(46,166,255,.2);
+  transform: translateY(-2px);
+}
+
+    .answers-list { list-style:none; margin-bottom:16px; }
     .answer-item {
-      background-color: var(--tg-theme-bg-color, #18222d);
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid var(--tg-theme-section-separator-color, #3e546a);
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      margin-bottom: 8px;
+      background-color: var(--tg-theme-bg-color,#18222d); padding:16px; border-radius:12px;
+      border:1px solid var(--tg-theme-section-separator-color,#3e546a);
+      display:flex; align-items:flex-start; gap:12px; margin-bottom:12px; transition: all .3s ease;
+      animation: slideIn .4s ease forwards; opacity:0; position:relative; overflow:hidden;
     }
-    
+    @keyframes slideIn { to { opacity:1; transform: translateX(0);} }
+
     .answer-item.correct {
-      border-left: 4px solid var(--tg-theme-button-color, #2ea6ff);
+      border-left: 4px solid var(--tg-theme-button-color,#2ea6ff);
+      background: linear-gradient(90deg, rgba(46,166,255,.15) 0%, rgba(46,166,255,.05) 100%);
+      animation: pulseCorrect .8s ease;
     }
-    
-    .answer-number {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      background-color: var(--tg-theme-button-color, #2ea6ff);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      color: var(--tg-theme-button-text-color, #ffffff);
-      flex-shrink: 0;
+    @keyframes pulseCorrect {
+      0%{transform:scale(1)} 25%{transform:scale(1.03); box-shadow:0 0 20px rgba(46,166,255,.5)}
+      50%{transform:scale(1.01)} 75%{transform:scale(1.02); box-shadow:0 0 15px rgba(46,166,255,.4)} 100%{transform:scale(1)}
     }
-    
+
+    /* Drag handle firmly on the LEFT */
+    .drag-handle {
+      order: 0; width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+      font-weight:bold; color: var(--tg-theme-hint-color,#7b8c9d); flex-shrink:0; cursor: grab; touch-action: none;
+      user-select: none; transition: all .2s ease; font-size:20px; margin-right: 6px;
+    }
+    .drag-handle:active { cursor: grabbing; color: var(--tg-theme-button-color,#2ea6ff); transform: scale(1.1); }
+
     .answer-input {
-      flex-grow: 1;
-      background: transparent;
-      border: none;
-      color: var(--tg-theme-text-color, #ffffff);
-      font-family: inherit;
-      font-size: 16px;
-      resize: vertical;
-      padding: 4px;
-      min-height: 24px;
+      flex-grow:1; background:transparent; border:none; color: var(--tg-theme-text-color,#fff);
+      font-family: inherit; font-size:16px; resize: vertical; padding:4px; min-height:28px; line-height:1.5; transition: all .3s ease;
     }
-    
-    .answer-input:focus {
-      outline: none;
-    }
-    
-    .answer-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-shrink: 0;
-      margin-left: 4px;
-    }
-    
-    .correct-toggle {
-      width: 48px;
-      height: 24px;
-      background-color: var(--tg-theme-secondary-bg-color, #1f2d3c);
-      border-radius: 12px;
-      position: relative;
-      cursor: pointer;
-      padding: 2px;
-      transition: background-color 0.2s;
-    }
-    
-    .correct-toggle.active {
-      background-color: var(--tg-theme-button-color, #2ea6ff);
-    }
-    
-    .toggle-handle {
-      width: 20px;
-      height: 20px;
-      background-color: var(--tg-theme-button-text-color, #ffffff);
-      border-radius: 50%;
-      transition: transform 0.2s;
-    }
-    
-    .toggle-handle.active {
-      transform: translateX(24px);
-    }
-    
+    .answer-input:focus { outline:none; transform: translateY(-1px); }
+
+    .answer-actions { display:flex; align-items:center; gap:12px; flex-shrink:0; margin-left:4px; }
+
+    .correct-toggle { width:52px; height:28px; background-color: var(--tg-theme-secondary-bg-color,#1f2d3c);
+      border-radius:14px; position:relative; cursor:pointer; padding:2px; transition: background-color .3s ease;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,.2); }
+    .correct-toggle.active { background-color: var(--tg-theme-button-color,#2ea6ff); }
+    .toggle-handle { width:24px; height:24px; background-color: var(--tg-theme-button-text-color,#fff);
+      border-radius:50%; transition: transform .3s cubic-bezier(.68,-.55,.27,1.55), box-shadow .3s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+    .toggle-handle.active { transform: translateX(24px); box-shadow: 0 2px 8px rgba(0,0,0,.3); }
+
     .remove-answer {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      border: 1px solid var(--tg-theme-destructive-text-color, #ff3b30);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--tg-theme-destructive-text-color, #ff3b30);
-      background: transparent;
-      cursor: pointer;
+      width:40px; height:40px; border-radius:10px; border:1px solid var(--tg-theme-destructive-text-color,#ff3b30);
+      display:flex; align-items:center; justify-content:center; color: var(--tg-theme-destructive-text-color,#ff3b30);
+      background:transparent; cursor:pointer; transition: all .2s ease;
     }
-    
+
     .add-answer-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 12px;
-      border-radius: 10px;
-      border: 2px dashed var(--tg-theme-button-color, #2ea6ff);
-      color: var(--tg-theme-button-color, #2ea6ff);
-      cursor: pointer;
-      font-weight: 500;
-      margin-top: 8px;
-      opacity: 0.7;
-      transition: opacity 0.2s;
+      display:flex; align-items:center; justify-content:center; gap:10px; padding:14px; border-radius:12px;
+      border:2px dashed var(--tg-theme-button-color,#2ea6ff); color: var(--tg-theme-button-color,#2ea6ff);
+      cursor:pointer; font-weight:500; margin-top:12px; opacity:.85; transition: all .2s ease; position:relative; overflow:hidden;
+      animation: pulseCorrect .8s ease;
     }
-    
-    .add-answer-btn:hover {
-      opacity: 1;
+    .add-answer-btn:active { opacity:1; background-color: rgba(46,166,255,.05); transform: scale(.98);
+      box-shadow: 0 6px 15px rgba(46,166,255,.25); 
+      animation: pulseCorrect .8s ease;
     }
-    
-    .footer {
-      padding: 12px;
-      color: var(--tg-theme-hint-color, #7b8c9d);
-      font-size: 12px;
-      text-align: center;
-    }
-    
-    .bottom-actions {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background-color: var(--tg-theme-bg-color, #18222d);
-      padding: 12px;
-      display: flex;
-      gap: 8px;
-      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-    }
-    
+
+    .footer { padding:16px; color: var(--tg-theme-hint-color,#7b8c9d); font-size:18px; text-align:center; margin-top:20px;
+      opacity:0; animation: fadeIn .6s ease forwards .4s; }
+
+    @keyframes slideUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+
     .btn {
-      flex: 1;
-      padding: 12px;
-      border-radius: 10px;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
+      flex:1; padding:16px; border-radius:12px; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:8px;
+      border:none; cursor:pointer; font-size:16px; transition: all .2s ease; position:relative; overflow:hidden;
     }
+    .btn:after { content:''; position:absolute; top:50%; left:50%; width:5px; height:5px; background: rgba(255,255,255,.5);
+      opacity:0; border-radius:100%; transform: scale(1,1) translate(-50%); transform-origin: 50% 50%; }
+    .btn:focus:not(:active)::after { animation: ripple 1s ease-out; }
+    @keyframes ripple { 0%{transform:scale(0,0); opacity:.5} 20%{transform:scale(10,10); opacity:.3} 100%{transform:scale(30,30); opacity:0} }
+
+    .btn-primary { background: linear-gradient(135deg, var(--tg-theme-button-color,#2ea6ff), #6c5ce7); color: var(--tg-theme-button-text-color,#fff);
+      box-shadow: 0 6px 15px rgba(46,166,255,.35); }
+    .btn-primary:active { transform: scale(.98); box-shadow: 0 4px 10px rgba(46,166,255,.3); }
+
+    .btn-secondary { background: linear-gradient(135deg, var(--tg-theme-secondary-bg-color,#1f2d3c), #2c3e50); color: var(--tg-theme-text-color,#fff);
+      box-shadow: 0 6px 15px rgba(0,0,0,.15); }
+    .btn-secondary:active { transform: scale(.98); box-shadow: 0 4px 10px rgba(0,0,0,.1); }
+
+    @keyframes fadeInUp { from {opacity:0; transform: translateY(20px) scale(.95);} to {opacity:1; transform: translateY(0) scale(1);} }
+    .answer-item.new { animation: fadeInUp .5s cubic-bezier(.25,.46,.45,.94) forwards; }
+
+:root {
+  --anim-time: 0.5s;
+}
+.answer-item {
+  opacity: 1; /* 👈 ensure starting opacity is explicitly 1 */
+  animation: pulseCorrect .8s ease;
+}
+    .answer-item.removing {
+  overflow: hidden;
+  height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border: 0;
+  opacity: 0;
+  transition:
+    height var(--anim-time) cubic-bezier(.2,0,.2,1),
+    padding var(--anim-time) cubic-bezier(.2,0,.2,1),
+    margin-bottom calc(var(--anim-time)*2) ease calc(var(--anim-time) /2),
+    border-width var(--anim-time) cubic-bezier(.2,0,.2,1),
+    opacity calc(var(--anim-time) - 0.05s) ease;
+}
     
-    .btn-primary {
-      background-color: var(--tg-theme-button-color, #2ea6ff);
-      color: var(--tg-theme-button-text-color, #ffffff);
+body.noscroll {
+  overflow: hidden;
+  height: 100%;
+}
+html, body {
+  overflow-anchor: none;
+  scroll-behavior: auto !important; /* no smooth-scroll on load */
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 0 !important;       /* Chrome/Safari/Edge */
+  height: 0 !important;      /* for horizontal bars */
+  background: transparent;
+}
+
+    @keyframes shake {
+      0%,100%{transform: translateX(0);} 10%,30%,50%,70%,90%{transform: translateX(-5px);} 20%,40%,60%,80%{transform: translateX(5px);}
     }
-    
-    .btn-secondary {
-      background-color: var(--tg-theme-secondary-bg-color, #1f2d3c);
-      color: var(--tg-theme-text-color, #ffffff);
+    .shake { animation: shake .6s ease; }
+
+    .toast {
+  position: absolute;                      /* pin to viewport */
+  top: calc(env(safe-area-inset-top, 0px) + 16px);
+  right: 0px;
+  z-index: 100000;                      /* above overlays */
+  pointer-events: none;                 /* don't block drags/clicks */
+  padding: 12px 20px;
+  background: var(--tg-theme-secondary-bg-color,#1f2d3c);
+  color: var(--tg-theme-text-color,#fff);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.2);
+  transform: translateX(120%);          /* off-screen start */
+  opacity: 1;
+  transition: transform .3s ease, opacity .3s ease;
+  will-change: transform, opacity;
+  
+}
+@keyframes slideAndPulse {
+  0% { transform: translateX(120%) scale(1);box-shadow: 0 0 15px rgba(46,166,255,.4);}
+  40% { transform: translateX(0) scale(1);}
+  55% { transform: translateX(0) scale(1.03); }
+  70% { transform: translateX(0) scale(1.01); }
+  85% { transform: translateX(0) scale(1.02);  box-shadow: 0 0 15px rgba(46,166,255,.4);}
+  100% { transform: translateX(0) scale(1); opacity: 1;box-shadow: 0 0 15px rgba(46,166,255,.1)}
+}
+    .toast.show {
+      
+  animation: slideAndPulse .8s ease forwards;
+}
+
+    /* Dragging visual improvements */
+    .answer-item.dragging {
+  position: fixed;
+  width: var(--drag-w, auto);
+  height: var(--drag-h, auto);
+  left: var(--drag-left, 0px);
+  top: var(--drag-top, 0px);
+  margin: 0;
+  opacity: .98;
+  transform: translate3d(0,0,0) scale(1.02);
+  box-shadow: 0 14px 28px rgba(0,0,0,.35);
+  z-index: 1000;
+  pointer-events: none;
+  transition: none !important; /* follow finger instantly */
+}
+.answer-item.drag-placeholder {
+  /* height is set from JS now (no CSS var) */
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  visibility: hidden; 
+}
+    .answer-item.drag-ghost { pointer-events: none; }
+    /* LEFT-side drop indicator */
+    .answer-item.drag-over {
+      box-shadow: inset 4px 0 0 var(--tg-theme-button-color,#2ea6ff);
+      border-color: var(--tg-theme-button-color,#2ea6ff);
     }
+
+    /* Smooth transform-only transition (FLIP) */
+    .answers-list .answer-item { 
+  will-change: transform; 
+}
+    .answers-list.dragging .answer-item:not(.dragging):not(.drag-placeholder) { 
+  pointer-events: none; 
+}
+
+    /* Disable selection helper */
+    .no-select { user-select: none; -webkit-user-select: none; }
+
+    /* Focus Mode overlay */
+    .focus-overlay{
+  position: fixed;
+  align-items: flex-start;
+   inset: 0;
+  display: flex; justify-content: center;
+  padding: 16px;
+  background: rgba(0,0,0,0);
+  backdrop-filter: blur(0);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity .35s ease, backdrop-filter .35s ease, background .35s ease, visibility 0s linear .35s;
+  z-index: 9999;
+}
+body.focus-mode .focus-overlay{
+  opacity: 1; visibility: visible; pointer-events: auto;
+  background: rgba(0,0,0,.35);
+  backdrop-filter: blur(8px);
+  transition: opacity .35s ease, backdrop-filter .35s ease, background .35s ease;
+}
+
+    body.focus-mode #main, body.focus-mode 
+    .focus-shell { width: 100% }
+    .focused-textarea {
+      width: 100%; min-height: 70vh; padding: 16px; font-size: 18px; line-height: 1.5;
+      background: var(--tg-theme-bg-color,#18222d);
+      border: 2px solid var(--tg-theme-button-color,#2ea6ff); border-radius: 16px;
+      outline: none; box-shadow: 0 12px 30px rgba(0,0,0,.45);
+    }
+    .focus-hint { margin-top: 10px; text-align: center; font-size: 13px; color: var(--tg-theme-hint-color,#7b8c9d); }
   </style>
 </head>
 <body>
   <div id="main" class="container">
     <div class="main-content">
       <div class="card">
-        <div class="card-header"></div>
-        
+
         <h2 class="title">
           <i class="title-icon fas fa-edit"></i>
           Edit Question
@@ -283,60 +301,60 @@
 
         <div class="form-group">
           <label class="form-label">Question:</label>
-          <textarea id="questionInput" class="form-textarea" rows="2">What is the process called when free radicals couple to form aporphine alkaloids?</textarea>
+          <textarea id="questionInput" class="form-textarea" rows="2" placeholder="Enter your question here">What is the process called when free radicals couple to form aporphine alkaloids?</textarea>
         </div>
 
         <div class="form-group">
           <label class="form-label">Answers:</label>
           <ul id="answersList" class="answers-list">
-            <li class="answer-item">
-              <span class="answer-number">1</span>
-              <textarea class="answer-input" rows="1">Ortho-para coupling</textarea>
+            <li class="answer-item" style="animation-delay: 0.1s; opacity: 1; transform: translateX(0);">
+              <div class="drag-handle" aria-label="Drag to reorder" title="Drag to reorder">≡</div>
+              <textarea class="answer-input" rows="1" placeholder="Enter answer text">Ortho-para coupling</textarea>
               <div class="answer-actions">
                 <div class="correct-toggle" onclick="setCorrect(this.closest('.answer-item'))">
                   <div class="toggle-handle"></div>
                 </div>
                 <button class="remove-answer" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
-                  <i class="fas fa-trash text-sm"></i>
+                  <i class="fas fa-trash"></i>
                 </button>
               </div>
             </li>
 
-            <li class="answer-item correct">
-              <span class="answer-number">2</span>
-              <textarea class="answer-input" rows="1">Electrostatic binding</textarea>
+            <li class="answer-item correct" style="animation-delay: 0.15s; opacity: 1; transform: translateX(0);">
+              <div class="drag-handle" aria-label="Drag to reorder" title="Drag to reorder">≡</div>
+              <textarea class="answer-input" rows="1" placeholder="Enter answer text">Electrostatic binding</textarea>
               <div class="answer-actions">
                 <div class="correct-toggle active" onclick="setCorrect(this.closest('.answer-item'))">
                   <div class="toggle-handle active"></div>
                 </div>
                 <button class="remove-answer" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
-                  <i class="fas fa-trash text-sm"></i>
+                  <i class="fas fa-trash"></i>
                 </button>
               </div>
             </li>
 
-            <li class="answer-item">
-              <span class="answer-number">3</span>
-              <textarea class="answer-input" rows="1">Redox reaction</textarea>
+            <li class="answer-item" style="animation-delay: 0.2s; opacity: 1; transform: translateX(0);">
+              <div class="drag-handle" aria-label="Drag to reorder" title="Drag to reorder">≡</div>
+              <textarea class="answer-input" rows="1" placeholder="Enter answer text">Redox reaction</textarea>
               <div class="answer-actions">
                 <div class="correct-toggle" onclick="setCorrect(this.closest('.answer-item'))">
                   <div class="toggle-handle"></div>
                 </div>
                 <button class="remove-answer" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
-                  <i class="fas fa-trash text-sm"></i>
+                  <i class="fas fa-trash"></i>
                 </button>
               </div>
             </li>
 
-            <li class="answer-item">
-              <span class="answer-number">4</span>
-              <textarea class="answer-input" rows="1">Radical cyclization</textarea>
+            <li class="answer-item" style="animation-delay: 0.25s; opacity: 1; transform: translateX(0);">
+              <div class="drag-handle" aria-label="Drag to reorder" title="Drag to reorder">≡</div>
+              <textarea class="answer-input" rows="1" placeholder="Enter answer text">Radical cyclization</textarea>
               <div class="answer-actions">
                 <div class="correct-toggle" onclick="setCorrect(this.closest('.answer-item'))">
                   <div class="toggle-handle"></div>
                 </div>
                 <button class="remove-answer" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
-                  <i class="fas fa-trash text-sm"></i>
+                  <i class="fas fa-trash"></i>
                 </button>
               </div>
             </li>
@@ -349,7 +367,7 @@
 
         <div class="form-group">
           <label class="form-label">Explanation:</label>
-          <textarea id="explanationInput" class="form-textarea" rows="2">Aporphine alkaloids arise from ortho- or para-couplings involving free radicals.</textarea>
+          <textarea id="explanationInput" class="form-textarea" rows="2" placeholder="Add explanation for the correct answer">Aporphine alkaloids arise from ortho- or para-couplings involving free radicals.</textarea>
         </div>
       </div>
 
@@ -358,204 +376,670 @@
       </div>
     </div>
   </div>
+
+
+  <div class="toast" id="toast"></div>
+
+  <!-- Focus Mode overlay -->
+  <div class="focus-overlay" id="focusOverlay" aria-hidden="true">
+    <div class="focus-shell">
+      <!-- the active textarea will be moved here temporarily -->
+      <div class="focus-hint">Press <b>Enter</b> to confirm</div>
+    </div>
+  </div>
+
 <input type="hidden" id="secretValue" value="">
 <script>
-// Initialize auto-resize for all textareas
-autosize(document.querySelectorAll('textarea'));
+/* ----------------------- UTILITIES ----------------------- */
+const $ = (q, el=document) => el.querySelector(q);
+const $$ = (q, el=document) => Array.from(el.querySelectorAll(q));
 
-// Variable to track textarea focus state
-let isTextareaFocused = false;
+function getScrollXY() {
+  const doc = document.documentElement;
+  const x = window.scrollX ?? window.pageXOffset ?? doc.scrollLeft ?? 0;
+  const y = window.scrollY ?? window.pageYOffset ?? doc.scrollTop  ?? 0;
 
-// Add event listeners for textarea focus and blur
-document.addEventListener('DOMContentLoaded', function() {
-  // Add focus and blur event listeners to all textareas
-  const textareas = document.querySelectorAll('textarea');
-  textareas.forEach(textarea => {
-    textarea.addEventListener('focus', () => {
-      isTextareaFocused = true;
-      console.log('Textarea focused');
-    });
-    
-    textarea.addEventListener('blur', () => {
-      isTextareaFocused = false;
-      console.log('Textarea blurred');
-    });
-  });
-  
-  // Add click event listener to document to blur focused textarea
-  document.addEventListener('click', function(event) {
-    // Check if a textarea is focused and the click is not on a textarea
-    if (isTextareaFocused && event.target.tagName !== 'TEXTAREA') {
-      // Blur the currently focused element
-      if (document.activeElement && document.activeElement.tagName === 'TEXTAREA') {
-        document.activeElement.blur();
-      }
+  // VisualViewport helps on mobile when the keyboard shifts the viewport
+  const vv = window.visualViewport;
+  const vvX = vv ? vv.pageLeft : x;  // usually equals scrollX
+  const vvY = vv ? vv.pageTop  : y;  // usually equals scrollY
+
+  return { x, y, vvX, vvY };
+}
+(function setupAbsoluteToastPin() {
+  const toast = document.getElementById('toast');
+  if (!toast) return;
+
+  // Ensure absolute positioning
+  toast.style.position = 'absolute';
+  toast.style.right = '16px';
+
+  function update() {
+    const { y, vvY } = getScrollXY();
+    // Prefer visual viewport on mobile to account for keyboard
+    const top = (window.visualViewport ? vvY : y) + 16;
+    toast.style.top = top + 'px';
+  }
+
+  let ticking = false;
+  function onScrollOrResize() {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(() => { ticking = false; update(); });
     }
-  });
-});
+  }
 
-// Set correct answer
-function setCorrect(answerItem) {
-  document.querySelectorAll('.answer-item').forEach(item => {
-    item.classList.remove('correct');
-    const toggle = item.querySelector('.correct-toggle');
-    toggle.classList.remove('active');
-    toggle.querySelector('.toggle-handle').classList.remove('active');
-  });
-  
-  answerItem.classList.add('correct');
-  const toggle = answerItem.querySelector('.correct-toggle');
-  toggle.classList.add('active');
-  toggle.querySelector('.toggle-handle').classList.add('active');
+  // Initial + next frame (covers first paint & autosize changes)
+  update();
+  requestAnimationFrame(update);
+
+  // Track window & visual viewport changes
+  window.addEventListener('scroll', onScrollOrResize, { passive: true });
+  window.addEventListener('resize', onScrollOrResize, { passive: true });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('scroll', onScrollOrResize, { passive: true });
+    window.visualViewport.addEventListener('resize', onScrollOrResize, { passive: true });
+  }
+})();
+function showToast(message, duration = 3000) {
+  let toast = document.getElementById('toast');
+  if (!toast) return;
+
+  // Ensure it's a direct child of <body> (not inside a scrolling/animated container)
+  if (toast.parentNode !== document.body) {
+    document.body.appendChild(toast);
+  }
+
+  toast.textContent = message;
+
+
+  // force reflow so the next add triggers the transition
+  // eslint-disable-next-line no-unused-expressions
+  toast.offsetHeight;
+  toast.classList.add('show');
+  const { y } = getScrollXY();
+  toast.style.position = 'absolute';
+  toast.style.top = (y + 16) + 'px';
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => {
+    toast.classList.remove('show');
+  }, duration);
 }
 
-// Remove answer
-function removeAnswer(answerItem) {
-  // Remove the selected item
-  const items = document.querySelectorAll('.answer-item');
+/* ----------------------- AUTO-RESIZE --------------------- */
+autosize(document.querySelectorAll('textarea'));
 
-  if (items.length == 1) return; 
-  answerItem.remove();
+/* ----------------------- GLOBALS ------------------------- */
+let isTextareaFocused = false;         // used by your viewportClose logic
+let draggingItem = null;
+let pointerIdInUse = null;
+let dragList = null;
+let lastY = 0;
+let itemRects = new Map();
+let dragPlaceholder = null;
+let grabShiftX = 0, grabShiftY = 0;
+let dragStartRect = null;
+let rafScheduled = false;
+let pointerX = 0, pointerY = 0;
+let dragGhost = null;     // the floating clone that follows the finger
+let dragOriginal = null;
+const flipAnimMap = new WeakMap();
 
-  let hasActive = false;
+let focusState = {
+  active: false,
+  textarea: null,
+  placeholder: null, // comment node to restore original position
+};
 
-  items.forEach((item, index) => {
-    // Renumber
-    item.querySelector('.answer-number').textContent = index + 1;
+/* -------------------- FOCUS MODE LOGIC ------------------- */
+/** Move a textarea to the centered overlay; blur background */
+function _rect(el){ const r = el.getBoundingClientRect(); return {left:r.left, top:r.top, width:r.width, height:r.height}; }
+function _flipFromTo(el, from, to, dur=350){
+  const dx = from.left - to.left;
+  const dy = from.top  - to.top;
+  const sx = from.width  / Math.max(1,to.width);
+  const sy = from.height / Math.max(1,to.height);
 
-    // Check for active toggle
-    const handle = item.querySelector('.toggle-handle');
-    if (handle.classList.contains('active')) {
-      hasActive = true;
-    }
+  // set inverse transform first (no transition), then animate to identity
+  el.style.transition = 'none';
+  el.style.transform  = `translate(${dx}px,${dy}px) scale(${sx},${sy})`;
+  // force reflow
+  void el.offsetWidth;
+  el.style.transition = `transform ${dur}ms cubic-bezier(.2,0,.2,1)`;
+  el.style.transform  = 'translate(0,0) scale(1,1)';
+  return new Promise(res=>{
+    const done = () => { el.removeEventListener('transitionend', done); res(); };
+    el.addEventListener('transitionend', done, { once:true });
   });
+}
+function enterFocusMode(textarea){
+  if (focusState.active) return;
+  focusState.active = true;
+  isTextareaFocused = true;
+  document.body.classList.add("noscroll"); 
+  const overlay = document.getElementById('focusOverlay');
+  const shell   = overlay.querySelector('.focus-shell');
 
-  // If none is active, set the first one active
-  if (!hasActive) {
-    const firstHandle = items[0].querySelector('.toggle-handle');
-    if (firstHandle) {
-      firstHandle.classList.add('active');
+  // placeholder keeps layout height
+  const ph = document.createElement('div');
+  ph.style.height = textarea.offsetHeight + 'px';
+  ph.style.margin = ph.style.padding = ph.style.border = '0';
+  textarea.parentNode.insertBefore(ph, textarea.nextSibling);
+
+  focusState.placeholder = ph;
+  focusState.textarea    = textarea;
+
+  const from = _rect(textarea);
+
+  // show overlay (blur anim via CSS)
+  document.body.classList.add('focus-mode');
+  overlay.setAttribute('aria-hidden','false');
+
+  // move same textarea into overlay and give final styles
+  shell.insertBefore(textarea, shell.firstChild);
+  textarea.classList.add('focused-textarea');
+
+  // wait a frame so it lays out at its final place/size, then FLIP
+  requestAnimationFrame(async ()=>{
+    const to = _rect(textarea);
+    await _flipFromTo(textarea, from, to, 350);
+    textarea.focus();
+    textarea.addEventListener('keydown', handleFocusKeydown);
+  });
+}
+/** Exit focus mode and restore textarea to its original spot */
+function exitFocusMode() {
+  if (!focusState.active) return;
+  document.body.classList.remove("noscroll");
+  const { textarea, placeholder } = focusState;
+
+  // Remove key listener
+  textarea.removeEventListener('keydown', handleFocusKeydown);
+
+  // Move textarea back before placeholder, then remove placeholder
+  const parent = placeholder.parentNode;
+  parent.insertBefore(textarea, placeholder);
+  placeholder.remove();
+
+  // Remove focused style & update autosize
+  textarea.classList.remove('focused-textarea');
+  autosize.update(textarea);
+
+  // Hide overlay & un-blur
+  const overlay = document.getElementById('focusOverlay');
+  overlay.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('focus-mode');
+
+  focusState = { active:false, textarea:null, placeholder:null };
+  // Keep your viewport logic happy
+  isTextareaFocused = false;
+}
+function handleFocusKeydown(e) {
+  // Confirm with Enter/Return
+  if (e.key === 'Enter') {
+    e.preventDefault(); // don't insert newline
+    exitFocusMode();
+    showToast('Text updated');
+  }
+  // (Optional) allow Esc to cancel as well
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    exitFocusMode();
+  }
+}
+// Click outside to exit
+document.getElementById('focusOverlay').addEventListener('click', (e) => {
+  if (e.target.id === 'focusOverlay') {
+    exitFocusMode();
+  }
+});
+
+/* Make every textarea open Focus Mode on focus/tap */
+document.addEventListener('focusin', (e) => {
+  const t = e.target;
+  if (t && t.tagName === 'TEXTAREA') {
+    // move into center + blur bg
+    enterFocusMode(t);
+  }
+});
+
+/* When clicking anywhere and a (non-focus-mode) textarea had focus, blur it */
+document.addEventListener('click', (event) => {
+  if (document.body.classList.contains('focus-mode')) return; // handled by overlay
+  if (isTextareaFocused && event.target.tagName !== 'TEXTAREA') {
+    if (document.activeElement && document.activeElement.tagName === 'TEXTAREA') {
+      document.activeElement.blur();
     }
+  }
+});
+
+/* ------------------ DRAG & DROP (pointer) — upgraded ---------------- */
+/**
+ * Improvements:
+ * - FLIP animation for items that shift when reordering.
+ * - Better hit-testing so you can drop at the very top.
+ * - Auto-scroll when dragging near the edges on mobile.
+ */
+function attachDragHandle(handle) {
+  handle.addEventListener('pointerdown', onPointerDown);
+  // Prevent native drag image / text selection
+  handle.addEventListener('dragstart', (e) => e.preventDefault());
+}
+
+function snapshotRects(container) {
+  const map = new Map();
+  container.querySelectorAll('.answer-item').forEach(el => {
+    map.set(el, el.getBoundingClientRect());
+  });
+  return map;
+}
+
+// REPLACE the whole function
+function animateItemsToNewPositions(prevRects, container) {
+  if (!prevRects) return;
+
+  container.querySelectorAll('.answer-item').forEach(el => {
+    if (el === draggingItem) return;
+    if (el.classList.contains('drag-placeholder')) return;
+
+    const prev = prevRects.get(el);
+    if (!prev) return;
+
+    const now = el.getBoundingClientRect();
+    const dx = prev.left - now.left;
+    const dy = prev.top  - now.top;
+    if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return;
+
+    // Cancel any in-flight animation on this element
+    const existing = flipAnimMap.get(el);
+    if (existing) existing.cancel();
+
+    // Set invert transform immediately
+    el.style.transform = `translate(${dx}px, ${dy}px)`;
+
+    // Glide back to identity using WAAPI (immune to CSS interruptions)
+    const anim = el.animate(
+      [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'translate(0,0)' }],
+      { duration: 220, easing: 'cubic-bezier(.2,0,0,1)', fill: 'forwards' }
+    );
+    flipAnimMap.set(el, anim);
+
+    anim.onfinish = () => {
+      if (flipAnimMap.get(el) === anim) {
+        el.style.transform = '';
+        flipAnimMap.delete(el);
+      }
+    };
+    anim.oncancel = () => {
+      if (flipAnimMap.get(el) === anim) flipAnimMap.delete(el);
+    };
+  });
+}
+
+
+
+/** Improved hit-testing: returns the element to insert BEFORE */
+// REPLACE the whole function
+function getInsertBefore(container, y) {
+  const els = [...container.querySelectorAll('.answer-item:not(.dragging):not(.drag-placeholder)')];
+  let closest = { offset: Number.NEGATIVE_INFINITY, element: null };
+
+  for (const el of els) {
+    const rect = el.getBoundingClientRect();
+    const offset = y - (rect.top + rect.height / 2);
+    if (offset < 0 && offset > closest.offset) {
+      closest = { offset, element: el };
+    }
+  }
+  return closest.element; // null -> append at end
+}
+
+
+function autoScroll(y) {
+  const margin = 60;
+  const speed = 18; // tweak feel
+  
+  if (y < margin) {
+    window.scrollBy(0, -speed);
+  } else if (window.innerHeight - y < margin) {
+    window.scrollBy(0, speed);
   }
 }
 
-// Add answer
+function onPointerDown(e) {
+  if (e.button !== 0 && e.pointerType === 'mouse') return;
+
+  const item = e.target.closest('.answer-item');
+  if (!item) return;
+
+  dragList       = document.getElementById('answersList');
+  dragOriginal   = item;             // keep reference to the real node
+  pointerIdInUse = e.pointerId;
+
+  // Current pointer and rect
+  const rect = item.getBoundingClientRect();
+  const rootRect = getFixedRootRect(); 
+  pointerX = e.clientX;
+  pointerY = e.clientY;
+  grabShiftX = pointerX - rect.left; // preserve exact grab offset
+  grabShiftY = pointerY - rect.top;
+
+  // 1) Insert a placeholder *immediately* at the same spot (no layout jump)
+  dragPlaceholder = document.createElement('li');
+  dragPlaceholder.className = 'answer-item drag-placeholder';
+  dragPlaceholder.style.padding = '0';
+  dragPlaceholder.style.border = '0';
+  dragPlaceholder.style.background = 'transparent';
+  dragPlaceholder.style.visibility = 'hidden';
+  dragPlaceholder.style.height = `${rect.height}px`;
+  dragList.replaceChild(dragPlaceholder, item); // swap real item -> placeholder
+
+  // 2) Make a floating ghost clone that looks identical to the item
+  const nextLeft = pointerX - rootRect.left - grabShiftX; // <-- CHANGED
+  const nextTop  = pointerY - rootRect.top  - grabShiftY; // <-- CHANGED
+  dragGhost = item.cloneNode(true);
+  dragGhost.classList.add('dragging', 'drag-ghost');
+  dragGhost.style.setProperty('--drag-w', `${rect.width}px`);
+  dragGhost.style.setProperty('--drag-h', `${rect.height}px`);
+  dragGhost.style.setProperty('--drag-left', `${nextLeft}px`);
+  dragGhost.style.setProperty('--drag-top', `${nextTop}px`);
+  document.body.appendChild(dragGhost);
+
+  // Prep list animations
+  itemRects = snapshotRects(dragList);
+  document.body.classList.add('no-select');
+  dragList.classList.add('dragging');
+
+  // RAF loop drive
+  rafScheduled = false;
+
+  window.addEventListener('pointermove', onPointerMove, { passive: false });
+  window.addEventListener('pointerup', onPointerUp, { passive: false });
+  window.addEventListener('pointercancel', onPointerUp, { passive: false });
+
+  e.preventDefault();
+}
+
+
+
+
+
+
+function onPointerMove(e) {
+  if (!dragGhost) return;
+  e.preventDefault();
+  pointerX = e.clientX;
+  pointerY = e.clientY;
+
+  if (!rafScheduled) {
+    rafScheduled = true;
+    requestAnimationFrame(rafDragStep);
+  }
+}
+
+function getFixedRootRect() {
+  // In many webviews, <body> becomes the containing block for position:fixed
+  // when it has transform/filter/animation. Adjust coordinates to that space.
+  return document.body.getBoundingClientRect();
+}
+
+function rafDragStep() {
+  rafScheduled = false;
+  const rootRect = getFixedRootRect();
+  // Move the floating ghost exactly with your finger (keeps grab offset)
+  const nextLeft = pointerX - rootRect.left - grabShiftX; // <-- CHANGED
+  const nextTop  = pointerY - rootRect.top  - grabShiftY; // <-- CHANGED
+  dragGhost.style.setProperty('--drag-left', `${nextLeft}px`);
+  dragGhost.style.setProperty('--drag-top', `${nextTop}px`);
+
+  // Measure BEFORE moving placeholder
+  const prevRects = snapshotRects(dragList);
+
+  // Reposition the placeholder by pointer Y
+  const beforeEl = getInsertBefore(dragList, pointerY);
+  if (beforeEl == null) dragList.appendChild(dragPlaceholder);
+  else dragList.insertBefore(dragPlaceholder, beforeEl);
+
+  // Smoothly glide siblings using your WAAPI FLIP
+  animateItemsToNewPositions(prevRects, dragList);
+
+  autoScroll(pointerY);
+  renumberAnswers();
+}
+
+
+
+
+function onPointerUp() {
+  if (!dragPlaceholder) return;
+
+  // Finish in-flight sibling animations
+  document.querySelectorAll('.answer-item').forEach(el => {
+    const anim = flipAnimMap.get(el);
+    if (anim) { try { anim.finish(); } catch(_) {} flipAnimMap.delete(el); }
+    el.style.transform = '';
+  });
+
+  // Put the original item where the placeholder ended up
+  dragList.replaceChild(dragOriginal, dragPlaceholder);
+  dragPlaceholder = null;
+
+  // Remove the floating ghost
+  if (dragGhost) {
+    dragGhost.remove();
+    dragGhost = null;
+  }
+
+  document.body.classList.remove('no-select');
+  if (dragList) dragList.classList.remove('dragging');
+
+  window.removeEventListener('pointermove', onPointerMove);
+  window.removeEventListener('pointerup', onPointerUp);
+  window.removeEventListener('pointercancel', onPointerUp);
+
+  dragOriginal = null;
+  dragList = null;
+
+  showToast('Answers reordered');
+}
+
+
+
+
+
+// Initialize DnD on existing handles
+function initDragAndDrop() {
+  $$('.drag-handle').forEach(attachDragHandle);
+  // Make textareas non-draggable by browser
+  $$('textarea').forEach(t => t.setAttribute('draggable', 'false'));
+}
+
+/* ---------------- ANSWERS HELPERS ----------------------- */
+function setCorrect(answerItem) {
+  $$('.answer-item').forEach(item => {
+    item.classList.remove('correct');
+    const toggle = item.querySelector('.correct-toggle');
+    if (toggle) {
+      toggle.classList.remove('active');
+      const h = toggle.querySelector('.toggle-handle');
+      h && h.classList.remove('active');
+    }
+  });
+
+  answerItem.classList.add('correct');
+  const toggle = answerItem.querySelector('.correct-toggle');
+  if (toggle) {
+    toggle.classList.add('active');
+    const h = toggle.querySelector('.toggle-handle');
+    h && h.classList.add('active');
+  }
+
+  showToast('Correct answer set!');
+}
+const px = n => Math.max(0, Math.round(n)) + 'px';
+
+// Collapse ONE element from its current (auto) height -> 0
+function collapse(el) {
+  const cs = getComputedStyle(el);
+
+  // lock current layout into pixels (each element has its own height)
+  el.style.height = px(el.getBoundingClientRect().height);
+  el.style.paddingTop = cs.paddingTop;
+  el.style.paddingBottom = cs.paddingBottom;
+  el.style.borderTopWidth = cs.borderTopWidth;
+  el.style.borderBottomWidth = cs.borderBottomWidth;
+  el.style.opacity = '1';
+
+  // reflow, then animate to zero
+  void el.offsetHeight;
+  el.style.height = '0px';
+  el.style.paddingTop = '0px';
+  el.style.paddingBottom = '0px';
+  el.style.borderTopWidth = '0px';
+  el.style.borderBottomWidth = '0px';
+  el.style.opacity = '0';
+}
+
+// Expand ONE element from 0 -> its natural content height
+function expand(el) {
+  // reset height to measure the natural target
+  el.style.removeProperty('height');
+  const target = el.scrollHeight; // THIS is per-element
+  // prepare from-state
+  el.style.opacity = '0';
+  el.style.height = '0px';
+  el.style.paddingTop = '';
+  el.style.paddingBottom = '';
+  el.style.borderTopWidth = '';
+  el.style.borderBottomWidth = '';
+
+  // reflow, then animate up
+  void el.offsetHeight;
+  el.style.height = px(target);
+  el.style.opacity = '1';
+
+  // after the transition, clear inline height so it can be auto again
+  el.addEventListener('transitionend', function te(e){
+    if (e.propertyName === 'height') {
+      el.style.removeProperty('height');
+      el.removeEventListener('transitionend', te);
+    }
+  });
+}
+
+// Helpers to handle lists of elements (each one different size)
+function collapseAll(nodeListOrArray){
+  const els = (nodeListOrArray instanceof Element)
+    ? [nodeListOrArray]     // wrap single element
+    : Array.from(nodeListOrArray); // convert NodeList
+  els.forEach(el => {
+    el.classList.add('collapsible');
+    collapse(el);
+  });
+}
+
+function expandAll(nodeListOrArray){
+  const els = (nodeListOrArray instanceof Element)
+    ? [nodeListOrArray]
+    : Array.from(nodeListOrArray);
+  els.forEach(el => {
+    el.classList.add('collapsible');
+    expand(el);
+  });
+}
+function removeAnswer(answerItem) {
+  if ($$('.answer-item').filter(el => !el.classList.contains('removing')).length <= 1) {
+    answerItem.classList.add('shake');
+    showToast('You need at least one answer!', 2000);
+    setTimeout(() => answerItem.classList.remove('shake'), 600);
+    return;
+  }
+  collapseAll(answerItem);
+  answerItem.classList.add('removing');
+  const correctExists = $('.answer-item.correct');
+  if (correctExists == answerItem){
+    if (correctExists == $$('.answer-item')[0])
+      {setCorrect($$('.answer-item')[1])}
+    else{setCorrect($$('.answer-item')[0])}
+  };
+  showToast('Answer removed');
+  setTimeout(() => {
+    answerItem.remove();
+    renumberAnswers();
+    
+  }, 800);
+}
+function renumberAnswers() {
+  $$('.answer-item').forEach((item, idx) => {
+    item.style.animationDelay = `${0.1 + idx * 0.05}s`;
+  });
+}
 function addAnswer(txt = "") {
   const answersList = document.getElementById('answersList');
-  const newAnswer = document.createElement('li');
-  newAnswer.className = 'answer-item';
-  
-  const answerCount = answersList.children.length + 1;
-  
-  newAnswer.innerHTML = `
-    <span class="answer-number">${answerCount}</span>
-    <textarea class="answer-input" rows="1" placeholder="Enter answer text">${txt}</textarea>
+  const li = document.createElement('li');
+  li.className = 'answer-item new';
+  li.innerHTML = `
+    <div class="drag-handle" aria-label="Drag to reorder" title="Drag to reorder">≡</div>
+    <textarea class="answer-input" rows="1" placeholder="Enter answer text"></textarea>
     <div class="answer-actions">
       <div class="correct-toggle" onclick="setCorrect(this.closest('.answer-item'))">
         <div class="toggle-handle"></div>
       </div>
       <button class="remove-answer" title="Remove answer" onclick="removeAnswer(this.closest('.answer-item'))">
-        <i class="fas fa-trash text-sm"></i>
+        <i class="fas fa-trash"></i>
       </button>
     </div>
   `;
-  
-  answersList.appendChild(newAnswer);
-  autosize(newAnswer.querySelector('textarea'));
-  
-  // Add focus and blur event listeners to the new textarea
-  const newTextarea = newAnswer.querySelector('textarea');
-  newTextarea.addEventListener('focus', () => {
-    isTextareaFocused = true;
-    console.log('Textarea focused');
-  });
-  
-  newTextarea.addEventListener('blur', () => {
-    isTextareaFocused = false;
-    console.log('Textarea blurred');
-  });
-}
+  answersList.appendChild(li);
 
-function removeAllAnswers() {
-  const allAnswers = document.querySelectorAll('.answer-item');
-  allAnswers.forEach(item => item.remove());
-}
+  const ta = li.querySelector('textarea');
+  ta.value = txt;
+  autosize(ta);
 
+  attachDragHandle(li.querySelector('.drag-handle'));
+
+  // Make this textarea open Focus Mode on first focus (handled globally)
+  ta.addEventListener('blur', () => { isTextareaFocused = false; });
+
+  li.classList.remove('new')
+  showToast('New answer added');
+}
+function removeAllAnswers() { $$('.answer-item').forEach(i => i.remove()); }
 function setCorrectByIndex(index) {
-  const allAnswers = document.querySelectorAll('.answer-item');
-  if (index >= 0 && index < allAnswers.length) {
-    setCorrect(allAnswers[index]);
-  } else {
-    console.warn('Invalid index for setCorrectByIndex');
-  }
+  const all = $$('.answer-item');
+  if (index >= 0 && index < all.length) setCorrect(all[index]);
 }
-
 function getCurrentCorrectIndex() {
-  const items = Array.from(document.querySelectorAll('.answer-item'));
-
-  // Try several cues, so it works with your different versions:
-  // 1) toggle data-flag you set earlier
-  // 2) Tailwind class used for the green left border
-  // 3) Translated handle (toggle knob moved)
-  for (let i = 0; i < items.length; i++) {
-    const item   = items[i];
-    const toggle = item.querySelector('.correct-toggle');
-    const knob   = toggle?.querySelector('.toggle-handle');
-
-    const hasDataFlag  = toggle?.dataset?.active === 'true';
-    const hasBorder    = item.classList.contains('border-l-4') || item.classList.contains('border-green-500');
-    const knobMoved    = knob?.classList.contains('translate-x-6') || (knob?.style.transform || '').includes('translateX');
-
-    if (hasDataFlag || hasBorder || knobMoved) return i;
-  }
+  const items = $$('.answer-item');
+  for (let i=0;i<items.length;i++) if (items[i].classList.contains('correct')) return i;
   return -1;
 }
 
-// Gathers all form data from the page and returns an object ready for JSON.stringify
+/* --------------- COLLECT & SAVE HANDLERS ---------------- */
 function collectPayload() {
-  const questionEl    = document.getElementById('questionInput');
-  const explanationEl = document.getElementById('explanationInput');
-
-  const question    = (questionEl?.value ?? '').trim();
-  const explanation = (explanationEl?.value ?? '').trim();
-
-  // Gather answers (skip completely empty ones)
-  const answers = Array.from(document.querySelectorAll('.answer-item .answer-input'))
-    .map(el => (el.value ?? '').trim())
+  const question = ($('#questionInput')?.value || '').trim();
+  const explanation = ($('#explanationInput')?.value || '').trim();
+  const answers = $$('.answer-item .answer-input')
+    .map(el => (el.value || '').trim())
     .filter(txt => txt.length > 0);
 
-  // Map correct index to the filtered answers:
-  // We need to compute it against the visible items, skipping empties consistently.
-  const allItems          = Array.from(document.querySelectorAll('.answer-item'));
-  const originalCorrectIx = getCurrentCorrectIndex();
-
-  // Build a mapping from original indices -> filtered indices
-  
   let correctedIndex = -1;
-  document.querySelectorAll('.answer-item').forEach((item, index) => {
-    const handle = item.querySelector('.toggle-handle');
-    if (handle && handle.classList.contains('active')) {
-      correctedIndex = index;
-    }
+  $$('.answer-item').forEach((item, idx) => {
+    if (item.classList.contains('correct')) correctedIndex = idx;
   });
 
-  return {
-    question,
-    explanation,
-    answers,
-    correct_index: correctedIndex,
-
-
-  };
+  return { question, explanation, answers, correct_index: correctedIndex };
 }
 function buildSSString() {
   const p = collectPayload();
-  // question SS explanation SS ...answers SS correct_index
   const parts = [p.question, p.explanation, ...p.answers, String(p.correct_index)];
   return parts.join('SS');
 }
+
 let dataB = "";
-// Telegram WebApp Integration (if available)
+
+
+/* ------------------- TELEGRAM HOOKS --------------------- */
 window.onload = () => {
   const tg = window.Telegram?.WebApp;
   tg.MainButton.setText("Save & Close");
