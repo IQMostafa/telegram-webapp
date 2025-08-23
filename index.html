@@ -1082,35 +1082,6 @@ window.onload = () => {
   initDragAndDrop();
 };
 </script>
-<script>
-  // This script runs inside your web app
-async function initTg() {
-  if (window.Telegram.WebApp) {
-    const { viewport } = window.Telegram.WebApp;
-    // Initialize the app
-    window.Telegram.WebApp.initDataUnsafe; 
 
-    // First, expand the viewport to full height
-    if (viewport.isAvailable) {
-      await viewport.expand(); 
-    }
-
-    // Then, request full-screen mode for the most immersive experience
-    if (viewport.mount.isAvailable()) {
-  await viewport.mount();
-}
-
-if (viewport.requestFullscreen.isAvailable()) {
-  await viewport.requestFullscreen();
-}
-  }
-}
-
-// Call the initialization function when the page loads
-(async () => {
-  await initTg();
-})();
-
-</script>
 </body>
 </html>
