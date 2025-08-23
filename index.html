@@ -1151,12 +1151,22 @@ window.onload = () => {
     }
   });
 
-  document.addEventListener("visibilitychange", () => {
-  if (document.hidden) {
-    // App has been minimized or switched away
-    Telegram.WebApp.close();
-  }
-});
+  if (tg?.isVersionAtLeast?.('9.0')) {
+    tg.onEvent('deactivated', () => {
+      // user minimized / switched away → close
+      tg.close();
+    });
+    // Optional: observe re-activation
+    tg.onEvent('activated', () => {
+      // app brought to foreground
+      // console.log('activated');
+    });
+  } else {
+    // Fallback for older Telegram clients
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') tg?.close();
+    });
+    window.addEventListener('pagehide', () => tg?.close());}
 
   // Init DnD after DOM is ready
   initDragAndDrop();

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <title>Page Not Found • Telegram Bot</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -29,6 +30,7 @@
             width: 100%;
             text-align: center;
             padding: 40px 30px;
+            padding-top: 12vh;
             background: rgba(18, 31, 43, 0.85);
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
@@ -231,6 +233,26 @@
                 el.style.animationDelay = `${index * 0.5}s`;
             });
         });
-    </script>
+    window.onload = () => {
+  const tg = window.Telegram?.WebApp;
+  tg.MainButton.setText("Close");
+  tg.MainButton.color = "#2ea86d";       // background color (hex or rgb)
+  tg.MainButton.textColor = "#ffffff";   // text color
+  tg.MainButton.show();
+  tg.setHeaderColor('#1f2d3c')
+  tg.setBackgroundColor('#1f2d3c')
+  tg.disableVerticalSwipes()
+  tg.requestFullscreen()
+  tg.disableClosingConfirmation()
+  if (tg) {
+    tg.expand();
+    tg.ready();
+
+  tg.onEvent('mainButtonClicked', () => {
+    tg.close();
+  });}
+
+};
+</script>
 </body>
 </html>
