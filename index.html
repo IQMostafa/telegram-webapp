@@ -1111,7 +1111,6 @@ window.onload = () => {
     const question = parts[0];
     const explanation = parts[1];
     const correctIndex = parseInt(parts[parts.length - 2], 10);
-    const payload = parts[parts.length - 1];
     const answers = parts.slice(2, -2);
 
     // 4) Populate UI (guard functions in case not defined)
@@ -1130,22 +1129,23 @@ window.onload = () => {
     qEl.value = question;
     eEl.value = explanation;
 
-    // 5) Save payload safely
-    let dataB = payload; // use this local, or attach to window if needed:
+    let dataB = parts[parts.length - 1]; // use this local, or attach to window if needed:
     // window.dataB = payload;
+    tg.onEvent('mainButtonClicked', () => {
+    const payloads = buildSSString() + "SS" + dataB;
+    tg.sendData(payloads);
+    tg.close();
+  });
 
   } catch (e) {
     // Fallback to your 404 page
     redirect404();
   }
-  tg.onEvent('mainButtonClicked', () => {
-    const payload = buildSSString() + "SS" + dataB;
-    tg.sendData(payload);
-    tg.close();
-  });
+  
 
   tg.onEvent('fullscreenChanged', () => {
     if (tg.isFullscreen  == false){
+      tg.sendData();
       tg.close();
     }
   });
@@ -1153,6 +1153,7 @@ window.onload = () => {
   if (tg?.isVersionAtLeast?.('9.0')) {
     tg.onEvent('deactivated', () => {
       // user minimized / switched away → close
+      tg.sendData();
       tg.close();
     });
     // Optional: observe re-activation
@@ -1163,9 +1164,9 @@ window.onload = () => {
   } else {
     // Fallback for older Telegram clients
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden') tg?.close();
+      if (document.visibilityState === 'hidden') tg?.close();tg.sendData();
     });
-    window.addEventListener('pagehide', () => tg?.close());}
+    window.addEventListener('pagehide', () => tg?.close());tg.sendData();}
 
   // Init DnD after DOM is ready
   initDragAndDrop();
