@@ -1082,32 +1082,31 @@ window.onload = () => {
   initDragAndDrop();
 };
 </script>
-<script type="module">
-  import { init, isTMA, viewport } from "@tma.js/sdk";
+<script>
+  // This script runs inside your web app
+async function initTg() {
+  if (window.Telegram.WebApp) {
+    const { viewport } = window.Telegram.WebApp;
+    // Initialize the app
+    window.Telegram.WebApp.initDataUnsafe; 
 
-  async function initTg() {
-    if (await isTMA()) {
-      init();
+    // First, expand the viewport to full height
+    if (viewport.isAvailable) {
+      await viewport.expand(); 
+    }
 
-      // Mount viewport if supported
-      if (viewport.mount.isAvailable()) {
-        await viewport.mount();
-      }
-
-      // First expand to full height
-      if (viewport.expand.isAvailable()) {
-        await viewport.expand();
-      }
-
-      // Then request real fullscreen if supported
-      if (viewport.requestFullscreen.isAvailable()) {
-        await viewport.requestFullscreen();
-      }
+    // Then, request full-screen mode for the most immersive experience
+    if (viewport.isAvailable) {
+      await viewport.requestFullscreen();
     }
   }
+}
 
-  // just run it once like the old way
-  initTg();
+// Call the initialization function when the page loads
+(async () => {
+  await initTg();
+})();
+
 </script>
 </body>
 </html>
