@@ -19,7 +19,7 @@
     }
     @keyframes fadeIn { from {opacity:0; transform: translateY(10px);} to {opacity:1; transform: translateY(0);} }
 
-    .container { width: 100%; max-width: 100%; flex: 1; padding-bottom: 80px; }
+    .container { width: 100%; max-width: 100%; flex: 1;padding-top: 10vh; padding-bottom: 80px; }
     .main-content { max-width: 100%; margin: 0 auto; }
 
     .card {
@@ -417,7 +417,7 @@ function getScrollXY() {
   function update() {
     const { y, vvY } = getScrollXY();
     // Prefer visual viewport on mobile to account for keyboard
-    const top = (window.visualViewport ? vvY : y) + 16;
+    const top = (window.visualViewport ? vvY : y) + 100;
     toast.style.top = top + 'px';
   }
 
@@ -459,7 +459,7 @@ function showToast(message, duration = 3000) {
   toast.classList.add('show');
   const { y } = getScrollXY();
   toast.style.position = 'absolute';
-  toast.style.top = (y + 16) + 'px';
+  toast.style.top = (y + 100) + 'px';
   clearTimeout(showToast._t);
   showToast._t = setTimeout(() => {
     toast.classList.remove('show');
