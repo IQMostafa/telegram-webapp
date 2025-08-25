@@ -1068,7 +1068,10 @@ window.onload = () => {
   tg.disableVerticalSwipes()
   tg.requestFullscreen()
   tg.disableClosingConfirmation()
-  if (tg) {
+  if (!tg) {
+    // Not inside Telegram → redirect or block
+    window.location.href = "https://t.me/YourBotUsername"; 
+  } else {
     tg.expand();
     tg.ready();
 
