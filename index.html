@@ -1068,9 +1068,9 @@ window.onload = () => {
   tg.disableVerticalSwipes()
   tg.requestFullscreen()
   tg.disableClosingConfirmation()
+  let wasExpanded = tg.isExpanded;
   if (!tg) {
-    // Not inside Telegram → redirect or block
-    window.location.href = "https://t.me/YourBotUsername"; 
+    window.location.href = "https://iqmostafa.github.io/telegram-webapp/page-not-found"; 
   } else {
     tg.expand();
     tg.ready();
@@ -1086,29 +1086,29 @@ window.onload = () => {
         ExpandedViewportHight = tg.viewportStableHeight;
         return;
       }
-      // don't auto-close while in Focus Mode
       if (tg.viewportHeight < ExpandedViewportHight - 200){
-        if (isTextareaFocused == false && !document.body.classList.contains('focus-mode')) { tg.close() }
+        if (isTextareaFocused == false && !document.body.classList.contains('focus-mode')) {
+          tg.close()
+        }
       }
     };
     tg.onEvent('viewportChanged', onViewport);
   }
+  tg.onEvent("activated", () => {
+    console.log("✅ Mini App restored → closing now");
+    tg.close();
+  });
   const redirect404 = () => location.replace('/telegram-webapp/page-not-found');
   const $ = (s) => document.querySelector(s);
-  // preload data from URL ?data=
   try {
-    // 1) Read ?data=... first; if missing, also check #data=...
     const url = new URL(location.href);
     const fromQuery = url.searchParams.get('data');
     const fromHash = new URLSearchParams(location.hash.replace(/^#/, '')).get('data');
     const dataROW = fromQuery || fromHash;
 
-    // 2) If no data → redirect (don’t wait for an exception)
     if (!dataROW) return redirect404();
 
-    // 3) Split & minimally validate
     const parts = dataROW.split('SS');
-    // Expect: [question, explanation, ...answers..., correctIndex, payload]
     if (parts.length < 5) return redirect404();
 
     const question = parts[0];
@@ -1116,7 +1116,6 @@ window.onload = () => {
     const correctIndex = parseInt(parts[parts.length - 2], 10);
     const answers = parts.slice(2, -2);
 
-    // 4) Populate UI (guard functions in case not defined)
     if (typeof removeAllAnswers === 'function') removeAllAnswers();
     if (Array.isArray(answers) && typeof addAnswer === 'function') {
       answers.forEach((a) => addAnswer(a));
@@ -1141,7 +1140,6 @@ window.onload = () => {
   });
 
   } catch (e) {
-    // Fallback to your 404 page
     redirect404();
   }
   
@@ -1156,22 +1154,14 @@ window.onload = () => {
   if (tg?.isVersionAtLeast?.('9.0')) {
     tg.onEvent('deactivated', () => {
       // user minimized / switched away → close
-      tg.sendData();
       tg.close();
     });
-    // Optional: observe re-activation
-    tg.onEvent('activated', () => {
-      // app brought to foreground
-      // console.log('activated');
-    });
   } else {
-    // Fallback for older Telegram clients
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') tg?.close();tg.sendData();
     });
     window.addEventListener('pagehide', () => tg?.close());tg.sendData();}
 
-  // Init DnD after DOM is ready
   initDragAndDrop();
 };
 </script>
