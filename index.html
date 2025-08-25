@@ -1069,7 +1069,7 @@ window.onload = () => {
   tg.requestFullscreen()
   tg.disableClosingConfirmation()
   let wasExpanded = tg.isExpanded;
-  if (!tg) {
+  if (!window.Telegram && window.Telegram.WebApp) {
     window.location.href = "https://iqmostafa.github.io/telegram-webapp/page-not-found"; 
   } else {
     tg.expand();
