@@ -1069,8 +1069,8 @@ window.onload = () => {
   tg.requestFullscreen()
   tg.disableClosingConfirmation()
   let wasExpanded = tg.isExpanded;
-  if (false) {
-     
+  if (!window.Telegram && window.Telegram.WebApp) {
+    location.replace("https://iqmostafa.github.io/telegram-webapp/page-not-found");
   } else {
     tg.expand();
     tg.ready();
@@ -1261,25 +1261,6 @@ window.addEventListener("resize", resizeFonts);
     toast.style.contain = 'layout paint';
   }
 })();
-</script>
-<script>
-  (function enforceTelegramOnly() {
-    const tg2 = window.Telegram && window.Telegram.WebApp;
-
-    // Robust check: must have WebApp + real initData (Telegram fills this)
-    const hasRealInitData = !!(tg2 && (tg2.initData && tg2.initData.length > 0));
-    // Fallback: many Telegram webviews include "Telegram" in UA
-    const uaLooksLikeTelegram = /Telegram/i.test(navigator.userAgent);
-
-    const inTelegram = hasRealInitData || uaLooksLikeTelegram;
-
-    if (!inTelegram) {
-      // block early so the page doesn't "work normally" in browsers
-      document.documentElement.innerHTML = ""; // clear page fast
-      location.replace("https://iqmostafa.github.io/telegram-webapp/page-not-found"); // your bot link
-      return;
-    }
-  })();
 </script>
 </body>
 </html>
