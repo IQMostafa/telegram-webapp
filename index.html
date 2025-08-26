@@ -1069,7 +1069,7 @@ window.onload = () => {
   tg.requestFullscreen()
   tg.disableClosingConfirmation()
   let wasExpanded = tg.isExpanded;
-  if (!window.Telegram && window.Telegram.WebApp) {
+  if (!window.Telegram || window.Telegram.WebApp) {
     location.replace("https://iqmostafa.github.io/telegram-webapp/page-not-found");
   } else {
     tg.expand();
@@ -1107,7 +1107,7 @@ window.onload = () => {
     const dataROW = fromQuery || fromHash;
 
     if (!dataROW) return redirect404();
-
+    let parts = [];
     try{ parts = dataROW.split('SS');}
     catch{redirect404()}
     if (parts.length < 5) return redirect404();
