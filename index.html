@@ -1098,7 +1098,7 @@ window.onload = () => {
     console.log("✅ Mini App restored → closing now");
     tg.close();
   });
-  const redirect404 = () => location.replace('/telegram-webapp/page-not-found');
+  const redirect404 = () => location.replace("https://iqmostafa.github.io/telegram-webapp/page-not-found");
   const $ = (s) => document.querySelector(s);
   try {
     const url = new URL(location.href);
@@ -1108,7 +1108,8 @@ window.onload = () => {
 
     if (!dataROW) return redirect404();
 
-    const parts = dataROW.split('SS');
+    try{ parts = dataROW.split('SS');}
+    catch{redirect404()}
     if (parts.length < 5) return redirect404();
 
     const question = parts[0];
