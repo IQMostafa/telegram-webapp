@@ -834,17 +834,14 @@ window.onload = () => {
     const fromQuery = url.searchParams.get('data');
     const fromHash = new URLSearchParams(location.hash.replace(/^#/, '')).get('data');
     const dataROW = fromQuery || fromHash;
-
-
     const parts = dataROW.split('SS');
-
-
     const name = parts[0];
     const len = parts[1];
 
     EnhancedRangeBar.setTotalPages(Number(len));
     x = Number(len) / 4
     EnhancedRangeBar.setRange(parseInt(x), parseInt(x*3));
+    $('#sectionName').value = name
 
     let dataB = parts[parts.length - 1]; // use this local, or attach to window if needed:
 
@@ -856,7 +853,7 @@ window.onload = () => {
   });
 
   } catch (e) {
-    //redirect404();
+    redirect404();
   }
   
 

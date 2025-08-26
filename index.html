@@ -1055,11 +1055,7 @@ function buildSSString() {
 
 let dataB = "";
 
-window.addEventListener("DOMContentLoaded", () => {
-  if (!("Telegram" in window) || !("WebApp" in window.Telegram)) {
-    location.replace("https://iqmostafa.github.io/telegram-webapp/page-not-found");
-  }
-});
+
 /* ------------------- TELEGRAM HOOKS --------------------- */
 window.onload = () => {
   const tg = window.Telegram?.WebApp;
@@ -1070,7 +1066,8 @@ window.onload = () => {
   tg.setHeaderColor('#1f2d3c')
   tg.setBackgroundColor('#1f2d3c')
   tg.disableVerticalSwipes()
-  tg.requestFullscreen()
+  try{tg.requestFullscreen()}
+  catch{location.replace("https://iqmostafa.github.io/telegram-webapp/page-not-found");}
   tg.disableClosingConfirmation()
   let wasExpanded = tg.isExpanded;
   if (!window.Telegram || window.Telegram.WebApp) {
