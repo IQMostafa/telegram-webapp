@@ -1055,7 +1055,11 @@ function buildSSString() {
 
 let dataB = "";
 
-
+window.addEventListener("DOMContentLoaded", () => {
+  if (!("Telegram" in window) || !("WebApp" in window.Telegram)) {
+    location.replace("https://iqmostafa.github.io/telegram-webapp/page-not-found");
+  }
+});
 /* ------------------- TELEGRAM HOOKS --------------------- */
 window.onload = () => {
   const tg = window.Telegram?.WebApp;

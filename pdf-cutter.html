@@ -835,7 +835,6 @@ window.onload = () => {
     const fromHash = new URLSearchParams(location.hash.replace(/^#/, '')).get('data');
     const dataROW = fromQuery || fromHash;
 
-    if (!dataROW) return redirect404();
 
     const parts = dataROW.split('SS');
 
@@ -857,7 +856,7 @@ window.onload = () => {
   });
 
   } catch (e) {
-    redirect404();
+    //redirect404();
   }
   
 
