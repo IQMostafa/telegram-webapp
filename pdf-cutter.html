@@ -765,13 +765,6 @@ $('#sectionName').addEventListener('input', updateVisuals2);
 
 
 
-// Telegram Mini App integration
-function openTelegramLink(url) {
-  const tg = window.Telegram?.WebApp;
-  if (tg?.openTelegramLink) tg.openTelegramLink(url);
-  else window.open(url, '_blank', 'noopener,noreferrer');
-}
-
 
 function collectPayload() {
   const name = ($('#pageFrom')?.value || '').trim();
@@ -787,6 +780,7 @@ function buildSSString() {
 }
 
 window.onload = () => {
+  EnhancedRangeBar.init();
   const tg = window.Telegram?.WebApp;
   tg.MainButton.setText("Save & Close");
   tg.MainButton.color = "#2ea86d";       // background color (hex or rgb)
@@ -795,7 +789,8 @@ window.onload = () => {
   tg.setHeaderColor('#1f2d3c')
   tg.setBackgroundColor('#1f2d3c')
   tg.disableVerticalSwipes()
-  tg.requestFullscreen()
+  try{tg.requestFullscreen()}
+  catch{location.replace("https://iqmostafa.github.io/telegram-webapp/page-not-found");}
   tg.disableClosingConfirmation()
   let wasExpanded = tg.isExpanded;
   if (!window.Telegram && window.Telegram.WebApp) {
