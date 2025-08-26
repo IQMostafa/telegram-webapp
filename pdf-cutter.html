@@ -137,8 +137,8 @@
       position: absolute;
       top: 50%;
       transform: translate(-50%, -50%);
-      width: 20px;
-      height: 20px;
+      width: 40px;
+      height: 40px;
       background: #fff;
       border-radius: 50%;
       cursor: pointer;
@@ -839,7 +839,7 @@ window.onload = () => {
     $('#sectionName').value = name
 
     let dataB = parts[parts.length - 1]; // use this local, or attach to window if needed:
-
+    updateVisualsFromRange();
     // window.dataB = payload;
     tg.onEvent('mainButtonClicked', () => {
     const payloads = buildSSString() + "SS" + dataB;
