@@ -849,7 +849,7 @@ window.onload = () => {
     const payloads = collectPayload();
     payloads.data = dataB; 
     payloads.type = "cut"; 
-    tg.sendData(JSON.stringify(payload));
+    tg.sendData(JSON.stringify(payloads));
     tg.close();
   });
 
