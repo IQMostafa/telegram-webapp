@@ -767,16 +767,12 @@ $('#sectionName').addEventListener('input', updateVisuals2);
 
 
 function collectPayload() {
-  const name = ($('#sectionName')?.value || '').trim();
-  const from = ($('#pageFrom')?.value || '').trim();
-  const to = ($('#pageTo')?.value || '').trim();
-
-  return { name,from, to};
-}
-function buildSSString() {
-  const p = collectPayload();
-  const parts = [p.name, p.from, p.to];
-  return parts.join('SS');
+  const payload = {
+    name: ($('#sectionName')?.value || '').trim(),
+    from: ($('#pageFrom')?.value || '').trim(),
+    to: ($('#pageTo')?.value || '').trim()
+  };
+  return payload;
 }
 
 window.onload = () => {
@@ -850,8 +846,9 @@ window.onload = () => {
     updateVisualsFromRange();
     // window.dataB = payload;
     tg.onEvent('mainButtonClicked', () => {
-    const payloads = buildSSString() + "SS" + dataB;
-    tg.sendData(payloads);
+    const payloads = collectPayload();
+    payloads.data = dataB; 
+    tg.sendData(JSON.stringify(payload));
     tg.close();
   });
 
