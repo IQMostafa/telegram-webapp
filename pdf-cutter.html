@@ -848,6 +848,7 @@ window.onload = () => {
     tg.onEvent('mainButtonClicked', () => {
     const payloads = collectPayload();
     payloads.data = dataB; 
+    payloads.type = "cut"; 
     tg.sendData(JSON.stringify(payload));
     tg.close();
   });
