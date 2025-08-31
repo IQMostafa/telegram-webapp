@@ -767,7 +767,7 @@ $('#sectionName').addEventListener('input', updateVisuals2);
 
 
 function collectPayload() {
-  const name = ($('#pageFrom')?.value || '').trim();
+  const name = ($('#sectionName')?.value || '').trim();
   const from = ($('#pageFrom')?.value || '').trim();
   const to = ($('#pageTo')?.value || '').trim();
 
@@ -826,19 +826,27 @@ window.onload = () => {
   const $ = (s) => document.querySelector(s);
   try {
     const url = new URL(location.href);
-    const fromQuery = url.searchParams.get('data');
-    const fromHash = new URLSearchParams(location.hash.replace(/^#/, '')).get('data');
-    const dataROW = fromQuery || fromHash;
-    const parts = dataROW.split('SS');
-    const name = parts[0];
-    const len = parts[1];
+
+    const pdf_name = url.searchParams.get('pdf_name');
+    const page_count = url.searchParams.get('page_count');
+    const data = url.searchParams.get('data');
+    
+    const hashParams = new URLSearchParams(location.hash.replace(/^#/, ''));
+    
+    const hashPdfName = hashParams.get('pdf_name');
+    const hashPageCount = hashParams.get('page_count');
+    const hashData = hashParams.get('data');
+
+    const name = pdf_name || hashPdfName;
+    const len = page_count || hashPageCount;
+    const finalData   = data   || hashData;
 
     EnhancedRangeBar.setTotalPages(Number(len));
     x = Number(len) / 4
     EnhancedRangeBar.setRange(parseInt(x), parseInt(x*3));
     $('#sectionName').value = name
 
-    let dataB = parts[parts.length - 1]; // use this local, or attach to window if needed:
+    let dataB = finalData
     updateVisualsFromRange();
     // window.dataB = payload;
     tg.onEvent('mainButtonClicked', () => {
