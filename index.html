@@ -1120,7 +1120,7 @@ window.onload = () => {
       
     // Fallback logic
     const question = question_fromQuery || hash_question;
-    const answers = options_fromQuery.length > 0 ? options_fromQuery : hash_options;
+    const answers = options_fromQuery || hash_options;
     const correctIndex = correct_option_id_fromQuery || hash_correct_option_id;
     const explanation = explanation_fromQuery || hash_explanation;
 
