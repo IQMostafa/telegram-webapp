@@ -1034,9 +1034,9 @@ function getCurrentCorrectIndex() {
 
 /* --------------- COLLECT & SAVE HANDLERS ---------------- */
 function collectPayload() {
-  const question = ($('#questionInput')?.value || '').trim();
-  const explanation = ($('#explanationInput')?.value || '').trim();
-  const answers = $$('.answer-item .answer-input')
+  const _question = ($('#questionInput')?.value || '').trim();
+  const _explanation = ($('#explanationInput')?.value || '').trim();
+  const _answers = $$('.answer-item .answer-input')
     .map(el => (el.value || '').trim())
     .filter(txt => txt.length > 0);
 
@@ -1044,13 +1044,13 @@ function collectPayload() {
   $$('.answer-item').forEach((item, idx) => {
     if (item.classList.contains('correct')) correctedIndex = idx;
   });
-
-  return { question, explanation, answers, correct_index: correctedIndex };
-}
-function buildSSString() {
-  const p = collectPayload();
-  const parts = [p.question, p.explanation, ...p.answers, String(p.correct_index)];
-  return parts.join('SS');
+  const payload = {
+    question: _question,
+    options: _answers,
+    correct_option_id, correct_index: correctedIndex,
+    explanation: _explanation
+  };
+  return payload
 }
 
 let dataB = "";
@@ -1103,20 +1103,25 @@ window.onload = () => {
   const $ = (s) => document.querySelector(s);
   try {
     const url = new URL(location.href);
-    const fromQuery = url.searchParams.get('data');
-    const fromHash = new URLSearchParams(location.hash.replace(/^#/, '')).get('data');
-    const dataROW = fromQuery || fromHash;
 
-    if (!dataROW) return redirect404();
-    let parts = [];
-    try{ parts = dataROW.split('SS');}
-    catch{redirect404()}
-    if (parts.length < 5) return redirect404();
+    const question_id_fromQuery = url.searchParams.get('question_id');
+    const question_fromQuery = url.searchParams.get('question');
+    const options_fromQuery = url.searchParams.get('options');
+    const correct_option_id_fromQuery = url.searchParams.get('correct_option_id');
+    const explanation_fromQuery = url.searchParams.get('explanation');
 
-    const question = parts[0];
-    const explanation = parts[1];
-    const correctIndex = parseInt(parts[parts.length - 2], 10);
-    const answers = parts.slice(2, -2);
+    const hashParams = new URLSearchParams(location.hash.replace(/^#/, ''));
+
+    const hash_question_id_fromQuery = hashParams.get('question_id');
+    const hash_question_fromQuery = hashParams.get('question');
+    const hash_options_fromQuery = hashParams.get('options');
+    const hash_correct_option_id_fromQuery = hashParams.get('correct_option_id');
+    const hash_explanation_fromQuery = hashParams.get('explanation');
+
+    const question = question_fromQuery || hash_question_fromQuery;
+    const answers = options_fromQuery || hash_options_fromQuery;
+    const correctIndex = question_id_fromQuery || hash_correct_option_id_fromQuery;
+    const explanation = explanation_fromQuery || hash_explanation_fromQuery;
 
     if (typeof removeAllAnswers === 'function') removeAllAnswers();
     if (Array.isArray(answers) && typeof addAnswer === 'function') {
@@ -1133,11 +1138,13 @@ window.onload = () => {
     qEl.value = question;
     eEl.value = explanation;
 
-    let dataB = parts[parts.length - 1]; // use this local, or attach to window if needed:
+    let dataB = question_id_fromQuery || hash_question_id_fromQuery;
     // window.dataB = payload;
     tg.onEvent('mainButtonClicked', () => {
-    const payloads = buildSSString() + "SS" + dataB;
-    tg.sendData(payloads);
+    const payloads = collectPayload();
+    payloads.question_id = dataB;
+    payloads.type = "EDIT";
+    tg.sendData(JSON.stringify(payloads));
     tg.close();
   });
 
