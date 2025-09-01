@@ -1047,7 +1047,7 @@ function collectPayload() {
   const payload = {
     question: _question,
     options: _answers,
-    correct_option_id, correct_index: correctedIndex,
+    correct_option_id: correctedIndex,
     explanation: _explanation
   };
   return payload
@@ -1141,13 +1141,11 @@ window.onload = () => {
     let dataB = question_id_fromQuery || hash_question_id;
     // window.dataB = payload;
     tg.onEvent('mainButtonClicked', () => {
-    try{
       const payloads = collectPayload();
       payloads.question_id = dataB;
       payloads.type = "EDIT";
       tg.sendData(JSON.stringify(payloads));
-      tg.close();}
-      catch(e){document.getElementById('main').innerHTML = e}
+      tg.close();
   });
 
   } catch (e) {
