@@ -1106,7 +1106,7 @@ window.onload = () => {
 
     const question_id_fromQuery = url.searchParams.get("question_id");
     const question_fromQuery = url.searchParams.get("question");
-    const options_fromQuery = url.searchParams.get("options").split("-");  
+    const options_fromQuery = JSON.parse(url.searchParams.get("options"));  
     const correct_option_id_fromQuery = url.searchParams.get("correct_option_id");
     const explanation_fromQuery = url.searchParams.get("explanation");
       
@@ -1114,7 +1114,7 @@ window.onload = () => {
     const hashParams = new URLSearchParams(location.hash.substring(1));
     const hash_question_id = hashParams.get("question_id");
     const hash_question = hashParams.get("question");
-    const hash_options = hashParams.get("options").split("-");  
+    const hash_options = JSON.parse(hashParams.get("options"));  
     const hash_correct_option_id = hashParams.get("correct_option_id");
     const hash_explanation = hashParams.get("explanation");
       
