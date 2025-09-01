@@ -1067,11 +1067,11 @@ window.onload = () => {
   tg.setBackgroundColor('#1f2d3c')
   tg.disableVerticalSwipes()
   try{tg.requestFullscreen()}
-  catch{location.replace("https://iqmostafa.github.io/telegram-webapp/page-not-found");}
+  catch{}
   tg.disableClosingConfirmation()
   let wasExpanded = tg.isExpanded;
   if (!window.Telegram || window.Telegram.WebApp) {
-    location.replace("https://iqmostafa.github.io/telegram-webapp/page-not-found");
+    //location.replace("https://iqmostafa.github.io/telegram-webapp/page-not-found");
   } else {
     tg.expand();
     tg.ready();
@@ -1149,7 +1149,7 @@ window.onload = () => {
   });
 
   } catch (e) {
-    redirect404()
+    //redirect404()
   }
   
 
