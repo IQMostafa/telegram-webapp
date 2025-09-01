@@ -1125,12 +1125,10 @@ window.onload = () => {
     const explanation = explanation_fromQuery || hash_explanation;
 
     if (typeof removeAllAnswers === 'function') removeAllAnswers();
-    if (Array.isArray(answers) && typeof addAnswer === 'function') {
-      answers.forEach((a) => addAnswer(a));
-    }
-    if (typeof setCorrectByIndex === 'function' && Number.isInteger(correctIndex)) {
-      setCorrectByIndex(correctIndex);
-    }
+    answers.forEach((a) => addAnswer(a));
+
+    setCorrectByIndex(correctIndex);
+
 
     const qEl = $('#questionInput');
     const eEl = $('#explanationInput');
