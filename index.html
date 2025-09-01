@@ -1104,24 +1104,23 @@ window.onload = () => {
   try {
     const url = new URL(location.href);
 
-    const question_id_fromQuery = url.searchParams.get('question_id');
-    const question_fromQuery = url.searchParams.get('question');
-    const options_fromQuery = url.searchParams.get('options');
-    const correct_option_id_fromQuery = url.searchParams.get('correct_option_id');
-    const explanation_fromQuery = url.searchParams.get('explanation');
-
-    const hashParams = new URLSearchParams(location.hash.replace(/^#/, ''));
-
-    const hash_question_id_fromQuery = hashParams.get('question_id');
-    const hash_question_fromQuery = hashParams.get('question');
-    const hash_options_fromQuery = hashParams.get('options');
-    const hash_correct_option_id_fromQuery = hashParams.get('correct_option_id');
-    const hash_explanation_fromQuery = hashParams.get('explanation');
-
-    const question = question_fromQuery || hash_question_fromQuery;
-    const answers = options_fromQuery || hash_options_fromQuery;
-    const correctIndex = question_id_fromQuery || hash_correct_option_id_fromQuery;
-    const explanation = explanation_fromQuery || hash_explanation_fromQuery;
+    const question_fromQuery = url.searchParams.get("question");
+    const options_fromQuery = url.searchParams.getAll("options");
+    const correct_option_id_fromQuery = url.searchParams.get("correct_option_id");
+    const explanation_fromQuery = url.searchParams.get("explanation");
+      
+    // Hash params
+    const hashParams = new URLSearchParams(location.hash.substring(1));
+    const hash_question = hashParams.get("question");
+    const hash_options = hashParams.getAll("options");
+    const hash_correct_option_id = hashParams.get("correct_option_id");
+    const hash_explanation = hashParams.get("explanation");
+      
+    // Fallback logic
+    const question = question_fromQuery || hash_question;
+    const answers = options_fromQuery.length > 0 ? options_fromQuery : hash_options;
+    const correctIndex = correct_option_id_fromQuery || hash_correct_option_id;
+    const explanation = explanation_fromQuery || hash_explanation;
 
     if (typeof removeAllAnswers === 'function') removeAllAnswers();
     if (Array.isArray(answers) && typeof addAnswer === 'function') {
