@@ -1071,7 +1071,7 @@ window.onload = () => {
   tg.disableClosingConfirmation()
   let wasExpanded = tg.isExpanded;
   if (!window.Telegram || window.Telegram.WebApp) {
-    //location.replace("https://iqmostafa.github.io/telegram-webapp/page-not-found");
+    location.replace("https://iqmostafa.github.io/telegram-webapp/page-not-found");
   } else {
     tg.expand();
     tg.ready();
@@ -1104,6 +1104,7 @@ window.onload = () => {
   try {
     const url = new URL(location.href);
 
+    const question_id_fromQuery = url.searchParams.get("question_id");
     const question_fromQuery = url.searchParams.get("question");
     const options_fromQuery = url.searchParams.getAll("options");
     const correct_option_id_fromQuery = url.searchParams.get("correct_option_id");
@@ -1111,6 +1112,7 @@ window.onload = () => {
       
     // Hash params
     const hashParams = new URLSearchParams(location.hash.substring(1));
+    const hash_question_id = hashParams.get("question_id");
     const hash_question = hashParams.get("question");
     const hash_options = hashParams.getAll("options");
     const hash_correct_option_id = hashParams.get("correct_option_id");
@@ -1136,7 +1138,7 @@ window.onload = () => {
     qEl.value = question;
     eEl.value = explanation;
 
-    let dataB = question_id_fromQuery || hash_question_id_fromQuery;
+    let dataB = question_id_fromQuery || hash_question_id;
     // window.dataB = payload;
     tg.onEvent('mainButtonClicked', () => {
     const payloads = collectPayload();
@@ -1147,7 +1149,7 @@ window.onload = () => {
   });
 
   } catch (e) {
-    document.getElementById('main').innerHTML = e
+    redirect404()
   }
   
 
