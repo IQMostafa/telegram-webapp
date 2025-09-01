@@ -1141,16 +1141,18 @@ window.onload = () => {
     let dataB = question_id_fromQuery || hash_question_id;
     // window.dataB = payload;
     tg.onEvent('mainButtonClicked', () => {
-    const payloads = collectPayload();
-    payloads.question_id = dataB;
-    payloads.type = "EDIT";
-    tg.sendData(JSON.stringify(payloads));
-    tg.close();
+    try{
+      const payloads = collectPayload();
+      payloads.question_id = dataB;
+      payloads.type = "EDIT";
+      tg.sendData(JSON.stringify(payloads));
+      tg.close();}
+      catch(e){document.getElementById('main').innerHTML = e}
   });
 
   } catch (e) {
-    document.getElementById('main').innerHTML = e
-    //redirect404()
+    //
+    redirect404()
   }
   
 
