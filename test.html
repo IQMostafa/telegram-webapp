@@ -22,43 +22,6 @@
     <div><div class="lbl">Parsed initData / initDataUnsafe</div><pre id="parsed"></pre></div>
   </main>
 
-  <script>
-    const $ = id => document.getElementById(id);
-    const setJSON = (id, v) => $(id).textContent = JSON.stringify(v, null, 2);
 
-    function parseHashLaunchParams() {
-      const h = location.hash.startsWith('#') ? location.hash.slice(1) : location.hash;
-      if (!h) return null;
-      const qp = new URLSearchParams(h);
-
-      const tgWebAppData = qp.get('tgWebAppData');
-      if (!tgWebAppData) return null;
-
-
-      const inner = new URLSearchParams(tgWebAppData);
-      const out = { raw: tgWebAppData, fields: {} };
-      for (const [k, v] of inner.entries()) out.fields[k] = v;
-
-
-      if (out.fields.user) {
-        try { out.fields.user = JSON.parse(decodeURIComponent(out.fields.user)); } catch {}
-      }
-
-      out.version  = qp.get('tgWebAppVersion');
-      out.platform = qp.get('tgWebAppPlatform');
-      out.theme    = qp.get('tgWebAppThemeParams') ? JSON.parse(qp.get('tgWebAppThemeParams')) : undefined;
-
-      return out;
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const tg = window.Telegram?.WebApp;
-        const hashData = parseHashLaunchParams();
-        if (hashData) {
-          setJSON('parsed', hashData.fields);
-          return;
-        }
-    });
-  </script>
 </body>
 </html>
