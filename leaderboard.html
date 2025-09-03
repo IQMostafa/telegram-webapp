@@ -28,7 +28,11 @@ html { font-size: calc(100vw / 98); }
   --warning: #ffbf3c;
   --me: rgba(31, 139, 76, 0.3);
   --grid: #1e2b3a;
-
+    --overlay-bg: rgba(10,14,25,0.35);      /* overlay tint */
+    --blur: 10px;                            /* big blur */
+    --card-bg: rgba(255,255,255,0.08);       /* glass card */
+    --card-stroke: rgba(255,255,255,0.18);   /* subtle border */
+    --shadow: 0 10px 40px rgba(0,0,0,0.45);
   /* Winner color variables (unchanged) */
   --w1-card: radial-gradient(ellipse farthest-corner at right bottom, #FEDB37 0%, #FDB931 8%, #9f7928 30%, #8A6E2F 40%, transparent 80%), radial-gradient(ellipse farthest-corner at left top,#FFFFFF 0%, #FFFFAC 8%, #D1B464 25%, #5d4a1f 62.5%, #5d4a1f 100%);
   --w2-card: linear-gradient(to bottom, #cccccc 0%, #a0a0a0 50%, #707070 100%);
@@ -330,13 +334,140 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ width:0; height:0; background:
 .base-2 {
   height: 10rem;
 }
-
-/* Bronze shortest */
-
   </style>
+  <style>
+/* ========= Overlay (uses your palette & blur vars) ========= */
+.loading{
+  position: fixed; inset: 0; z-index: 9999;
+  display: grid; place-items: center;
+  color: var(--txt);
+  background: var(--overlay-bg);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  transition: opacity .35s ease, visibility .35s ease;
+  opacity: 1; visibility: visible;
+  transition: opacity .6s ease, visibility .6s ease;
+  isolation: isolate;
+}
+.loading.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+/* ========= Card (glass + gradient stroke like your cards) ========= */
+.loading .loading-card{
+  --r: 2rem;
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(2rem, 3.6vw, 3.8rem);
+  border-radius: var(--r);
+  position: relative;
+  /* gradient stroke using masked border (mirrors your .card::before idea) */
+  box-shadow: 0 2rem 4rem rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.loading .loading-card::before{
+  content:""; position:absolute; inset:-.12rem; border-radius: calc(var(--r) + .12rem);
+  padding:.12rem;
+  background: linear-gradient(135deg, rgba(46,166,255,.35), rgba(108,92,231,.35));
+  -webkit-mask: 
+    linear-gradient(#000 0 0) content-box, 
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  pointer-events:none;
+}
+/* soft conic bloom like your .card::after */
+.loading .loading-card::after{
+  content:""; position:absolute; inset:-.2rem; border-radius: calc(var(--r) + .2rem);
+  background: conic-gradient(from 0deg, transparent 0 75%, rgba(46,166,255,.25) 85%, transparent 95%);
+  filter: blur(1.4rem); opacity:.25; animation: ld-spin 8s linear infinite;
+}
+
+/* ========= Spinner (premium ring + orbit glow, CSS-only) ========= */
+.loading .spinner{
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  /* dual-tone arc with inner cutout */
+  background:
+    conic-gradient(from 0deg, var(--accent1) 0 28%, rgba(255,255,255,.22) 28% 100%);
+  mask: radial-gradient(farthest-side, transparent 60%, #000 60%);
+  animation: ld-spin .9s linear infinite;
+  filter: drop-shadow(0 .2rem 1rem rgba(0,0,0,.35));
+  position: relative;
+}
+/* orbit halo – echoes your podium glows */
+.loading .spinner::before{
+  content:""; position:absolute; inset:-2.2rem; border-radius:50%;
+  background: conic-gradient(from 0deg,
+    rgba(255,255,255,0) 0 55%,
+    rgba(46,166,255,.28) 60%,
+    rgba(255,255,255,0) 70% 100%);
+  filter: blur(1.2rem);
+  animation: ld-orbit 2.6s linear infinite;
+  opacity:.7;
+}
+/* subtle highlight sweep across the spinner face */
+.loading .spinner::after{
+  content:""; position:absolute; inset:0; border-radius:50%;
+  background:
+    radial-gradient(60% 60% at 30% 30%, rgba(255,255,255,.35), transparent 60%);
+  mix-blend-mode: screen; opacity:.35;
+}
+
+/* ========= Label (gradient text like your .title) ========= */
+.loading .loading-text{
+  direction: rtl; 
+  text-align: right;
+  margin-top: 1.2rem;
+  font: 700 clamp(1.4rem, 2.6vw, 1.8rem)/1.2 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+  letter-spacing:.02rem;
+  display:flex; align-items:baseline; gap:.2rem;
+  text-shadow: none; /* gradient text stays crisp */
+  font-size: 100%;
+  
+}
+/* animated dots (kept from your pattern) */
+.loading .dots::after{
+  content: "";
+  display: flex;
+  margin-right: 20%;
+  width: 1.2em; text-align: left;
+  animation: ld-dots 1.2s steps(4, end) infinite;
+}
+
+/* ========= Hidden state (keep your API) ========= */
+.loading.is-hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+
+/* ========= Reduced motion ========= */
+@media (prefers-reduced-motion: reduce){
+  .loading .spinner{ animation-duration: 2.4s; }
+  .loading, .loading.is-hidden{ transition: none; }
+  .loading .dots{ animation-duration: 2.4s; }
+}
+
+/* ========= Keyframes ========= */
+@keyframes ld-spin { to { transform: rotate(1turn); } }
+@keyframes ld-orbit { to { transform: rotate(-1turn); } }
+@keyframes ld-dots{
+  0%{ content:""; } 25%{ content:"."; }
+  50%{ content:".."; } 75%{ content:"..."; } 100%{ content:""; }
+}
+</style>
 </head>
 <body>
-  <!-- scroll progress --><dev id="main"></dev>
+<dev id="main">
+<div class="loading"  role="status" aria-live="polite" aria-busy="true">
+  <div class="loading-card" aria-label="Loading, please wait">
+    <div class="spinner" aria-hidden="true"></div>
+    <div class="loading-text">
+      <strong>ثواني </strong><span class="dots"></span>
+    </div>
+  </div>
+</div>
+</dev>
+
   <div class="scrollbar" id="scrollbar"></div>
 
 
@@ -753,9 +884,6 @@ function parseHashLaunchParams() {
 }
 
 async function init() {
-  const parsed = parseHashLaunchParams();
-  const out = document.getElementById('main');
-
   // Then load JSON file if provided
   if (parsed.custom.file) {
     try {
@@ -763,8 +891,12 @@ async function init() {
       if (!res.ok) throw new Error("Failed to fetch file");
       const data = await res.json();
       loadLeaderboard(data)
+      const loader = document.querySelector('.loading');
+      loader.classList.add('is-hidden');
+      setTimeout(() => loader.remove(), 600);
     } catch (err) {
       out.textContent += "\n\n❌ " + err.message;
+      
     }
   }
 }
@@ -772,6 +904,7 @@ async function init() {
     window.addEventListener('DOMContentLoaded', () => { 
       init();
     });
+    
   </script>
 </body>
 </html>
