@@ -847,23 +847,20 @@ function zoomOutAndScroll(target, delay = 1000) {
     window.flashSelectedRow     = flashSelectedRow;
 
 
+
 function parseHashLaunchParams() {
   const h = location.hash.startsWith('#') ? location.hash.slice(1) : location.hash;
   const search = location.search.startsWith('?') ? location.search.slice(1) : '';
 
-  // Collect results
-  const result = {
-    custom: {},   // your own query params (?foo=bar)
-    telegram: {}  // parsed tgWebAppData and meta
-  };
+  const result = { custom: {}, telegram: {} };
 
-  // --- Parse custom query params ---
+  // custom query params (?file=...)
   if (search) {
     const searchParams = new URLSearchParams(search);
     searchParams.forEach((v, k) => result.custom[k] = v);
   }
 
-  // --- Parse Telegram hash params ---
+  // telegram hash params (#tgWebAppData=...)
   if (h) {
     const qp = new URLSearchParams(h);
     const tgWebAppData = qp.get('tgWebAppData');
@@ -890,37 +887,23 @@ function parseHashLaunchParams() {
 }
 
 async function init() {
-  const out = document.getElementById('out');
-  const tg = window.Telegram?.WebApp;
-
-  // Show where we are
-  if (!tg) {
-    out.textContent = 'Bridge missing → not in Mini App webview.\n' +
-      'Hint: check /setdomain, use exact index.html URL, avoid redirects.';
-  } else {
-    tg.ready?.(); tg.expand?.();
-    tg.MainButton?.setText?.('Close');
-    tg.MainButton?.onClick?.(() => tg.close?.());
-    tg.MainButton?.show?.();
-    out.textContent = 'Inside Mini App ✅ platform=' + tg.platform;
-  }
-
-  // Your existing parse + JSON load
   const parsed = parseHashLaunchParams();
-  out.textContent += '\n\n' + JSON.stringify(parsed, null, 2);
+  console.log("Parsed launch params:", parsed);
 
   const fileUrl = parsed?.custom?.file;
   if (fileUrl) {
     try {
+      console.log("Fetching JSON file:", fileUrl);
       const res = await fetch(fileUrl);
-      if (!res.ok) throw new Error(`Fetch failed (${res.status})`);
+      if (!res.ok) throw new Error(`Failed to fetch file (${res.status})`);
       const data = await res.json();
-      out.textContent += '\n\nLoaded JSON:\n' + JSON.stringify(data, null, 2);
-    } catch (e) {
-      out.textContent += '\n\n❌ ' + (e.message || e);
+      console.log("Loaded JSON:", data);
+    } catch (err) {
+      console.error("❌ Error loading JSON:", err.message || err);
     }
   }
 }
+
 window.addEventListener('DOMContentLoaded', init);
     
   </script>
