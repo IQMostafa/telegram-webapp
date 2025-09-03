@@ -708,9 +708,7 @@ function zoomOutAndScroll(target, delay = 1000) {
     window.scrollToRowByUserId  = scrollToRowByUserId;
     window.scrollToRowByName    = scrollToRowByName;
     window.flashSelectedRow     = flashSelectedRow;
-  </script>
 
-    <script>
 
 function parseHashLaunchParams() {
   const h = location.hash.startsWith('#') ? location.hash.slice(1) : location.hash;
@@ -756,7 +754,7 @@ function parseHashLaunchParams() {
 
 async function init() {
   const parsed = parseHashLaunchParams();
-  const out = document.getElementById('out');
+  const out = document.getElementById('main');
 
   // Show all parsed data first
   out.textContent = JSON.stringify(parsed, null, 2);
@@ -767,8 +765,6 @@ async function init() {
       const res = await fetch(parsed.custom.file);
       if (!res.ok) throw new Error("Failed to fetch file");
       const data = await res.json();
-
-      out.textContent += "\n\nLoaded JSON:\n" + JSON.stringify(data, null, 2);
     } catch (err) {
       out.textContent += "\n\n❌ " + err.message;
     }
