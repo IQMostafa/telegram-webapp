@@ -930,7 +930,7 @@ async function init() {
         loader.classList.add('is-hidden');
         setTimeout(() => loader.remove(), 600);
       }
-      scrollToRowByUserId(605455767)
+      scrollToRowByUserId(parsed.telegram.fields.user.id)
     } catch (err) {
       console.error("❌ Error loading JSON:", err.message || err);
       
