@@ -709,23 +709,13 @@ function zoomOutAndScroll(target, delay = 1000) {
     window.scrollToRowByName    = scrollToRowByName;
     window.flashSelectedRow     = flashSelectedRow;
   </script>
-  <script>
-    
-      window.onload = () => {
-        try{
-    const tg = window.Telegram?.WebApp;
-      tg.expand();
-      tg.ready();
+<script type="module">
+  import { retrieveLaunchParams } from 'https://cdn.jsdelivr.net/npm/@telegram-apps/sdk/dist/index.js';
 
-      // Raw init data as a string
-      const initData = tg.initData;
+  const { initDataRaw, initData } = retrieveLaunchParams();
 
-      // Parsed init data as an object
-      const initDataUnsafe = tg.initDataUnsafe;
-      document.getElementById('main').innerHTML = `<pre>${esc(JSON.stringify(initDataUnsafe, null, 2))}</pre>`;
-      
-      }catch (e){document.getElementById('main').innerHTML = e}};
-  
-  </script>
+  document.getElementById('main').innerHTML =
+    `<pre>${JSON.stringify({ initDataRaw, initData }, null, 2)}</pre>`;
+</script>
 </body>
 </html>
