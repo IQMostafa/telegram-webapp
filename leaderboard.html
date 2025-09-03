@@ -710,31 +710,33 @@ function zoomOutAndScroll(target, delay = 1000) {
     window.flashSelectedRow     = flashSelectedRow;
   </script>
   <script>
-    window.onload = () => {
-  EnhancedRangeBar.init();
-  const tg = window.Telegram?.WebApp;
-  tg.MainButton.setText("Save & Close");
-  tg.MainButton.color = "#2ea86d";       // background color (hex or rgb)
-  tg.MainButton.textColor = "#ffffff";   // text color
-  tg.MainButton.show();
-  tg.setHeaderColor('#1f2d3c')
-  tg.setBackgroundColor('#1f2d3c')
-  tg.disableVerticalSwipes()
-  tg.requestFullscreen()
-  tg.disableClosingConfirmation()
-  let wasExpanded = tg.isExpanded;
+    try{
+      window.onload = () => {
+    EnhancedRangeBar.init();
+    const tg = window.Telegram?.WebApp;
+    tg.MainButton.setText("Save & Close");
+    tg.MainButton.color = "#2ea86d";       // background color (hex or rgb)
+    tg.MainButton.textColor = "#ffffff";   // text color
+    tg.MainButton.show();
+    tg.setHeaderColor('#1f2d3c')
+    tg.setBackgroundColor('#1f2d3c')
+    tg.disableVerticalSwipes()
+    tg.requestFullscreen()
+    tg.disableClosingConfirmation()
+    let wasExpanded = tg.isExpanded;
 
-    tg.expand();
-    tg.ready();
+      tg.expand();
+      tg.ready();
 
-    // Raw init data as a string
-    const initData = tg.initData;
+      // Raw init data as a string
+      const initData = tg.initData;
 
-    // Parsed init data as an object
-    const initDataUnsafe = tg.initDataUnsafe;
-    document.getElementById('main').innerHTML = initDataUnsafe
-  
-};
+      // Parsed init data as an object
+      const initDataUnsafe = tg.initDataUnsafe;
+      document.getElementById('main').innerHTML = initDataUnsafe
+      
+  };}
+  catch (e){document.getElementById('main').innerHTML = e}
   </script>
 </body>
 </html>
