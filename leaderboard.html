@@ -890,43 +890,38 @@ function parseHashLaunchParams() {
 }
 
 async function init() {
-  // Then load JSON file if provided
+  const out = document.getElementById('out');
   const tg = window.Telegram?.WebApp;
-  tg.MainButton.setText("Save & Close");
-  tg.MainButton.color = "#2ea86d";       // background color (hex or rgb)
-  tg.MainButton.textColor = "#ffffff";   // text color
-  tg.MainButton.show();
-  tg.setHeaderColor('#1f2d3c')
-  tg.setBackgroundColor('#1f2d3c')
-  tg.disableVerticalSwipes()
-  try{tg.requestFullscreen()}
-  catch{location.replace("https://iqmostafa.github.io/telegram-webapp/page-not-found");}
-  tg.disableClosingConfirmation()
-  let wasExpanded = tg.isExpanded;
-  if (!window.Telegram && window.Telegram.WebApp) {
-    location.replace("https://iqmostafa.github.io/telegram-webapp/page-not-found");
+
+  // Show where we are
+  if (!tg) {
+    out.textContent = 'Bridge missing → not in Mini App webview.\n' +
+      'Hint: check /setdomain, use exact index.html URL, avoid redirects.';
+  } else {
+    tg.ready?.(); tg.expand?.();
+    tg.MainButton?.setText?.('Close');
+    tg.MainButton?.onClick?.(() => tg.close?.());
+    tg.MainButton?.show?.();
+    out.textContent = 'Inside Mini App ✅ platform=' + tg.platform;
   }
+
+  // Your existing parse + JSON load
   const parsed = parseHashLaunchParams();
-  if (parsed.custom.file) {
+  out.textContent += '\n\n' + JSON.stringify(parsed, null, 2);
+
+  const fileUrl = parsed?.custom?.file;
+  if (fileUrl) {
     try {
-      const res = await fetch(parsed.custom.file);
-      if (!res.ok) throw new Error("Failed to fetch file");
+      const res = await fetch(fileUrl);
+      if (!res.ok) throw new Error(`Fetch failed (${res.status})`);
       const data = await res.json();
-      loadLeaderboard(data)
-      const loader = document.querySelector('.loading');
-      loader.classList.add('is-hidden');
-      setTimeout(() => loader.remove(), 600);
-      scrollToRowByUserId(parsed.user.id)
-    } catch (err) {
-      out.textContent += "\n\n❌ " + err.message;
-      
+      out.textContent += '\n\nLoaded JSON:\n' + JSON.stringify(data, null, 2);
+    } catch (e) {
+      out.textContent += '\n\n❌ ' + (e.message || e);
     }
   }
 }
-
-    window.addEventListener('DOMContentLoaded', () => { 
-      init();
-    });
+window.addEventListener('DOMContentLoaded', init);
     
   </script>
 </body>
