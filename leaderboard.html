@@ -708,14 +708,33 @@ function zoomOutAndScroll(target, delay = 1000) {
     window.scrollToRowByUserId  = scrollToRowByUserId;
     window.scrollToRowByName    = scrollToRowByName;
     window.flashSelectedRow     = flashSelectedRow;
+window.onload = () => {
+  try {
+    const tg = window.Telegram?.WebApp;
+
+    if (!tg) {
+      document.getElementById('main').innerHTML = "⚠️ Not running inside Telegram.";
+      return;
+    }
+
+    tg.expand?.();
+    tg.ready?.();
+
+    // Raw init data as a string
+    const initData = tg.initData;
+
+    // Parsed init data as an object (convert to string!)
+    const initDataUnsafe = tg.initDataUnsafe;
+
+    document.getElementById('main').innerHTML =
+      `<h3>Raw initData:</h3><pre>${initData}</pre>
+       <h3>Parsed initDataUnsafe:</h3><pre>${JSON.stringify(initDataUnsafe, null, 2)}</pre>`;
+
+  } catch (e) {
+    document.getElementById('main').innerHTML =
+      `<pre style="color:red">${e?.message || e}</pre>`;
+  }
+};
   </script>
-<script type="module">
-  import { retrieveLaunchParams } from 'https://cdn.jsdelivr.net/npm/@telegram-apps/sdk/dist/index.js';
-
-  const { initDataRaw, initData } = retrieveLaunchParams();
-
-  document.getElementById('main').innerHTML =
-    `<pre>${JSON.stringify({ initDataRaw, initData }, null, 2)}</pre>`;
-</script>
 </body>
 </html>
