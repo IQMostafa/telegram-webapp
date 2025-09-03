@@ -762,6 +762,7 @@ async function init() {
       const res = await fetch(parsed.custom.file);
       if (!res.ok) throw new Error("Failed to fetch file");
       const data = await res.json();
+      loadLeaderboard(data)
     } catch (err) {
       out.textContent += "\n\n❌ " + err.message;
     }
