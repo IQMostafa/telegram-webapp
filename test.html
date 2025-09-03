@@ -3,118 +3,99 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Telegram Mini App — Init Data Viewer</title>
+  <title>Telegram Init Data (Bridge + Hash Fallback)</title>
   <style>
-    :root{
-      --bg:#0f1720; --card:#0d1623; --line:#243244; --txt:#e6edf3; --muted:#9fb0c2; --accent:#2ea6ff;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial}
-    header{padding:14px 16px;border-bottom:1px solid var(--line);background:#132233;font-weight:600}
-    main{padding:16px;display:grid;gap:14px;max-width:900px;margin:0 auto}
-    .row{display:grid;gap:8px}
-    .label{font-weight:600;color:var(--muted)}
-    pre{margin:0;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--card);white-space:pre-wrap;word-break:break-word}
-    .pill{display:inline-block;padding:4px 8px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.04)}
-    .actions{display:flex;gap:8px;flex-wrap:wrap}
-    button{padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#152235;color:var(--txt);cursor:pointer}
-    button:hover{background:#162a44}
-    a{color:var(--accent);text-decoration:none}
-    .muted{color:var(--muted)}
+    body{margin:0;background:#0f1720;color:#e6edf3;font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto}
+    header{padding:12px 16px;border-bottom:1px solid #263445;background:#132233;font-weight:600}
+    main{padding:16px;max-width:900px;margin:0 auto;display:grid;gap:12px}
+    .lbl{opacity:.8}
+    pre{margin:0;background:#0d1623;border:1px solid #263445;border-radius:10px;padding:12px;white-space:pre-wrap;word-break:break-word}
+    .pill{display:inline-block;padding:4px 8px;border:1px solid #263445;border-radius:999px;background:rgba(255,255,255,.04)}
   </style>
 </head>
 <body>
-  <header>Telegram Init Data Viewer</header>
+  <header>Telegram Init Data</header>
   <main>
-    <div class="row">
-      <div class="label">Status</div>
-      <div id="status" class="pill">Checking environment…</div>
-    </div>
-
-    <div class="row">
-      <div class="label">Environment</div>
-      <pre id="env">(empty)</pre>
-    </div>
-
-    <div class="row">
-      <div class="label">Raw <code>initData</code></div>
-      <div class="actions">
-        <button id="copyRaw">Copy raw</button>
-      </div>
-      <pre id="raw">(empty)</pre>
-    </div>
-
-    <div class="row">
-      <div class="label">Parsed <code>initDataUnsafe</code></div>
-      <div class="actions">
-        <button id="copyParsed">Copy JSON</button>
-      </div>
-      <pre id="parsed">(empty)</pre>
-    </div>
-
-    <div class="muted">
-      Tip: Open this via an <strong>InlineKeyboardButton</strong> with <code>web_app=WebAppInfo(url)</code> to get real values.
-    </div>
+    <div><span class="lbl">Status:</span> <span id="status" class="pill">…</span></div>
+    <div><div class="lbl">Environment</div><pre id="env"></pre></div>
+    <div><div class="lbl">Raw initData</div><pre id="raw"></pre></div>
+    <div><div class="lbl">Parsed initData / initDataUnsafe</div><pre id="parsed"></pre></div>
   </main>
 
   <script>
-    // Helpers
-    const $ = (id) => document.getElementById(id);
-    const setText = (id, text) => { $(id).textContent = (text ?? '').toString(); };
-    const setJSON = (id, obj) => { $(id).textContent = JSON.stringify(obj, null, 2); };
-    const copy = async (text) => { try { await navigator.clipboard.writeText(text); alert('Copied!'); } catch(_) { alert('Copy failed'); } };
+    const $ = id => document.getElementById(id);
+    const setJSON = (id, v) => $(id).textContent = JSON.stringify(v, null, 2);
+    const setTXT  = (id, v) => $(id).textContent = v ?? '';
+
+    function parseHashLaunchParams() {
+      // Supports URLs like: #tgWebAppData=...&tgWebAppVersion=...&tgWebAppPlatform=...
+      const h = location.hash.startsWith('#') ? location.hash.slice(1) : location.hash;
+      if (!h) return null;
+      const qp = new URLSearchParams(h);
+
+      const tgWebAppData = qp.get('tgWebAppData'); // raw signed string with params
+      if (!tgWebAppData) return null;
+
+      // Parse the inner key=value pairs of tgWebAppData
+      const inner = new URLSearchParams(tgWebAppData);
+      const out = { raw: tgWebAppData, fields: {} };
+      for (const [k, v] of inner.entries()) out.fields[k] = v;
+
+      // Decode the nested user JSON if present
+      if (out.fields.user) {
+        try { out.fields.user = JSON.parse(decodeURIComponent(out.fields.user)); } catch {}
+      }
+      // Attach version/platform if present
+      out.version  = qp.get('tgWebAppVersion');
+      out.platform = qp.get('tgWebAppPlatform');
+      out.theme    = qp.get('tgWebAppThemeParams') ? JSON.parse(qp.get('tgWebAppThemeParams')) : undefined;
+
+      return out;
+    }
 
     window.addEventListener('DOMContentLoaded', () => {
       const tg = window.Telegram?.WebApp;
 
-      // Wire copy buttons
-      $('copyRaw').onclick = () => copy($('raw').textContent);
-      $('copyParsed').onclick = () => copy($('parsed').textContent);
-
       try {
-        if (!tg) {
-          // Not inside Telegram Mini App container
-          $('status').textContent = 'NOT in Telegram Mini App (browser mode)';
+        if (tg) {
+          // Inside Telegram Mini App (JS bridge available)
+          tg.ready?.(); tg.expand?.();
+
+          $('status').textContent = 'INSIDE Telegram Mini App ✅';
           setJSON('env', {
-            where: 'browser',
-            href: location.href,
-            userAgent: navigator.userAgent
+            platform: tg.platform, version: tg.version, colorScheme: tg.colorScheme,
+            isExpanded: tg.isExpanded, viewportStableHeight: tg.viewportStableHeight
           });
-          setText('raw', '');
-          setJSON('parsed', {
-            note: 'Open via Telegram bot inline/reply button with web_app to see real initData.'
-          });
+
+          setTXT('raw', tg.initData || '');
+          setJSON('parsed', tg.initDataUnsafe || {});
           return;
         }
 
-        // Inside Telegram Mini App
-        tg.ready?.();
-        tg.expand?.();
-
-        $('status').textContent = 'INSIDE Telegram Mini App ✅';
-
-        // Show environment info from Telegram
-        setJSON('env', {
-          platform: tg.platform,                 // 'android' | 'ios' | 'tdesktop' | 'macos' | 'web'
-          version: tg.version,
-          colorScheme: tg.colorScheme,
-          isExpanded: tg.isExpanded,
-          viewportStableHeight: tg.viewportStableHeight
-        });
-
-        // Raw + parsed init data
-        setText('raw', tg.initData || '');
-        setJSON('parsed', tg.initDataUnsafe || {});
-
-        // Optional: main button to close
-        if (tg.MainButton) {
-          tg.MainButton.setText('Close');
-          tg.MainButton.onClick(() => tg.close?.());
-          tg.MainButton.show();
+        // No bridge → try hash fallback
+        const hashData = parseHashLaunchParams();
+        if (hashData) {
+          $('status').textContent = 'Browser mode (using tgWebAppData hash) ✅';
+          setJSON('env', {
+            where: 'browser',
+            href: location.href,
+            platform_from_hash: hashData.platform,
+            version_from_hash: hashData.version
+          });
+          setTXT('raw', hashData.raw);
+          setJSON('parsed', hashData.fields);
+          return;
         }
+
+        // Neither Telegram bridge nor hash found
+        $('status').textContent = 'Browser mode (no Telegram data)';
+        setJSON('env', { where: 'browser', href: location.href, userAgent: navigator.userAgent });
+        setTXT('raw', '');
+        setJSON('parsed', { note: 'Open via Telegram web_app button to get real initData.' });
+
       } catch (err) {
-        $('status').textContent = 'Error while initializing';
-        setText('raw', (err && (err.stack || err.message)) || String(err));
+        $('status').textContent = 'Error';
+        setTXT('raw', err?.stack || err?.message || String(err));
       }
     });
   </script>
