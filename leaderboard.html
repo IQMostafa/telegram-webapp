@@ -462,7 +462,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ width:0; height:0; background:
 </head>
 <body>
 <dev id="main">
-<div class="loading"  role="status" aria-live="polite" aria-busy="true">
+<div id="load" class="loading"  role="status" aria-live="polite" aria-busy="true">
   <div class="loading-card" aria-label="Loading, please wait">
     <div class="spinner" aria-hidden="true"></div>
     <div class="loading-text">
@@ -899,9 +899,12 @@ async function init() {
       if (!res.ok) throw new Error("Failed to fetch file");
       const data = await res.json();
       loadLeaderboard(data)
-      document.getElementById('main').innerHTML = "";
-      console.error(parsed);
-      //scrollToRowByUserId(parsed.user.id)
+      const loader = document.querySelector('.loading');
+      if (loader) {
+        loader.classList.add('is-hidden');
+        setTimeout(() => loader.remove(), 600);
+      }
+      scrollToRowByUserId(parsed.telegram.fields.user.id)
     } catch (err) {
       console.error("❌ Error loading JSON:", err.message || err);
       
