@@ -759,7 +759,7 @@ function parseHashLaunchParams() {
       const tg = window.Telegram?.WebApp;
         const hashData = parseHashLaunchParams();
         if (hashData) {
-          document.getElementById('main').innerHTML = hashData;
+          document.getElementById('main').innerHTML = JSON.stringify(hashData, null, 2);;
         }
     });
   </script>
