@@ -899,6 +899,7 @@ async function init() {
       if (!res.ok) throw new Error("Failed to fetch file");
       const data = await res.json();
       loadLeaderboard(data)
+      console.error(parsed.telegram.fields.user.id);
       const loader = document.querySelector('.loading');
       if (loader) {
         loader.classList.add('is-hidden');
