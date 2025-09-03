@@ -885,16 +885,16 @@ function parseHashLaunchParams() {
 
 async function init() {
   // Then load JSON file if provided
-  const res = await fetch(parsed.custom.file);
-  if (res.custom.file) {
+  const parsed = parseHashLaunchParams();
+  if (parsed.custom.file) {
     try {
-      
+      const res = await fetch(parsed.custom.file);
       if (!res.ok) throw new Error("Failed to fetch file");
       const data = await res.json();
       loadLeaderboard(data)
-      const loader = document.querySelector('.loading');
-      loader.classList.add('is-hidden');
-      setTimeout(() => loader.remove(), 600);
+      //const loader = document.querySelector('.loading');
+      //loader.classList.add('is-hidden');
+      //setTimeout(() => loader.remove(), 600);
     } catch (err) {
       out.textContent += "\n\n❌ " + err.message;
       
