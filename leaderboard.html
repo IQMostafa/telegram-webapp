@@ -771,6 +771,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ width:0; height:0; background:
       updateLeaderboard(window._LB_last.rows, window._LB_last.options);
       requestAnimationFrame(()=>flashSelectedRow());
     }
+
 function zoomOutAndScroll(target, delay = 1000) {
   if (!target) return;
 
@@ -899,13 +900,12 @@ async function init() {
       if (!res.ok) throw new Error("Failed to fetch file");
       const data = await res.json();
       loadLeaderboard(data)
-      console.error(parsed.telegram.fields.user.id);
       const loader = document.querySelector('.loading');
       if (loader) {
         loader.classList.add('is-hidden');
         setTimeout(() => loader.remove(), 600);
       }
-      scrollToRowByUserId(parsed.telegram.fields.user.id)
+      scrollToRowByUserId(605455767)
     } catch (err) {
       console.error("❌ Error loading JSON:", err.message || err);
       
