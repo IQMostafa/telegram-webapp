@@ -920,7 +920,8 @@ async function init() {
   const parsed = parseHashLaunchParams();
   if (parsed.custom.file) {
     try {
-      const res = await fetch(parsed.custom.file);
+      const url = `${parsed.custom.file}?t=${Date.now()}`;
+      const res = await fetch(url, { cache: "no-store" });
       if (!res.ok) throw new Error("Failed to fetch file");
       const data = await res.json();
       loadLeaderboard(data)
