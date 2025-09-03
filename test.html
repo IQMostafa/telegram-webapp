@@ -25,27 +25,25 @@
   <script>
     const $ = id => document.getElementById(id);
     const setJSON = (id, v) => $(id).textContent = JSON.stringify(v, null, 2);
-    const setTXT  = (id, v) => $(id).textContent = v ?? '';
 
     function parseHashLaunchParams() {
-      // Supports URLs like: #tgWebAppData=...&tgWebAppVersion=...&tgWebAppPlatform=...
       const h = location.hash.startsWith('#') ? location.hash.slice(1) : location.hash;
       if (!h) return null;
       const qp = new URLSearchParams(h);
 
-      const tgWebAppData = qp.get('tgWebAppData'); // raw signed string with params
+      const tgWebAppData = qp.get('tgWebAppData');
       if (!tgWebAppData) return null;
 
-      // Parse the inner key=value pairs of tgWebAppData
+
       const inner = new URLSearchParams(tgWebAppData);
       const out = { raw: tgWebAppData, fields: {} };
       for (const [k, v] of inner.entries()) out.fields[k] = v;
 
-      // Decode the nested user JSON if present
+
       if (out.fields.user) {
         try { out.fields.user = JSON.parse(decodeURIComponent(out.fields.user)); } catch {}
       }
-      // Attach version/platform if present
+
       out.version  = qp.get('tgWebAppVersion');
       out.platform = qp.get('tgWebAppPlatform');
       out.theme    = qp.get('tgWebAppThemeParams') ? JSON.parse(qp.get('tgWebAppThemeParams')) : undefined;
@@ -55,48 +53,11 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       const tg = window.Telegram?.WebApp;
-
-      try {
-        if (tg) {
-          // Inside Telegram Mini App (JS bridge available)
-          tg.ready?.(); tg.expand?.();
-
-          $('status').textContent = 'INSIDE Telegram Mini App ✅';
-          setJSON('env', {
-            platform: tg.platform, version: tg.version, colorScheme: tg.colorScheme,
-            isExpanded: tg.isExpanded, viewportStableHeight: tg.viewportStableHeight
-          });
-
-          setTXT('raw', tg.initData || '');
-          setJSON('parsed', tg.initDataUnsafe || {});
-          return;
-        }
-
-        // No bridge → try hash fallback
         const hashData = parseHashLaunchParams();
         if (hashData) {
-          $('status').textContent = 'Browser mode (using tgWebAppData hash) ✅';
-          setJSON('env', {
-            where: 'browser',
-            href: location.href,
-            platform_from_hash: hashData.platform,
-            version_from_hash: hashData.version
-          });
-          setTXT('raw', hashData.raw);
           setJSON('parsed', hashData.fields);
           return;
         }
-
-        // Neither Telegram bridge nor hash found
-        $('status').textContent = 'Browser mode (no Telegram data)';
-        setJSON('env', { where: 'browser', href: location.href, userAgent: navigator.userAgent });
-        setTXT('raw', '');
-        setJSON('parsed', { note: 'Open via Telegram web_app button to get real initData.' });
-
-      } catch (err) {
-        $('status').textContent = 'Error';
-        setTXT('raw', err?.stack || err?.message || String(err));
-      }
     });
   </script>
 </body>
