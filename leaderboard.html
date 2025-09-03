@@ -710,8 +710,9 @@ function zoomOutAndScroll(target, delay = 1000) {
     window.flashSelectedRow     = flashSelectedRow;
   </script>
   <script>
-    try{
+    
       window.onload = () => {
+        try{
     const tg = window.Telegram?.WebApp;
       tg.expand();
       tg.ready();
@@ -723,8 +724,8 @@ function zoomOutAndScroll(target, delay = 1000) {
       const initDataUnsafe = tg.initDataUnsafe;
       document.getElementById('main').innerHTML = initDataUnsafe
       
-  };}
-  catch (e){document.getElementById('main').innerHTML = e}
+      }catch (e){document.getElementById('main').innerHTML = e}};
+  
   </script>
 </body>
 </html>
