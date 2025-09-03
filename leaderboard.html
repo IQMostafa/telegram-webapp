@@ -900,7 +900,8 @@ async function init() {
       const data = await res.json();
       loadLeaderboard(data)
       document.getElementById('main').innerHTML = "";
-      scrollToRowByUserId(parsed.user.id)
+      console.error(parsed);
+      //scrollToRowByUserId(parsed.user.id)
     } catch (err) {
       console.error("❌ Error loading JSON:", err.message || err);
       
