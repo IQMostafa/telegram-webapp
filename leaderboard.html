@@ -902,7 +902,7 @@ async function init() {
       document.getElementById('main').innerHTML = "";
       scrollToRowByUserId(parsed.user.id)
     } catch (err) {
-      out.textContent += "\n\n❌ " + err.message;
+      console.error("❌ Error loading JSON:", err.message || err);
       
     }
   }
