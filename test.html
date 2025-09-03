@@ -3,71 +3,118 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Init Data Viewer</title>
+  <title>Telegram Mini App — Init Data Viewer</title>
   <style>
-    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:#0f1720; color:#e6edf3; }
-    header { padding:12px 16px; border-bottom:1px solid #263445; background:#132233; font-weight:600; }
-    main { padding:16px; }
-    pre { white-space:pre-wrap; word-break:break-word; background:#0d1623; border:1px solid #263445; border-radius:10px; padding:12px; margin:0 0 12px; }
-    .muted { opacity:.75; font-size:.95rem; margin-bottom:12px; }
+    :root{
+      --bg:#0f1720; --card:#0d1623; --line:#243244; --txt:#e6edf3; --muted:#9fb0c2; --accent:#2ea6ff;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial}
+    header{padding:14px 16px;border-bottom:1px solid var(--line);background:#132233;font-weight:600}
+    main{padding:16px;display:grid;gap:14px;max-width:900px;margin:0 auto}
+    .row{display:grid;gap:8px}
+    .label{font-weight:600;color:var(--muted)}
+    pre{margin:0;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--card);white-space:pre-wrap;word-break:break-word}
+    .pill{display:inline-block;padding:4px 8px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.04)}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    button{padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#152235;color:var(--txt);cursor:pointer}
+    button:hover{background:#162a44}
+    a{color:var(--accent);text-decoration:none}
+    .muted{color:var(--muted)}
   </style>
 </head>
 <body>
-  <header>Telegram Init Data</header>
+  <header>Telegram Init Data Viewer</header>
   <main>
-    <div class="muted" id="status">Loading…</div>
-    <h3>Raw initData</h3>
-    <pre id="raw">(empty)</pre>
+    <div class="row">
+      <div class="label">Status</div>
+      <div id="status" class="pill">Checking environment…</div>
+    </div>
 
-    <h3>Parsed initDataUnsafe</h3>
-    <pre id="parsed">(empty)</pre>
+    <div class="row">
+      <div class="label">Environment</div>
+      <pre id="env">(empty)</pre>
+    </div>
+
+    <div class="row">
+      <div class="label">Raw <code>initData</code></div>
+      <div class="actions">
+        <button id="copyRaw">Copy raw</button>
+      </div>
+      <pre id="raw">(empty)</pre>
+    </div>
+
+    <div class="row">
+      <div class="label">Parsed <code>initDataUnsafe</code></div>
+      <div class="actions">
+        <button id="copyParsed">Copy JSON</button>
+      </div>
+      <pre id="parsed">(empty)</pre>
+    </div>
+
+    <div class="muted">
+      Tip: Open this via an <strong>InlineKeyboardButton</strong> with <code>web_app=WebAppInfo(url)</code> to get real values.
+    </div>
   </main>
 
   <script>
-    // Small HTML escaper to keep <pre> safe
-    const esc = s => String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+    // Helpers
+    const $ = (id) => document.getElementById(id);
+    const setText = (id, text) => { $(id).textContent = (text ?? '').toString(); };
+    const setJSON = (id, obj) => { $(id).textContent = JSON.stringify(obj, null, 2); };
+    const copy = async (text) => { try { await navigator.clipboard.writeText(text); alert('Copied!'); } catch(_) { alert('Copy failed'); } };
 
     window.addEventListener('DOMContentLoaded', () => {
-      const rawEl = document.getElementById('raw');
-      const parsedEl = document.getElementById('parsed');
-      const statusEl = document.getElementById('status');
-
       const tg = window.Telegram?.WebApp;
+
+      // Wire copy buttons
+      $('copyRaw').onclick = () => copy($('raw').textContent);
+      $('copyParsed').onclick = () => copy($('parsed').textContent);
 
       try {
         if (!tg) {
-          statusEl.textContent = 'Not running inside Telegram — showing mock data.';
-          const mockRaw = '';
-          const mockParsed = {
-            platform: 'browser',
-            note: 'Open this page from a Telegram bot WebApp button to see real initData.'
-          };
-          rawEl.innerHTML = esc(mockRaw);
-          parsedEl.innerHTML = esc(JSON.stringify(mockParsed, null, 2));
+          // Not inside Telegram Mini App container
+          $('status').textContent = 'NOT in Telegram Mini App (browser mode)';
+          setJSON('env', {
+            where: 'browser',
+            href: location.href,
+            userAgent: navigator.userAgent
+          });
+          setText('raw', '');
+          setJSON('parsed', {
+            note: 'Open via Telegram bot inline/reply button with web_app to see real initData.'
+          });
           return;
         }
 
-        // Good practice: signal ready & expand
+        // Inside Telegram Mini App
         tg.ready?.();
         tg.expand?.();
 
-        // Read init data
-        const raw = tg.initData || '';
-        const parsed = tg.initDataUnsafe || {};
+        $('status').textContent = 'INSIDE Telegram Mini App ✅';
 
-        statusEl.textContent = 'Running inside Telegram ✅';
-        rawEl.innerHTML = esc(raw);
-        parsedEl.innerHTML = esc(JSON.stringify(parsed, null, 2));
+        // Show environment info from Telegram
+        setJSON('env', {
+          platform: tg.platform,                 // 'android' | 'ios' | 'tdesktop' | 'macos' | 'web'
+          version: tg.version,
+          colorScheme: tg.colorScheme,
+          isExpanded: tg.isExpanded,
+          viewportStableHeight: tg.viewportStableHeight
+        });
 
-        // Optional: show a main button (nice for testing)
+        // Raw + parsed init data
+        setText('raw', tg.initData || '');
+        setJSON('parsed', tg.initDataUnsafe || {});
+
+        // Optional: main button to close
         if (tg.MainButton) {
-          tg.MainButton.setText('OK, Close');
-          tg.MainButton.onClick(() => tg.close && tg.close());
+          tg.MainButton.setText('Close');
+          tg.MainButton.onClick(() => tg.close?.());
           tg.MainButton.show();
         }
       } catch (err) {
-        statusEl.textContent = 'Error';
-        rawEl.innerHTML = esc(err?.stack || err?.message || String(err));
+        $('status').textContent = 'Error while initializing';
+        setText('raw', (err && (err.stack || err.message)) || String(err));
       }
     });
   </script>
