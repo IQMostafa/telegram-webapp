@@ -847,20 +847,23 @@ function zoomOutAndScroll(target, delay = 1000) {
     window.flashSelectedRow     = flashSelectedRow;
 
 
-
 function parseHashLaunchParams() {
   const h = location.hash.startsWith('#') ? location.hash.slice(1) : location.hash;
   const search = location.search.startsWith('?') ? location.search.slice(1) : '';
 
-  const result = { custom: {}, telegram: {} };
+  // Collect results
+  const result = {
+    custom: {},   // your own query params (?foo=bar)
+    telegram: {}  // parsed tgWebAppData and meta
+  };
 
-  // custom query params (?file=...)
+  // --- Parse custom query params ---
   if (search) {
     const searchParams = new URLSearchParams(search);
     searchParams.forEach((v, k) => result.custom[k] = v);
   }
 
-  // telegram hash params (#tgWebAppData=...)
+  // --- Parse Telegram hash params ---
   if (h) {
     const qp = new URLSearchParams(h);
     const tgWebAppData = qp.get('tgWebAppData');
@@ -887,24 +890,27 @@ function parseHashLaunchParams() {
 }
 
 async function init() {
+  // Then load JSON file if provided
+  
   const parsed = parseHashLaunchParams();
-  console.log("Parsed launch params:", parsed);
-
-  const fileUrl = parsed?.custom?.file;
-  if (fileUrl) {
+  if (parsed.custom.file) {
     try {
-      console.log("Fetching JSON file:", fileUrl);
-      const res = await fetch(fileUrl);
-      if (!res.ok) throw new Error(`Failed to fetch file (${res.status})`);
+      const res = await fetch(parsed.custom.file);
+      if (!res.ok) throw new Error("Failed to fetch file");
       const data = await res.json();
-      console.log("Loaded JSON:", data);
+      loadLeaderboard(data)
+      document.getElementById('main').innerHTML = "";
+      scrollToRowByUserId(parsed.user.id)
     } catch (err) {
-      console.error("❌ Error loading JSON:", err.message || err);
+      out.textContent += "\n\n❌ " + err.message;
+      
     }
   }
 }
 
-window.addEventListener('DOMContentLoaded', init);
+    window.addEventListener('DOMContentLoaded', () => { 
+      init();
+    });
     
   </script>
 </body>
