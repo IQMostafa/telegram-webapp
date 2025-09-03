@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Leaderboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+/* ===== Base (responsive sizing only) ===== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow-x: hidden; overflow-anchor: none; }
+
+/* Make 1rem track viewport width:
+   At 980px width => 1rem ≈ 10px (100vw / 98) */
+html { font-size: calc(100vw / 98); }
+
+:root{
+  --bg: #0f1720;
+  --card: #1a2535;
+  --line: #2a3a4d;
+  --txt: #ffffff;
+  --muted: #a9b6c3;
+  --accent1: #2ea6ff;
+  --accent2: #6c5ce7;
+  --accent3: #ff7b3c;
+  --bar-bg: #0f1720;
+  --good: #2ea86d;
+  --warning: #ffbf3c;
+  --me: rgba(31, 139, 76, 0.3);
+  --grid: #1e2b3a;
+
+  /* Winner color variables (unchanged) */
+  --w1-card: radial-gradient(ellipse farthest-corner at right bottom, #FEDB37 0%, #FDB931 8%, #9f7928 30%, #8A6E2F 40%, transparent 80%), radial-gradient(ellipse farthest-corner at left top,#FFFFFF 0%, #FFFFAC 8%, #D1B464 25%, #5d4a1f 62.5%, #5d4a1f 100%);
+  --w2-card: linear-gradient(to bottom, #cccccc 0%, #a0a0a0 50%, #707070 100%);
+  --w3-card: linear-gradient(135deg, #4a2c14, #a97142, #cfa15a, #a97142, #4a2c14);
+
+  --w1-medal: linear-gradient(135deg,#ffb64c,#ff7b3c);
+  --w2-medal: linear-gradient(135deg,#9ea7b3,#d1d6de);
+  --w3-medal: linear-gradient(135deg,#d7985c,#ad6d2f);
+}
+
+/* subtle dithered noise */
+body::after{
+  content:"";
+  position:fixed; inset:0; pointer-events:none; opacity:.06; mix-blend-mode:soft-light;
+  background-image:
+    url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='0 0.5'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 18rem 18rem;
+}
+
+body{
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background:
+    radial-gradient(122rem 81.6rem at 10% -10%, #213245 0%, transparent 60%),
+    radial-gradient(102rem 71.4rem at 110% 10%, #1b2a3a 0%, transparent 60%),
+    var(--bg);
+  color: var(--txt);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: row;
+  line-height: 1.45;
+  opacity: 0;
+  animation: fadeIn .6s ease forwards;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  font-size: 3rem;
+  -webkit-tap-highlight-color: transparent;
+}
+body::before{
+  content: "";
+  position: fixed; inset: 0; pointer-events: none; opacity: .25;
+  background:
+    linear-gradient(90deg, transparent 3.1rem, var(--grid) 3.2rem, transparent 3.3rem) 0 0/6.4rem 6.4rem,
+    linear-gradient(transparent 3.1rem, var(--grid) 3.2rem, transparent 3.3rem) 0 0/6.4rem 6.4rem;
+  mask: radial-gradient(ellipse at 50% -20%, #000 0, transparent 60%);
+}
+@keyframes fadeIn{ from{opacity:0; transform:translateY(.8rem)} to{opacity:1; transform:translateY(0)} }
+
+/* Container */
+.container{
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 6vh 1.6rem 8.8rem;
+}
+
+/* Scroll progress */
+.scrollbar{
+  position: fixed; top:0; left:0; height:.3rem; width:0%;
+  background: linear-gradient(90deg,var(--accent1),var(--accent2));
+  box-shadow: 0 0 1.2rem rgba(46,166,255,.7);
+  z-index: 9999;
+}
+
+/* Card */
+.card{
+  background-color: var(--card);
+  padding: 2.4rem;
+  margin-bottom: 2.4rem;
+  position: relative; overflow: hidden;
+  transform: translateY(1.6rem);
+  opacity: 0; animation: cardAppear .5s ease forwards .1s;
+  border: .1rem solid var(--line);
+  border-radius: 2rem;
+  box-shadow: 0 2rem 4rem rgba(0, 0, 0, 0.2);
+  isolation: isolate;
+}
+.card::before{
+  content: ""; position: absolute; inset: -.1rem; border-radius: 2rem; padding: .1rem;
+  background: linear-gradient(135deg, rgba(46,166,255,.35), rgba(108,92,231,.35));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+.card::after{
+  content:""; position:absolute; inset:-.2rem;
+  background: conic-gradient(from 0deg, transparent 0 75%, rgba(46,166,255,.25) 85%, transparent 95%);
+  filter: blur(1.4rem); opacity:.25; animation: spin 8s linear infinite;
+  border-radius:2.2rem; pointer-events:none;
+}
+@keyframes spin { to { transform: rotate(360deg);} }
+@keyframes cardAppear{ to{ transform: translateY(0); opacity: 1 } }
+
+/* Title */
+.title{
+  text-align: center;
+  justify-content: space-evenly;
+  font-weight: 800;
+  margin-bottom: 1.6rem;
+  display: flex; align-items: center; gap: 1.2rem;
+  padding-bottom: 1.6rem; border-bottom: .1rem solid var(--line);
+  background: linear-gradient(135deg, var(--accent1), var(--accent3));
+  -webkit-background-clip: text; background-clip: text;
+}
+@keyframes pulse{
+  0% { transform: scale(1); box-shadow: 0 .6rem 1.6rem rgba(46, 166, 255, 0.4); }
+  50% { transform: scale(1.05); box-shadow: 0 .8rem 2.4rem rgba(46, 166, 255, 0.6); }
+  100% { transform: scale(1); box-shadow: 0 .6rem 1.6rem rgba(46, 166, 255, 0.4); }
+}
+
+/* Badges */
+.badges{
+  gap: 1.6rem; margin-bottom: 1.8rem;
+}
+.badge{
+  display: flex; align-items: center; justify-content: center; gap: 1rem;
+  background: rgba(24, 34, 45, 0.8);
+  border: .1rem solid var(--line);
+  padding: 1.2rem 1.6rem; border-radius: 1.6rem;
+  color: #cfe6ff; font-weight: 600;
+  box-shadow: 0 .6rem 1.5rem rgba(0,0,0,.15); backdrop-filter: blur(.4rem);
+  transition: all 0.3s ease;
+}
+.badge.updated{ outline: .1rem solid transparent; animation: flash .9s ease; }
+@keyframes flash{ 0%{outline-color:rgba(46,166,255,0)} 30%{outline-color:rgba(46,166,255,.8)} 100%{outline-color:rgba(46,166,255,0)} }
+
+/* ===== Podium ===== */
+.podium{
+  display: grid; grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 1.6rem; margin-bottom: 2.4rem;
+    align-items: end;
+}
+.podium-card{
+  border: .1rem solid var(--line); border-radius: 1.6rem; padding: 2rem;
+  display: flex; flex-direction: row; align-items: flex-start; gap: 1.2rem;
+  position: relative; overflow: hidden; min-width: 0;
+  box-shadow: 0 1rem 3rem rgba(0,0,0,.2);
+  transition: transform 0.3s ease, box-shadow .3s ease;
+}
+.podium-card::after{
+  content:""; position:absolute; inset:0; pointer-events:none; border-radius:1.6rem;
+  background:
+    radial-gradient(12rem 6rem at 30% -10%, rgba(255,255,255,.45), transparent 60%),
+    radial-gradient(14rem 8rem at 120% 10%, rgba(255,255,255,.25), transparent 60%);
+  mix-blend-mode:soft-light; opacity:.25;
+}
+.podium .gold {background: var(--w1-card); box-shadow: 0 0 3rem rgba(255, 215, 0, 0.3); position:relative; }
+.podium .gold::before{
+  content:""; position:absolute; inset:-.2rem; border-radius:1.8rem;
+  background: conic-gradient(from 0deg, rgba(255,214,90,.55), transparent 20%, transparent 60%, rgba(255,214,90,.4) 80%, transparent 90%);
+  filter: blur(1.6rem); opacity:.45; animation: spin 10s linear infinite;
+}
+.podium .silver { background: var(--w2-card); box-shadow: 0 0 3rem rgba(192, 192, 192, 0.3); }
+.podium .bronze { background: var(--w3-card); box-shadow: 0 0 3rem rgba(205, 127, 50, 0.3); }
+
+.podium-card .rankchip{
+  position: absolute; top: 1.2rem; right: 1.2rem;
+  font-size: 3rem; font-weight: 700; letter-spacing: .03rem;
+  padding: .6rem 1rem; border-radius: 999rem; color: #fff;
+  background: rgba(0,0,0,.25); backdrop-filter: blur(.2rem);
+}
+
+.avatar{
+  width: 100%; height: 100%; border-radius: 1.6rem;
+  display: flex; align-items: center; justify-content: center; color: #fff;
+  font-size: 7.2rem; font-weight: 800; line-height: 1;
+  box-shadow: inset 0 0 0 .2rem rgba(255,255,255,.12), 0 1rem 2rem rgba(0,0,0,.25);
+  text-transform: none; flex: 0 0 auto; backdrop-filter: blur(.4rem);
+  padding: 1rem; padding-bottom: 2rem; position:relative; overflow:hidden;
+}
+.avatar::after{
+  content:""; position:absolute; inset:-40% -40% auto auto; height:200%;
+  width:40%; transform: rotate(25deg) translateX(-120%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+  animation: sweep 3.2s ease-in-out infinite;
+}
+@keyframes sweep{ 0%{ transform: rotate(25deg) translateX(-120%);} 50%{ transform: rotate(25deg) translateX(40%);} 100%{ transform: rotate(25deg) translateX(120%);} }
+
+.podium-meta{ display:flex; flex-direction:column; align-items:center; gap: .6rem; min-width:0; width:100%; }
+.podium-name{ font-weight:700; font-size: 3rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; text-align:center; }
+.podium-score{ font-size: 1.6rem; color:#cfe6ff; display:flex; align-items:center; gap: .5rem; font-weight:600; }
+
+/* ===== Table ===== */
+.table-wrap{
+  overflow: hidden; border-radius: 1.6rem; border: .1rem solid var(--line);
+  background: #152231; box-shadow: 0 1rem 3rem rgba(0,0,0,.15);
+}
+table{ width: 100%; border-collapse: collapse; table-layout: auto; }
+thead th{
+  text-align: center; padding: 1.6rem; font-size: 3rem; color: var(--muted);
+  background: rgba(15, 25, 38, 0.9); position: sticky; top: 0; z-index: 2;
+  backdrop-filter: saturate(180%) blur(1rem); font-weight: 600; letter-spacing: .05rem;
+}
+thead th.time,
+td.time {
+  text-align: center;
+}
+
+
+tbody td{
+  padding: 1.6rem; border-top: .1rem solid rgba(255,255,255,0.04); vertical-align: middle;
+}
+tbody tr{
+  background: rgba(23, 36, 52, 0.7); animation: rowIn .35s ease both; cursor: pointer;
+  transition: all 0.2s ease; position:relative; overflow:hidden;
+}
+tbody tr::after{
+  content:""; position:absolute; inset:auto auto 0 0; height: .2rem; width: 0%;
+  background: linear-gradient(90deg,var(--accent1),var(--accent2)); transition: width .25s ease;
+}
+
+tbody tr:nth-child(odd){ background: rgba(26, 41, 59, 0.7); }
+
+@keyframes rowIn{ from{opacity:0; transform:translateY(.6rem)} to{opacity:1; transform:translateY(0)} }
+tbody tr.me{
+  outline: .2rem solid var(--good); outline-offset: -.2rem;
+  background: linear-gradient(0deg, rgba(31,139,76,0.12), rgba(31,139,76,0.12)), #152b3a;
+  box-shadow: 0 0 1.5rem rgba(46, 168, 109, 0.2);
+}
+
+@keyframes rowFlash {
+  0%{ box-shadow:0 0 0 0 rgba(46,166,255,0.0) inset, 0 0 0 rgba(46,166,255,0.0);}
+  25%{ box-shadow:0 0 0 .3rem rgba(46,166,255,0.7) inset, 0 0 1.8rem rgba(46,166,255,0.5);}
+  50%{ box-shadow:0 0 0 0 rgba(46,166,255,0.0) inset, 0 0 0 rgba(46,166,255,0.0);}
+  75%{ box-shadow:0 0 0 .3rem rgba(108,92,231,0.7) inset, 0 0 1.8rem rgba(108,92,231,0.5);}
+  100%{ box-shadow:0 0 0 0 rgba(46,166,255,0.0) inset, 0 0 0 rgba(46,166,255,0.0);}
+}
+tbody tr.flash { animation: rowFlash 1500ms ease-out 1; }
+
+td.rank{justify-content: center;padding-top: 0px; padding-bottom: 0px; width: 90%;font-weight: 800; display: flex; align-items: center; gap: 1rem; white-space: nowrap; padding-top: 8%;}
+.delta{ font-size: 1.2rem; padding: .4rem .8rem; border-radius: 999rem; font-weight: 700; }
+.delta.up{ background: rgba(46,168,109,.25); color:#79e3ac; }
+.delta.down{ background: rgba(255,99,99,.25); color:#ff9a9a; }
+.delta.same{ background: rgba(200,200,200,.15); color:#cfd8e3; }
+td.name{ font-weight: 600; letter-spacing: .02rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+td.score{width: 25rem; font-variant-numeric: tabular-nums; font-weight: 700; }
+td.time{text-align: center; width: 15rem; font-variant-numeric: tabular-nums; color: #c9d7e6; }
+
+.medal {
+  text-align: center;
+  width: 4.8rem;
+  height: 4.8rem;
+  line-height: 170%;
+  border-radius: 1.6rem;
+}
+.r1{ background: var(--w1-card); box-shadow: 0 0 1.5rem rgba(255, 182, 76, 0.5); }
+.r2{ background: var(--w2-card); box-shadow: 0 0 1.5rem rgba(158, 167, 179, 0.5); }
+.r3{ background: var(--w3-card); box-shadow: 0 0 1.5rem rgba(215, 152, 92, 0.5); }
+
+.scorebar{
+  position: relative; height: 3.2rem; background: var(--bar-bg);
+  border: .1rem solid rgba(255,255,255,.08);
+  border-radius: 1rem; overflow: hidden; box-shadow: inset 0 .2rem .4rem rgba(0,0,0,.2);
+}
+.scorebar .fill{
+  position: absolute; inset: 0 auto 0 0; width: 0%;
+  background: linear-gradient(90deg, var(--accent1), var(--accent2));
+  box-shadow: inset 0 0 2rem rgba(46,166,255,.35);
+  transition: width .6s ease;
+}
+.scorebar .val{
+  position: relative; z-index: 1; display: flex; align-items: center; height: 100%;
+  padding: 0 1.6rem; text-shadow: 0 .1rem .2rem rgba(0,0,0,.4); font-weight: 700; font-size: 2rem;
+}
+
+.footer{
+  padding: 2rem; color: var(--muted); font-size: 1.4rem; text-align: center; margin-top: 3rem;
+  background: rgba(15, 25, 38, 0.5); border-radius: 1.6rem; backdrop-filter: blur(.4rem);
+}
+.contact-link{ color: var(--accent1); text-decoration: none; transition: all 0.2s ease; }
+.contact-link:hover { color: var(--accent2); text-decoration: underline; }
+
+html::-webkit-scrollbar, body::-webkit-scrollbar{ width:0; height:0; background:transparent; }
+@media (prefers-reduced-motion: reduce){ *{ animation: none !important; transition: none !important; } }
+
+.confetti{
+  position: absolute;
+  width: 0.8rem; height: 0.8rem;
+  transform: translate(-50%, -50%);
+  border-radius: .2rem;
+  opacity: 1;
+  will-change: transform, opacity, rotate;
+  animation: confetti-fall linear forwards;
+}
+@keyframes confetti-fall{
+  0%   { transform: translate(var(--x0), var(--y0)) rotate(0turn); opacity: 1; }
+  100% { transform: translate(calc(var(--x0) + var(--dx)), calc(var(--y0) + var(--dy))) rotate(1.5turn); opacity: 0; }
+}
+.podium-base {
+  width: 80%;
+  border-radius: 1rem 1rem 0 0;
+  margin-top: auto;
+}
+
+/* Gold tallest */
+.base-1 {
+  height: 15rem;
+}
+
+/* Silver medium */
+.base-2 {
+  height: 10rem;
+}
+
+/* Bronze shortest */
+
+  </style>
+</head>
+<body>
+  <!-- scroll progress -->
+  <div class="scrollbar" id="scrollbar"></div>
+
+
+  <div class="container" id="main">
+    <div class="card">
+      <h2 class="title", id = 'title'>
+        Leaderboard
+      </h2>
+
+      <div class="badges">
+        <div class="badge" id="badgePlayers" title="Total players shown"><i class="fa-solid fa-users"></i> Students — 0</div>
+      </div>
+
+      <!-- Podium -->
+      <div class="podium" id="podium"></div>
+
+      <div class="table-wrap">
+        <table id="leaderboardTable" aria-label="Leaderboard table">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Player</th>
+              <th scope="col" style="text-align: center;">Score</th>
+              <th scope="col" class="time">Time</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"><!-- rows injected --></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="footer">
+      Leaderboard | MOSTAFA ABBAS FADHIL · contact:
+      <a href="https://t.me/al_kaabi33" class="contact-link" target="_blank" rel="noopener">@al_kaabi33</a>
+    </div>
+  </div>
+
+  <script>
+    /* =========================
+       Public API
+       =========================
+       - loadLeaderboard(source, options?)
+       - setWinnerColors({ first?, second?, third? })
+       - selectByIndex(i)
+       - scrollToRowByIndex(i)
+       - scrollToRowByUserId(userId)
+       - scrollToRowByName(name)
+       - flashSelectedRow()
+       - confettiBurst(x?, y?)  // reimplemented without canvas
+    */
+    const $ = (s, el=document) => el.querySelector(s);
+    const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
+
+    window._LB_last = { rows: [], options: {} };
+    let _selectedKey = null;
+    const rowKey = (row) => row.user_id != null ? `id:${row.user_id}` : `name:${String(row.name||"")}`;
+
+    function setWinnerColors({ first, second, third } = {}) {
+      const root = document.documentElement;
+      if (first)  root.style.setProperty('--w1-card', first);
+      if (second) root.style.setProperty('--w2-card', second);
+      if (third)  root.style.setProperty('--w3-card', third);
+    }
+
+    async function loadLeaderboard(source, options = {}) {
+      let rows = [];
+      if (typeof source === 'string') {
+        const res = await fetch(source, { cache: 'no-store' });
+        rows = await res.json();
+      } else if (Array.isArray(source)) {
+        rows = source;
+      } else {
+        console.warn('loadLeaderboard: source must be URL string or array');
+      }
+      updateLeaderboard(rows, options);
+    }
+
+    function selectByIndex(i = 0) {
+      const data = _computeRanked(window._LB_last.rows, window._LB_last.options);
+      if (data[i]) {
+        _selectedKey = rowKey(data[i]);
+        updateLeaderboard(window._LB_last.rows, window._LB_last.options);
+      }
+    }
+
+    function updateLeaderboard(rows, options = {}) {
+      window._LB_last = { rows, options };
+
+      if (!Array.isArray(rows)) rows = [];
+      const maxRows = Number.isFinite(options.maxRows) ? options.maxRows : 1000;
+      if (options.title) document.title = options.title;
+
+      const data = _computeRanked(rows, options).slice(0, maxRows);
+
+      if (!_selectedKey && data[0]) _selectedKey = rowKey(data[0]);
+
+      const podium = $('#podium'); podium.innerHTML = '';
+      const top3 = data.slice(0,3);
+      const order = [1,0,2];
+      top3.length && order.forEach((idx) => {
+
+        const r = top3[idx]; if (!r) return;
+        const card = document.createElement('div');
+        const tier = r._rank===1 ? 'gold' : r._rank===2 ? 'silver' : 'bronze';
+        card.className = 'podium-card ' + tier;
+        card.setAttribute('title', `#${r._rank} • ${String(r.name||'—')}`);
+        card.innerHTML = `
+  <div class="avatar">${r._rank}  <div class="podium-meta">
+    <div class="podium-name" title="${String(r.name||'—')}">${String(r.name||'—')}</div>
+    
+  </div><div class="podium-base base-${r._rank}"></div></div>
+  <div class="rankchip">#${r._rank}</div>
+`;
+        if (r._rank === 1) card.addEventListener('click', () => confettiBurst());
+        podium.appendChild(card);
+      });
+
+      const tbody = $('#tbody'); tbody.innerHTML = '';
+      const frag = document.createDocumentFragment();
+      const topScore = Math.max(0, ...data.map(r => Number(r.score||0)));
+      const idCounts = new Map();
+      data.forEach((row) => {
+        const key = rowKey(row);
+        const n = idCounts.get(key) || 0;
+        idCounts.set(key, n + 1);
+        const tr = document.createElement('tr');
+        tr.id = `row-${row._rank}-${key}-${n}`.replace(/[^a-z0-9:_-]/gi, '_');
+        if (key === _selectedKey) tr.classList.add('me');
+
+        const tdRank = document.createElement('td');
+        tdRank.className = 'rank';
+        if (row._rank <= 3) {
+          const i = document.createElement('i');
+          i.title = `Rank ${row._rank}`;
+          i.className = `medal r${row._rank} fa-solid ${row._rank===1?'fa-trophy':row._rank===2?'fa-medal':'fa-award'}`;
+          tdRank.appendChild(i);
+        } else {
+          tdRank.textContent = row._rank;
+        }
+        const delta = _deltaBadge(key, row._rank);
+        const deltaSpan = document.createElement('span'); deltaSpan.innerHTML = delta;
+        tdRank.appendChild(deltaSpan);
+
+        const tdName = document.createElement('td');
+        tdName.className = 'name';
+        tdName.textContent = String(row.name ?? '—');
+
+        const tdScore = document.createElement('td');
+        tdScore.className = 'score';
+        const pct = topScore > 0 ? Math.max(0, Math.min(100, (Number(row.score||0)/topScore)*100)) : 0;
+        tdScore.innerHTML = `
+          <div class="scorebar" role="progressbar" aria-valuemin="0" aria-valuemax="${topScore}" aria-valuenow="${Number(row.score||0)}" title="Score ${Number(row.score||0)}">
+            <span class="fill" style="width:${pct}%"></span>
+            <span class="val">${Number(row.score ?? 0).toLocaleString()}</span>
+          </div>
+        `;
+
+        const tdTime = document.createElement('td');
+        tdTime.className = 'time';
+        tdTime.textContent = _fmtTime(row.time);
+
+        tr.append(tdRank, tdName, tdScore, tdTime);
+        tr.dataset.key = key;
+        tr.addEventListener('click', () => {
+          //_selectedKey = key;
+          //updateLeaderboard(window._LB_last.rows, window._LB_last.options);
+        });
+
+        frag.appendChild(tr);
+      });
+      
+      tbody.appendChild(frag);
+
+      $('#badgePlayers').innerHTML = `<i class="fa-solid fa-users"></i> Student — ${data.length}`;
+      const dt = new Date(), hh = String(dt.getHours()).padStart(2,'0'), mm = String(dt.getMinutes()).padStart(2,'0');
+      upd.classList.remove('updated'); void upd.offsetWidth; upd.classList.add('updated');
+    }
+
+    /* ===== Helpers ===== */
+    function _computeRanked(rows){
+      const numericTime = (t) => {
+        if (t == null) return Number.POSITIVE_INFINITY;
+        if (typeof t === 'number') return t > 1000 ? t/1000 : t;
+        if (typeof t === 'string') {
+          const parts = t.split(':').map(Number);
+          if (parts.some(n => Number.isNaN(n))) return Number.POSITIVE_INFINITY;
+          return parts.reverse().reduce((acc, v, i) => acc + v * Math.pow(60, i), 0);
+        }
+        return Number.POSITIVE_INFINITY;
+      };
+      const data = rows.slice().sort((a,b) => {
+        const ds = (b.score||0) - (a.score||0);
+        if (ds !== 0) return ds;
+        const ta = numericTime(a.time), tb = numericTime(b.time);
+        if (ta !== tb) return ta - tb;
+        return String(a.name||'').localeCompare(String(b.name||''));
+      });
+
+      let lastScore = null, lastTime = null, lastRank = 0;
+      data.forEach((r,i) => {
+        const s = r.score ?? 0, t = numericTime(r.time);
+        if (i===0) lastRank = 1;
+        else if (s===lastScore && t===lastTime) { /* tie => same rank */ }
+        else lastRank = i+1;
+        r._rank = lastRank; lastScore = s; lastTime = t;
+        r._rank = i + 1;
+      });
+      return data;
+    }
+
+    window._prevRankByKey = window._prevRankByKey || new Map();
+    function _deltaBadge(key, rankNow){
+      const prev = window._prevRankByKey.get(key);
+      let html = '';
+      if (prev != null) {
+        const diff = prev - rankNow;
+        // (You can re-enable visual delta badges if needed)
+      }
+      window._prevRankByKey.set(key, rankNow);
+      return html;
+    }
+
+    function _fmtTime(t){
+      if (t == null || t === '' || Number.isNaN(t)) return '—';
+      if (typeof t === 'number') {
+        const secs = t > 1000 ? t/1000 : t;
+        const m = Math.floor(secs/60), s = Math.round(secs%60);
+        return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      }
+      if (typeof t === 'string') return t;
+      return '—';
+    }
+    function _nameHue(name){
+      let h=0; const s=String(name||"");
+      for(let i=0;i<s.length;i++) h=(h*31 + s.charCodeAt(i))>>>0;
+      return h%360;
+    }
+
+    /* ===== Scroll progress ===== */
+    const bar = $('#scrollbar');
+    function _onScroll(){
+      const h = document.documentElement;
+      const p = (h.scrollTop) / (h.scrollHeight - h.clientHeight);
+      bar.style.width = (p*100).toFixed(2) + '%';
+    }
+    document.addEventListener('scroll', _onScroll, { passive:true });
+
+    /* ===== Confetti (DOM-based, no canvas) ===== */
+
+    /* ===== Scroll + highlight helpers ===== */
+
+    function flashSelectedRow(ms = 1500){
+      const el = document.querySelector(`tr[data-key="${_selectedKey}"]`);
+      if (!el) return;
+      el.classList.remove('flash');
+      void el.offsetWidth;
+      el.classList.add('flash');
+      el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      setTimeout(()=> el.classList.remove('flash'), ms);
+    }
+
+    function scrollToRowByIndex(i = 0) {
+      const tbody = document.getElementById('tbody');
+      if (!tbody) return;
+
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      if (i < 0 || i >= rows.length) return;
+
+      const target = rows[i];
+
+      const prev = tbody.querySelector('tr.me');
+      if (prev) prev.classList.remove('me');
+      target.classList.add('me');
+
+      if (target.dataset && typeof target.dataset.key !== 'undefined') {
+        _selectedKey = target.dataset.key;
+      }
+
+      target.classList.remove('flash');
+      void target.offsetWidth;
+      target.classList.add('flash');
+
+      setTimeout(() => {
+    target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }, 1000);
+
+      setTimeout(() => target.classList.remove('flash'), 1500);
+    }
+
+    function scrollToRowByUserId(userId){
+      const data = _computeRanked(window._LB_last.rows, window._LB_last.options);
+      const r = data.find(x => x.user_id == userId);
+      if (!r) return;
+      _selectedKey = rowKey(r);
+      updateLeaderboard(window._LB_last.rows, window._LB_last.options);
+      requestAnimationFrame(()=>flashSelectedRow());
+    }
+function zoomOutAndScroll(target, delay = 1000) {
+  if (!target) return;
+
+  // Start zoom out (scale smaller)
+  target.style.transition = "transform 0.3s ease";
+  target.style.transform = "scale(0.9)";
+
+  // After half delay, restore size
+  setTimeout(() => {
+    target.style.transform = "scale(1)";
+  }, delay / 2);
+
+  // After full delay, scroll into view
+  setTimeout(() => {
+    target.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, delay);
+}
+
+    function scrollToRowByName(name) {
+      const tbody = document.getElementById('tbody');
+      if (!tbody) return;
+
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      const target = rows.find(r => {
+        const tdName = r.querySelector('td.name');
+        return tdName && tdName.textContent.trim() === String(name);
+      });
+
+      if (!target) return;
+
+      const prev = tbody.querySelector('tr.me');
+      if (prev) prev.classList.remove('me');
+      target.classList.add('me');
+
+      if (target.dataset && typeof target.dataset.key !== 'undefined') {
+        _selectedKey = target.dataset.key;
+      }
+
+      target.classList.remove('flash');
+      void target.offsetWidth;
+      target.classList.add('flash');
+
+      setTimeout(() => {
+    target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }, 1000);
+
+      setTimeout(() => target.classList.remove('flash'), 1500);
+    }
+
+    /* ===== Demo boot ===== */
+    document.addEventListener('DOMContentLoaded', () => {
+      const demo = [
+        { name:'Ali',     score:97,  time:73,  user_id:111 },
+        { name:'Zain',    score:100, time:95 },
+        { name:'Sara',    score:100, time:88 },
+        { name:'Mustafa', score:85,  time:120 },
+        { name:'Layla',   score:78 }
+      ];
+      loadLeaderboard(demo, { title:'Leaderboard' });
+
+      // Example usage:
+       //scrollToRowByIndex(30);
+      // scrollToRowByUserId(111);
+      //scrollToRowByName('Mustafa');
+    });
+
+    // Expose API globally
+    window.loadLeaderboard      = loadLeaderboard;
+    window.setWinnerColors      = setWinnerColors;
+    window.selectByIndex        = selectByIndex;
+    window.scrollToRowByIndex   = scrollToRowByIndex;
+    window.scrollToRowByUserId  = scrollToRowByUserId;
+    window.scrollToRowByName    = scrollToRowByName;
+    window.flashSelectedRow     = flashSelectedRow;
+  </script>
+  <script>
+    window.onload = () => {
+  EnhancedRangeBar.init();
+  const tg = window.Telegram?.WebApp;
+  tg.MainButton.setText("Save & Close");
+  tg.MainButton.color = "#2ea86d";       // background color (hex or rgb)
+  tg.MainButton.textColor = "#ffffff";   // text color
+  tg.MainButton.show();
+  tg.setHeaderColor('#1f2d3c')
+  tg.setBackgroundColor('#1f2d3c')
+  tg.disableVerticalSwipes()
+  tg.requestFullscreen()
+  tg.disableClosingConfirmation()
+  let wasExpanded = tg.isExpanded;
+  if (!window.Telegram && window.Telegram.WebApp) {
+    location.replace("https://iqmostafa.github.io/telegram-webapp/page-not-found");
+  } else {
+    tg.expand();
+    tg.ready();
+
+    // Raw init data as a string
+    const initData = tg.initData;
+
+    // Parsed init data as an object
+    const initDataUnsafe = tg.initDataUnsafe;
+    document.getElementById('main').innerHTML = initDataUnsafe
+  }
+};
+  </script>
+</body>
+</html>
