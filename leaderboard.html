@@ -723,9 +723,7 @@ function zoomOutAndScroll(target, delay = 1000) {
   tg.requestFullscreen()
   tg.disableClosingConfirmation()
   let wasExpanded = tg.isExpanded;
-  if (!window.Telegram && window.Telegram.WebApp) {
-    location.replace("https://iqmostafa.github.io/telegram-webapp/page-not-found");
-  } else {
+
     tg.expand();
     tg.ready();
 
@@ -735,7 +733,7 @@ function zoomOutAndScroll(target, delay = 1000) {
     // Parsed init data as an object
     const initDataUnsafe = tg.initDataUnsafe;
     document.getElementById('main').innerHTML = initDataUnsafe
-  }
+  
 };
   </script>
 </body>
