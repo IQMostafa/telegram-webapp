@@ -642,6 +642,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ width:0; height:0; background:
       tbody.appendChild(frag);
 
       $('#badgePlayers').innerHTML = `<i class="fa-solid fa-users"></i> Student — ${data.length}`;
+      const upd = document.getElementById('badgePlayers'); 
       const dt = new Date(), hh = String(dt.getHours()).padStart(2,'0'), mm = String(dt.getMinutes()).padStart(2,'0');
       upd.classList.remove('updated'); void upd.offsetWidth; upd.classList.add('updated');
     }
@@ -892,9 +893,9 @@ async function init() {
       if (!res.ok) throw new Error("Failed to fetch file");
       const data = await res.json();
       loadLeaderboard(data)
-      //const loader = document.querySelector('.loading');
-      //loader.classList.add('is-hidden');
-      //setTimeout(() => loader.remove(), 600);
+      const loader = document.querySelector('.loading');
+      loader.classList.add('is-hidden');
+      setTimeout(() => loader.remove(), 600);
     } catch (err) {
       out.textContent += "\n\n❌ " + err.message;
       
