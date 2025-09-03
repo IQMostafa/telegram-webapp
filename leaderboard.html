@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Leaderboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -888,6 +891,21 @@ function parseHashLaunchParams() {
 
 async function init() {
   // Then load JSON file if provided
+  const tg = window.Telegram?.WebApp;
+  tg.MainButton.setText("Save & Close");
+  tg.MainButton.color = "#2ea86d";       // background color (hex or rgb)
+  tg.MainButton.textColor = "#ffffff";   // text color
+  tg.MainButton.show();
+  tg.setHeaderColor('#1f2d3c')
+  tg.setBackgroundColor('#1f2d3c')
+  tg.disableVerticalSwipes()
+  try{tg.requestFullscreen()}
+  catch{location.replace("https://iqmostafa.github.io/telegram-webapp/page-not-found");}
+  tg.disableClosingConfirmation()
+  let wasExpanded = tg.isExpanded;
+  if (!window.Telegram && window.Telegram.WebApp) {
+    location.replace("https://iqmostafa.github.io/telegram-webapp/page-not-found");
+  }
   const parsed = parseHashLaunchParams();
   if (parsed.custom.file) {
     try {
