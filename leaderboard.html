@@ -756,9 +756,6 @@ async function init() {
   const parsed = parseHashLaunchParams();
   const out = document.getElementById('main');
 
-  // Show all parsed data first
-  out.textContent = JSON.stringify(parsed, null, 2);
-
   // Then load JSON file if provided
   if (parsed.custom.file) {
     try {
