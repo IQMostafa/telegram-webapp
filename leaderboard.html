@@ -336,11 +336,11 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ width:0; height:0; background:
   </style>
 </head>
 <body>
-  <!-- scroll progress -->
+  <!-- scroll progress --><dev id="main"></dev>
   <div class="scrollbar" id="scrollbar"></div>
 
 
-  <div class="container" id="main">
+  <div class="container" >
     <div class="card">
       <h2 class="title", id = 'title'>
         Leaderboard
@@ -712,19 +712,7 @@ function zoomOutAndScroll(target, delay = 1000) {
   <script>
     try{
       window.onload = () => {
-    EnhancedRangeBar.init();
     const tg = window.Telegram?.WebApp;
-    tg.MainButton.setText("Save & Close");
-    tg.MainButton.color = "#2ea86d";       // background color (hex or rgb)
-    tg.MainButton.textColor = "#ffffff";   // text color
-    tg.MainButton.show();
-    tg.setHeaderColor('#1f2d3c')
-    tg.setBackgroundColor('#1f2d3c')
-    tg.disableVerticalSwipes()
-    tg.requestFullscreen()
-    tg.disableClosingConfirmation()
-    let wasExpanded = tg.isExpanded;
-
       tg.expand();
       tg.ready();
 
