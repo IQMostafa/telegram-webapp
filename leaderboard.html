@@ -599,6 +599,8 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ width:0; height:0; background:
         const n = idCounts.get(key) || 0;
         idCounts.set(key, n + 1);
         const tr = document.createElement('tr');
+        tr.dataset.key = key;
+        tr.dataset.userId = row.user_id != null ? String(row.user_id) : "";
         tr.id = `row-${row._rank}-${key}-${n}`.replace(/[^a-z0-9:_-]/gi, '_');
         if (key === _selectedKey) tr.classList.add('me');
 
@@ -763,15 +765,37 @@ html::-webkit-scrollbar, body::-webkit-scrollbar{ width:0; height:0; background:
       setTimeout(() => target.classList.remove('flash'), 1500);
     }
 
-    function scrollToRowByUserId(userId){
-      const data = _computeRanked(window._LB_last.rows, window._LB_last.options);
-      const r = data.find(x => x.user_id == userId);
-      if (!r) return;
-      _selectedKey = rowKey(r);
-      updateLeaderboard(window._LB_last.rows, window._LB_last.options);
-      requestAnimationFrame(()=>flashSelectedRow());
-    }
+function scrollToRowByUserId(userId){
+  const tbody = document.getElementById('tbody');
+  if (!tbody) return;
 
+  const sel = `tr[data-user-id="${String(userId)}"]`;
+  let target = tbody.querySelector(sel);
+
+  // if not in DOM (e.g., first render), render once with selection hint
+  if (!target) {
+    _selectedKey = `id:${String(userId)}`;
+    updateLeaderboard(window._LB_last.rows, window._LB_last.options);
+    target = document.querySelector(sel);
+    if (!target) return;
+  }
+
+  const prev = tbody.querySelector('tr.me');
+  if (prev) prev.classList.remove('me');
+  target.classList.add('me');
+
+  _selectedKey = `id:${String(userId)}`;
+
+  target.classList.remove('flash');
+  void target.offsetWidth;
+  target.classList.add('flash');
+
+  setTimeout(() => {
+    target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }, 1000);
+
+  setTimeout(() => target.classList.remove('flash'), 1500);
+}
 function zoomOutAndScroll(target, delay = 1000) {
   if (!target) return;
 
